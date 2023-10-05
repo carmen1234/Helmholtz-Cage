@@ -9,13 +9,24 @@ While we recommend linux, this program should be usable on both windows and linu
 ## Structure
 
 root
+
 ├── CMakeLists.txt
+
 ├── include
+
 │   ├── MyFrame.h
+
 │   └── utils.h
+
 ├── README.md
+
 ├── SETUP.md
+
 └── src
+
     ├── main.cpp
+
     ├── MyFrame.cpp
+
     └── utils.cpp
+    
