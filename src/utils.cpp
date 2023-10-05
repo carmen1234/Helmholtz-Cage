@@ -1,4 +1,4 @@
-#include "../include/utils.h"
+#include "utils.h"
 #include <fstream>
 #include <iostream>
 #include <iomanip>

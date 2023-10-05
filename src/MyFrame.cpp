@@ -1,8 +1,11 @@
 #include <wx/wx.h>
+#include <wx/textctrl.h>
 #include "MyFrame.h"
+#include "utils.h"
+#include <string>
 
 MyFrame::MyFrame()
-    : wxFrame(nullptr, wxID_ANY, "Hello World")
+    : wxFrame(nullptr, wxID_ANY, "HCageGui")
 {
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
@@ -20,22 +23,27 @@ MyFrame::MyFrame()
     SetMenuBar( menuBar );
  
     CreateStatusBar();
-    SetStatusText("Welcome to wxWidgets!");
+    SetStatusText("Designed for UTAT");
+
+
+    //for CSV file functionality
+    CSVPathBox = new wxTextCtrl(this,CSVPathBoxE, _T("Type Path to CSV File Here"));
  
     Bind(wxEVT_MENU, &MyFrame::OnHello, this, ID_Hello);
     Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_MENU, &MyFrame::OnExit, this, wxID_EXIT);
 
     TestButton1 = new wxButton(this, BUTTON1_Hello, _T("Test1"));
-    TestButton2 = new wxButton(this, BUTTON2_Hello, _T("Test2"));
+    ReadCSVButton = new wxButton(this, UseCSV, _T("Import CSV"));
     TestButton3 = new wxButton(this, BUTTON3_Hello, _T("Test3"));
 
-    TestButton2->Move(0, 40, wxSIZE_USE_EXISTING );
+    ReadCSVButton->Move(0, 40, wxSIZE_USE_EXISTING);
+    CSVPathBox->Move(120,40, wxSIZE_USE_EXISTING);
     TestButton3->Move(0, 80, wxSIZE_USE_EXISTING );
 
     //EVT_BUTTON(BUTTON_Hello, &MyFrame::OnButton);
     Bind(wxEVT_BUTTON, &MyFrame::OnButton1, this, BUTTON1_Hello);
-    Bind(wxEVT_BUTTON, &MyFrame::OnButton2, this, BUTTON2_Hello);
+    Bind(wxEVT_BUTTON, &MyFrame::OnCSVButton, this, UseCSV);
     Bind(wxEVT_BUTTON, &MyFrame::OnButton3, this, BUTTON3_Hello);
 }
  
@@ -60,9 +68,21 @@ void MyFrame::OnButton1(wxCommandEvent& event)
     wxLogMessage("do something here");
 }
 
-void MyFrame::OnButton2(wxCommandEvent& event)
+void MyFrame::OnCSVButton(wxCommandEvent& event)
 {
-    wxLogMessage("do something else here");
+    //wxLogMessage("do something else here");
+
+    //On button press, we should read from the text box to get path
+    wxString csv_path = this->CSVPathBox->GetValue();
+    
+    //wxLogMessage(csv_path); //for debugging
+    
+    std::string csv_path_str = csv_path.ToStdString();
+
+    std::vector<std::pair<double, double>> csv_data; //note will probably need to make this a global variable or something so its scope isnt limited to this func
+    read_csv(csv_data,csv_path_str); 
+
+
 }
 
 void MyFrame::OnButton3(wxCommandEvent& event)
