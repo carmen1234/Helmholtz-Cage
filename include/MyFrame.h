@@ -16,23 +16,26 @@ private:
     wxButton *ReadCSVButton;
     wxButton *TestButton3;
     wxTextCtrl *CSVPathBox;
-    void OnHello(wxCommandEvent& event);
+    wxFrame *FileExplorer;
+    void OnImport(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnButton1(wxCommandEvent& event);
     void OnCSVButton(wxCommandEvent& event);
     void OnButton3(wxCommandEvent& event);
+    void OnHowTo(wxCommandEvent& event);
 };
  
 
 
 enum
 {
-    ID_Hello = 1,
+    ID_IMPORT = 1,
     BUTTON1_Hello = 2, // declares an id which will be used to call our button
     UseCSV = 3, // declares an id which will be used to call our button
     BUTTON3_Hello = 4, // declares an id which will be used to call our button
-    CSVPathBoxE = 5
+    CSVPathBoxE = 5,
+    ID_Documentation = 6
 };
 
 #endif
