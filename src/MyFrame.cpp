@@ -6,7 +6,7 @@
 #include <string>
 
 MyFrame::MyFrame()
-    : wxFrame(nullptr, wxID_ANY, "HCageGui")
+    : wxFrame(nullptr, wxID_ANY, "HCageGui",wxDefaultPosition)
 {
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(ID_IMPORT, "&Import CSV File\tCtrl-M",
@@ -31,7 +31,8 @@ MyFrame::MyFrame()
 
     //for CSV file functionality
     CSVPathBox = new wxTextCtrl(this,CSVPathBoxE, _T("Type Path to CSV File Here"));
- 
+    DebugBox = new wxTextCtrl(this, DebugBoxID);
+
     Bind(wxEVT_MENU, &MyFrame::OnImport, this, ID_IMPORT);
     Bind(wxEVT_MENU, &MyFrame::OnHowTo, this, ID_Documentation);
     Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
@@ -44,11 +45,23 @@ MyFrame::MyFrame()
     ReadCSVButton->Move(0, 40, wxSIZE_USE_EXISTING);
     CSVPathBox->Move(120,40, wxEXPAND | wxALL | wxHORIZONTAL | wxTE_CHARWRAP);
     TestButton3->Move(0, 80, wxSIZE_USE_EXISTING );
+    DebugBox->SetSize(0,200,600,200, wxVERTICAL | wxSIZE_AUTO);
 
     //EVT_BUTTON(BUTTON_Hello, &MyFrame::OnButton);
     Bind(wxEVT_BUTTON, &MyFrame::OnButton1, this, BUTTON1_Hello);
     Bind(wxEVT_BUTTON, &MyFrame::OnCSVButton, this, UseCSV);
     Bind(wxEVT_BUTTON, &MyFrame::OnButton3, this, BUTTON3_Hello);
+
+
+    //frame resizing:
+    // wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+    // sizer->Add(DebugBox);
+    // sizer->Add(CSVPathBox);
+    // sizer->Add(ReadCSVButton);
+    // this->SetSizer(sizer);
+    // Fit();
+    // Centre();
+    this->Fit(); //this works on its own, i don't understand how to use sizers lol
 }
  
 void MyFrame::OnExit(wxCommandEvent& event)
@@ -77,6 +90,7 @@ void MyFrame::OnImport(wxCommandEvent& event)
         //error_handlung
     }
 
+
     //OPTION 1: Use FileStream funcs from wxWidgets first, just output messages to a debug console or something 
     //OPTION 2: Use GetPath to get path to file, then have logic similar to CSV button and only process data once we click a button...
     
@@ -100,9 +114,12 @@ void MyFrame::OnCSVButton(wxCommandEvent& event)
     //wxLogMessage(csv_path); //for debugging
     
     std::string csv_path_str = csv_path.ToStdString();
-
+    std::string error_status = "";
     std::vector<std::pair<double, double>> csv_data; //note will probably need to make this a global variable or something so its scope isnt limited to this func
-    read_csv(csv_data,csv_path_str); 
+    read_csv(csv_data,csv_path_str,error_status); 
+    
+    wxString error_wxString(error_status);
+    this->DebugBox->SetValue(error_wxString);
 
    
 }

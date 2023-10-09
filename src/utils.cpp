@@ -3,7 +3,7 @@
 #include <iostream>
 #include <iomanip>
 
-void read_csv(std::vector<std::pair<double, double>> & sim, std::string & data_file_path){
+void read_csv(std::vector<std::pair<double, double>> & sim, std::string & data_file_path, std::string & status_str){
 
     std::ifstream data_file (data_file_path);
 
@@ -11,8 +11,10 @@ void read_csv(std::vector<std::pair<double, double>> & sim, std::string & data_f
     std::string line;
     if(data_file.fail()){
         std::cout << "Unable to open file, check file path and permissions" << std::endl;
+        status_str = "Unable to open file: " + data_file_path;
     } else {
         //read from file
+        status_str = "Successfully opened file: " + data_file_path;
         int i = 0; 
         while(std::getline(data_file, line)){
 
