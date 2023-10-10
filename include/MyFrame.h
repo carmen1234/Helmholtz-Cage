@@ -13,10 +13,27 @@ public:
  
 private:
     wxButton *TestButton1;
-    wxButton *ReadCSVButton;
     wxButton *TestButton3;
+
+    /*CSV Functionality*/
+    wxButton *ReadCSVButton;
     wxTextCtrl *CSVPathBox;
+
+    /*Debug dialogue, WIP*/
     wxTextCtrl *DebugBox;
+
+    /*Read Magnetic Field Input (from magnanenomter)*/
+    wxStaticText *ReadMagX;
+    wxStaticText *ReadMagY;
+    wxStaticText *ReadMagZ;
+    wxTextCtrl *MagXInput;
+    wxTextCtrl *MagYInput;
+    wxTextCtrl *MagZInput;
+
+    /*Read Current (from current sensor)*/
+    wxStaticText *ReadCurrent;
+    wxTextCtrl *CurrentInput;
+
     void OnImport(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
@@ -36,7 +53,16 @@ enum
     BUTTON3_Hello = 4, // declares an id which will be used to call our button
     CSVPathBoxE = 5,
     ID_Documentation = 6, 
-    DebugBoxID = 7
+    DebugBoxID = 7,
+    ID_MagXRead = 8,
+    ID_MagYRead = 9,
+    ID_MagZRead = 10,
+    ID_MagXInput = 11,
+    ID_MagYInput = 12,
+    ID_MagZInput = 13,
+    ID_CurrentRead = 14,
+    ID_CurrentInput = 15,
+
 };
 
 #endif

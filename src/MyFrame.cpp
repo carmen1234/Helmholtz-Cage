@@ -28,6 +28,13 @@ MyFrame::MyFrame()
     CreateStatusBar();
     SetStatusText("Designed for UTAT");
 
+    
+
+
+    //Adding panels
+    // wxPanel *InputPanel = new wxPanel(this,wxID_ANY,wxDefaultPosition, wxDefaultSize,wxTAB_TRAVERSAL);
+    // wxBoxSizer *frame_sizer = new wxBoxSizer(wxHORIZONTAL);
+    
 
     //for CSV file functionality
     CSVPathBox = new wxTextCtrl(this,CSVPathBoxE, _T("Type Path to CSV File Here"));
@@ -39,13 +46,34 @@ MyFrame::MyFrame()
     Bind(wxEVT_MENU, &MyFrame::OnExit, this, wxID_EXIT);
 
     TestButton1 = new wxButton(this, BUTTON1_Hello, _T("Test1"));
-    ReadCSVButton = new wxButton(this, UseCSV, _T("Import CSV"));
+    
     TestButton3 = new wxButton(this, BUTTON3_Hello, _T("Test3"));
+    TestButton3->Move(0, 40, wxSIZE_USE_EXISTING );
 
-    ReadCSVButton->Move(0, 40, wxSIZE_USE_EXISTING);
-    CSVPathBox->Move(120,40, wxEXPAND | wxALL | wxHORIZONTAL | wxTE_CHARWRAP);
-    TestButton3->Move(0, 80, wxSIZE_USE_EXISTING );
-    DebugBox->SetSize(0,200,600,200, wxVERTICAL | wxSIZE_AUTO);
+    ReadCSVButton = new wxButton(this, UseCSV, _T("Import CSV"));
+    ReadCSVButton->Move(0, 80, wxSIZE_USE_EXISTING);
+    CSVPathBox->Move(120,80, wxEXPAND | wxALL | wxHORIZONTAL | wxTE_CHARWRAP | wxGROW);
+    
+    DebugBox->SetSize(0,500,600,200, wxVERTICAL | wxGROW);
+    CSVPathBox->SetSize(120,80, 250,40, wxHORIZONTAL | wxGROW);
+
+    /*TEXT BOXES FOR READING INCOMING MAGENTIC FIELD DATA*/
+    ReadMagX = new wxStaticText(this,ID_MagXRead,_T("M. Field Strength X"));
+    ReadMagY = new wxStaticText(this,ID_MagYRead,_T("M. Field Strength Y"));
+    ReadMagZ = new wxStaticText(this,ID_MagZRead,_T("M. Field Strength Z"));
+    
+    ReadMagX->Move(5, 147, wxSIZE_USE_EXISTING);
+    ReadMagY->Move(5, 187, wxSIZE_USE_EXISTING);
+    ReadMagZ->Move(5, 227, wxSIZE_USE_EXISTING);
+
+    /*TODO: add functions to write to the textbox (will basically be copying the debug box)*/
+    MagXInput = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(140,140),wxDefaultSize,wxTE_READONLY);
+    MagYInput = new wxTextCtrl(this,ID_MagYInput, _T(""),wxPoint(140,180),wxDefaultSize,wxTE_READONLY);
+    MagZInput = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(140,220),wxDefaultSize,wxTE_READONLY);
+
+    ReadCurrent = new wxStaticText(this,ID_MagZRead,_T("Current"));
+    ReadCurrent->Move(5, 267, wxSIZE_USE_EXISTING);
+    CurrentInput = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(140,260),wxDefaultSize,wxTE_READONLY);
 
     //EVT_BUTTON(BUTTON_Hello, &MyFrame::OnButton);
     Bind(wxEVT_BUTTON, &MyFrame::OnButton1, this, BUTTON1_Hello);
