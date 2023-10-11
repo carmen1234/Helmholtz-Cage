@@ -15,6 +15,11 @@ private:
     wxButton *TestButton1;
     wxButton *TestButton3;
 
+    /*Panels*/
+    wxPanel *XAxisPanel;
+    wxPanel *YAxisPanel;
+    wxPanel *ZAxisPanel;
+
     /*CSV Functionality*/
     wxButton *ReadCSVButton;
     wxTextCtrl *CSVPathBox;

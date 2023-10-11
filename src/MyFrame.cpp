@@ -31,9 +31,12 @@ MyFrame::MyFrame()
     
 
 
-    //Adding panels
-    // wxPanel *InputPanel = new wxPanel(this,wxID_ANY,wxDefaultPosition, wxDefaultSize,wxTAB_TRAVERSAL);
-    // wxBoxSizer *frame_sizer = new wxBoxSizer(wxHORIZONTAL);
+   /*Panels*/
+    XAxisPanel = new wxPanel(this,wxID_ANY,wxDefaultPosition, wxDefaultSize,wxTAB_TRAVERSAL);
+    YAxisPanel = new wxPanel(this,wxID_ANY,wxDefaultPosition, wxDefaultSize,wxTAB_TRAVERSAL);
+    ZAxisPanel = new wxPanel(this,wxID_ANY,wxDefaultPosition, wxDefaultSize,wxTAB_TRAVERSAL);
+    /*I have no idea how to use them, they somehow work with sizers which I also dont get */
+    
     
 
     //for CSV file functionality
