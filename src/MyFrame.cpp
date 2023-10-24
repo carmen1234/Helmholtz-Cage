@@ -1,9 +1,12 @@
 #include <wx/wx.h>
 #include "MyFrame.h"
+#include "mathplot.h"
 
 MyFrame::MyFrame()
     : wxFrame(nullptr, wxID_ANY, "Hello World")
 {
+    mpWindow *m_plot;
+
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
                      "Help string shown in status bar for this menu item");
@@ -37,6 +40,17 @@ MyFrame::MyFrame()
     Bind(wxEVT_BUTTON, &MyFrame::OnButton1, this, BUTTON1_Hello);
     Bind(wxEVT_BUTTON, &MyFrame::OnButton2, this, BUTTON2_Hello);
     Bind(wxEVT_BUTTON, &MyFrame::OnButton3, this, BUTTON3_Hello);
+
+
+    //graph
+    m_plot = new mpWindow( this, -1, wxPoint(0,0), wxSize(100,100), wxSUNKEN_BORDER );
+    m_plot->SetMargins(0,0,50,70);
+    mpScaleX* xaxis = new mpScaleX(wxT("x"), mpALIGN_BOTTOM, true);
+    mpScaleY* yaxis = new mpScaleY(wxT("y"), mpALIGN_LEFT, true);
+    xaxis->SetDrawOutsideMargins(false);
+    yaxis->SetDrawOutsideMargins(false);
+    m_plot->AddLayer(xaxis);
+    m_plot->AddLayer(yaxis);
 }
  
 void MyFrame::OnExit(wxCommandEvent& event)
