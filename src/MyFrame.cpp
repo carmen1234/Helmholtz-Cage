@@ -2,12 +2,18 @@
 #include <wx/textctrl.h>
 #include <wx/wfstream.h>
 #include "MyFrame.h"
+
 #include "utils.h"
 #include <string>
+
+#include "../mathplot/mathplot.h"
+
 
 MyFrame::MyFrame()
     : wxFrame(nullptr, wxID_ANY, "HCageGui",wxDefaultPosition)
 {
+    mpWindow *m_plot;
+
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(ID_IMPORT, "&Import CSV File\tCtrl-M",
                      "Help string shown in status bar for this menu item");
@@ -84,6 +90,7 @@ MyFrame::MyFrame()
     Bind(wxEVT_BUTTON, &MyFrame::OnButton3, this, BUTTON3_Hello);
 
 
+
     //frame resizing:
     // wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     // sizer->Add(DebugBox);
@@ -93,6 +100,17 @@ MyFrame::MyFrame()
     // Fit();
     // Centre();
     this->Fit(); //this works on its own, i don't understand how to use sizers lol
+
+    //graph
+    m_plot = new mpWindow( this, -1, wxPoint(0,0), wxSize(850,400), wxSUNKEN_BORDER );
+    m_plot->SetMargins(0,0,50,70);
+    mpScaleX* xaxis = new mpScaleX(wxT("x"), mpALIGN_BOTTOM, true);
+    mpScaleY* yaxis = new mpScaleY(wxT("y"), mpALIGN_LEFT, true);
+    xaxis->SetDrawOutsideMargins(false);
+    yaxis->SetDrawOutsideMargins(false);
+    m_plot->AddLayer(xaxis);
+    m_plot->AddLayer(yaxis);
+
 }
  
 void MyFrame::OnExit(wxCommandEvent& event)
