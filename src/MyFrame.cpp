@@ -1,6 +1,6 @@
 #include <wx/wx.h>
 #include "MyFrame.h"
-#include "mathplot.h"
+#include "../mathplot/mathplot.h"
 
 MyFrame::MyFrame()
     : wxFrame(nullptr, wxID_ANY, "Hello World")
