@@ -3,6 +3,7 @@
 
 #include <wx/wx.h>
 #include <wx/textctrl.h>
+#include <wx/richtext/richtextctrl.h>
 
 
 class MyFrame : public wxFrame
@@ -12,8 +13,8 @@ public:
     
  
 private:
-    wxButton *TestButton1;
-    wxButton *TestButton3;
+    wxButton *XVal_SetButton;
+    wxButton *YVal_SetButton;
 
     /*Panels*/
     wxPanel *XAxisPanel;
@@ -39,12 +40,17 @@ private:
     wxStaticText *ReadCurrent;
     wxTextCtrl *CurrentInput;
 
+    //labels for X,Y,Z done with Richtext
+    wxRichTextCtrl *XAxisLabel;
+    wxRichTextCtrl *YAxisLabel;
+    wxRichTextCtrl *ZAxisLabel;
+
     void OnImport(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
-    void OnButton1(wxCommandEvent& event);
+    void OnSetMagX(wxCommandEvent& event);
     void OnCSVButton(wxCommandEvent& event);
-    void OnButton3(wxCommandEvent& event);
+    void OnSetMagY(wxCommandEvent& event);
     void OnHowTo(wxCommandEvent& event);
 };
  
@@ -67,7 +73,15 @@ enum
     ID_MagZInput = 13,
     ID_CurrentRead = 14,
     ID_CurrentInput = 15,
-
+    Graph_ToggleX = 16,
+    Graph_ToggleY = 17,
+    Graph_ToggleZ = 18,
+    Axis_LabelX = 19,
+    Axis_LabelY = 20,
+    Axis_LabelZ = 21,
+    ID_SetMagX = 22,
+    ID_SetMagY = 23,
+    ID_SetMagZ = 24
 };
 
 #endif

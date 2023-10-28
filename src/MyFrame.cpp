@@ -29,7 +29,13 @@ MyFrame::MyFrame()
     SetStatusText("Designed for UTAT");
 
     
-
+    /*Labels for Axis Data*/
+    XAxisLabel = new wxRichTextCtrl(this,Axis_LabelX,wxEmptyString,wxDefaultPosition,wxSize(350,50),wxTE_READONLY);
+    XAxisLabel->BeginAlignment(wxTEXT_ALIGNMENT_CENTRE);
+    XAxisLabel->BeginFontSize(16);
+    XAxisLabel->WriteText(wxT("X-Axis"));
+    XAxisLabel->GetCaret()->Hide(); //hide the stupid blinking | in front of text
+    
 
    /*Panels*/
     XAxisPanel = new wxPanel(this,wxID_ANY,wxDefaultPosition, wxDefaultSize,wxTAB_TRAVERSAL);
@@ -48,16 +54,16 @@ MyFrame::MyFrame()
     Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_MENU, &MyFrame::OnExit, this, wxID_EXIT);
 
-    TestButton1 = new wxButton(this, BUTTON1_Hello, _T("Test1"));
-    
-    TestButton3 = new wxButton(this, BUTTON3_Hello, _T("Test3"));
-    TestButton3->Move(0, 40, wxSIZE_USE_EXISTING );
+    XVal_SetButton = new wxButton(this, ID_SetMagX , _T("Set Value"));
+    XVal_SetButton->Move(0, 120, wxSIZE_USE_EXISTING );
+    YVal_SetButton = new wxButton(this, ID_SetMagY, _T("Set Value"));
+    YVal_SetButton->Move(0, 40, wxSIZE_USE_EXISTING );
 
     ReadCSVButton = new wxButton(this, UseCSV, _T("Import CSV"));
     ReadCSVButton->Move(0, 80, wxSIZE_USE_EXISTING);
     CSVPathBox->Move(120,80, wxEXPAND | wxALL | wxHORIZONTAL | wxTE_CHARWRAP | wxGROW);
     
-    DebugBox->SetSize(0,500,600,200, wxVERTICAL | wxGROW);
+    DebugBox->SetSize(0,500,350,200, wxVERTICAL | wxGROW);
     CSVPathBox->SetSize(120,80, 250,40, wxHORIZONTAL | wxGROW);
 
     /*TEXT BOXES FOR READING INCOMING MAGENTIC FIELD DATA*/
@@ -79,9 +85,13 @@ MyFrame::MyFrame()
     CurrentInput = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(140,260),wxDefaultSize,wxTE_READONLY);
 
     //EVT_BUTTON(BUTTON_Hello, &MyFrame::OnButton);
-    Bind(wxEVT_BUTTON, &MyFrame::OnButton1, this, BUTTON1_Hello);
+    Bind(wxEVT_BUTTON, &MyFrame::OnSetMagX, this, ID_SetMagX);
     Bind(wxEVT_BUTTON, &MyFrame::OnCSVButton, this, UseCSV);
-    Bind(wxEVT_BUTTON, &MyFrame::OnButton3, this, BUTTON3_Hello);
+    Bind(wxEVT_BUTTON, &MyFrame::OnSetMagY, this, ID_SetMagY);
+
+
+    
+
 
 
     //frame resizing:
@@ -130,7 +140,7 @@ void MyFrame::OnImport(wxCommandEvent& event)
     
 }
 
-void MyFrame::OnButton1(wxCommandEvent& event)
+void MyFrame::OnSetMagX(wxCommandEvent& event)
 {
     wxLogMessage("do something here");
 }
@@ -160,7 +170,7 @@ void MyFrame::OnHowTo(wxCommandEvent& event)
 
 }
 
-void MyFrame::OnButton3(wxCommandEvent& event)
+void MyFrame::OnSetMagY(wxCommandEvent& event)
 {
     wxLogMessage("do another thing here");
 }

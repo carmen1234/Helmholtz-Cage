@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(hcage_gui)
 
-find_package(wxWidgets COMPONENTS core base xrc REQUIRED)
+find_package(wxWidgets COMPONENTS core base xrc richtext REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 
