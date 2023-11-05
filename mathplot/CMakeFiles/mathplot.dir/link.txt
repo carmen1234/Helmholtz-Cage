@@ -1,0 +1,2 @@
+/usr/bin/ar qc libmathplot.a CMakeFiles/mathplot.dir/mathplot.o
+/usr/bin/ranlib libmathplot.a

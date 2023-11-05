@@ -20,6 +20,12 @@ Run the following command:
 This will install the wxWidgets package on your machine
 
 
+You will need to build mathplot:
+1. `cd  <root of repo>`
+2. `cd mathplot`
+3. `cmake .`
+4. `make`
+
 Then, run the following instructions:
 1. `cd  <root of repo>`
 2. `mkdir build`

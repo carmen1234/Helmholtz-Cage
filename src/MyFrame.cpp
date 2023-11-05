@@ -2,12 +2,18 @@
 #include <wx/textctrl.h>
 #include <wx/wfstream.h>
 #include "MyFrame.h"
+
 #include "utils.h"
 #include <string>
+
+#include "../mathplot/mathplot.h"
+
 
 MyFrame::MyFrame()
     : wxFrame(nullptr, wxID_ANY, "HCageGui",wxDefaultPosition, wxSize(720,1280))
 {
+    mpWindow *m_plot;
+
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(ID_IMPORT, "&Import CSV File\tCtrl-M",
                      "Help string shown in status bar for this menu item");
@@ -145,6 +151,18 @@ MyFrame::MyFrame()
     Graph_ToggleZ->SetBackgroundColour(0x886421);
     Graph_ToggleZ->SetForegroundColour(0xFFFFFF); //foreground is text
 
+
+
+    //graph
+    m_plot = new mpWindow( this, -1, wxPoint(460,40), wxSize(735,400), wxSUNKEN_BORDER );
+    m_plot->SetMargins(0,0,50,70);
+    mpScaleX* xaxis = new mpScaleX(wxT("x"), mpALIGN_BOTTOM, true);
+    mpScaleY* yaxis = new mpScaleY(wxT("y"), mpALIGN_LEFT, true);
+    xaxis->SetDrawOutsideMargins(false);
+    yaxis->SetDrawOutsideMargins(false);
+    m_plot->AddLayer(xaxis);
+    m_plot->AddLayer(yaxis);
+
     //EVT_BUTTON(BUTTON_Hello, &MyFrame::OnButton);
     Bind(wxEVT_BUTTON, &MyFrame::OnSetMagX, this, ID_SetMagX);
     Bind(wxEVT_BUTTON, &MyFrame::OnCSVButton, this, UseCSV);
@@ -152,6 +170,7 @@ MyFrame::MyFrame()
 
 
     
+
 
 
 
@@ -164,8 +183,11 @@ MyFrame::MyFrame()
     // this->SetSizer(sizer);
     // Fit();
     // Centre();
+
     //this->Fit(); //this works on its own, i don't understand how to use sizers lol
     this->SetSize(1200,800);
+
+
 }
  
 void MyFrame::OnExit(wxCommandEvent& event)
