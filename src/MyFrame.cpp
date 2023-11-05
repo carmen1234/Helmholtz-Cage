@@ -30,25 +30,25 @@ MyFrame::MyFrame()
 
     
     /*Labels for Axis Data*/
-    XAxisLabel = new wxRichTextCtrl(this,Axis_LabelX,wxEmptyString,wxDefaultPosition,wxSize(350,35),wxTE_READONLY);
+    XAxisLabel = new wxRichTextCtrl(this,Axis_LabelX,wxEmptyString,wxDefaultPosition,wxSize(450,35),wxTE_READONLY);
     XAxisLabel->BeginAlignment(wxTEXT_ALIGNMENT_CENTRE);
     XAxisLabel->BeginFontSize(16);
-    XAxisLabel->WriteText(wxT("                     X-Axis"));
+    XAxisLabel->WriteText(wxT("                                 X-Axis"));
     XAxisLabel->GetCaret()->Hide(); //hide the stupid blinking | in front of text
     XAxisLabel->SetBackgroundColour(0xF7E9DC);
     
 
-    YAxisLabel = new wxRichTextCtrl(this,Axis_LabelX,wxEmptyString,wxPoint(0,160),wxSize(350,35),wxTE_READONLY);
+    YAxisLabel = new wxRichTextCtrl(this,Axis_LabelX,wxEmptyString,wxPoint(0,160),wxSize(450,35),wxTE_READONLY);
     YAxisLabel->BeginAlignment(wxTEXT_ALIGNMENT_CENTRE);
     YAxisLabel->BeginFontSize(16);
-    YAxisLabel->WriteText(wxT("                     Y-Axis"));
+    YAxisLabel->WriteText(wxT("                                 Y-Axis"));
     YAxisLabel->GetCaret()->Hide(); //hide the stupid blinking | in front of text
     YAxisLabel->SetBackgroundColour(0xF7E9DC);
 
-    ZAxisLabel = new wxRichTextCtrl(this,Axis_LabelX,wxEmptyString,wxPoint(0,320),wxSize(350,35),wxTE_READONLY);
+    ZAxisLabel = new wxRichTextCtrl(this,Axis_LabelX,wxEmptyString,wxPoint(0,320),wxSize(450,35),wxTE_READONLY);
     ZAxisLabel->BeginAlignment(wxTEXT_ALIGNMENT_CENTRE);
     ZAxisLabel->BeginFontSize(16);
-    ZAxisLabel->WriteText(wxT("                     Z-Axis"));
+    ZAxisLabel->WriteText(wxT("                                 Z-Axis"));
     ZAxisLabel->GetCaret()->Hide(); //hide the stupid blinking | in front of text
     ZAxisLabel->SetBackgroundColour(0xF7E9DC);
     
@@ -65,54 +65,85 @@ MyFrame::MyFrame()
     Bind(wxEVT_MENU, &MyFrame::OnExit, this, wxID_EXIT);
 
     XVal_SetButton = new wxButton(this, ID_SetMagX , _T("Set Value"));
-    XVal_SetButton->Move(40, 120, wxSIZE_USE_EXISTING );
+    XVal_SetButton->Move(80, 120, wxSIZE_USE_EXISTING );
     XVal_SetButton->SetBackgroundColour(0x886421);
     XVal_SetButton->SetForegroundColour(0xFFFFFF); //foreground is text
     YVal_SetButton = new wxButton(this, ID_SetMagY, _T("Set Value"));
-    YVal_SetButton->Move(40, 280, wxSIZE_USE_EXISTING );
+    YVal_SetButton->Move(80, 280, wxSIZE_USE_EXISTING );
     YVal_SetButton->SetBackgroundColour(0x886421);
     YVal_SetButton->SetForegroundColour(0xFFFFFF); //foreground is text
     ZVal_SetButton = new wxButton(this, ID_SetMagZ, _T("Set Value"));
-    ZVal_SetButton->Move(40, 440, wxSIZE_USE_EXISTING );
+    ZVal_SetButton->Move(80, 440, wxSIZE_USE_EXISTING );
     ZVal_SetButton->SetBackgroundColour(0x886421);
     ZVal_SetButton->SetForegroundColour(0xFFFFFF); //foreground is text
 
-    SetX = new wxTextCtrl(this,ID_ValX, _T(""),wxPoint(160,120),wxDefaultSize);
-    SetY = new wxTextCtrl(this,ID_ValY, _T(""),wxPoint(160,280),wxDefaultSize);
-    SetZ = new wxTextCtrl(this,ID_ValZ, _T(""),wxPoint(160,440),wxDefaultSize);
+    SetX = new wxTextCtrl(this,ID_ValX, _T(""),wxPoint(200,120),wxDefaultSize);
+    SetY = new wxTextCtrl(this,ID_ValY, _T(""),wxPoint(200,280),wxDefaultSize);
+    SetZ = new wxTextCtrl(this,ID_ValZ, _T(""),wxPoint(200,440),wxDefaultSize);
     
 
+    /*TODO: CHANGE TO FILE DIALOGUE TYPE!!!!!*/
     ReadCSVButton = new wxButton(this, UseCSV, _T("Import CSV"));
-    ReadCSVButton->Move(350, 80, wxSIZE_USE_EXISTING);
-    CSVPathBox->Move(400,80, wxEXPAND | wxALL | wxHORIZONTAL | wxTE_CHARWRAP | wxGROW);
+    ReadCSVButton->Move(675, 540, wxSIZE_USE_EXISTING);
+    ReadCSVButton->SetBackgroundColour(0x886421);
+    ReadCSVButton->SetForegroundColour(0xFFFFFF); //foreground is text
+    CSVPathBox->Move(790,536, wxEXPAND | wxALL | wxHORIZONTAL | wxTE_CHARWRAP | wxGROW);
+    CSVPathBox->SetSize(790,536, 250,40, wxHORIZONTAL | wxGROW);
     
-    DebugBox->SetSize(0,500,350,200, wxVERTICAL | wxGROW);
-    CSVPathBox->SetSize(400,80, 250,40, wxHORIZONTAL | wxGROW);
+    DebugBox->SetSize(0,500,450,200, wxVERTICAL | wxGROW);
+    
 
     /*TEXT BOXES FOR READING INCOMING MAGENTIC FIELD DATA*/
     ReadMagX = new wxStaticText(this,ID_MagXRead,_T("M. Field Strength"));
     ReadMagY = new wxStaticText(this,ID_MagYRead,_T("M. Field Strength"));
     ReadMagZ = new wxStaticText(this,ID_MagZRead,_T("M. Field Strength"));
     
-    ReadMagX->Move(40, 50, wxSIZE_USE_EXISTING);
-    ReadMagY->Move(40, 210, wxSIZE_USE_EXISTING);
-    ReadMagZ->Move(40, 370, wxSIZE_USE_EXISTING);
+    ReadMagX->Move(80, 50, wxSIZE_USE_EXISTING);
+    ReadMagY->Move(80, 210, wxSIZE_USE_EXISTING);
+    ReadMagZ->Move(80, 370, wxSIZE_USE_EXISTING);
 
     /*TODO: add functions to write to the textbox (will basically be copying the debug box)*/
-    MagXInput = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(160,43),wxDefaultSize,wxTE_READONLY);
-    MagYInput = new wxTextCtrl(this,ID_MagYInput, _T(""),wxPoint(160,203),wxDefaultSize,wxTE_READONLY);
-    MagZInput = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(160,363),wxDefaultSize,wxTE_READONLY);
+    MagXInput = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(200,43),wxDefaultSize,wxTE_READONLY);
+    MagYInput = new wxTextCtrl(this,ID_MagYInput, _T(""),wxPoint(200,203),wxDefaultSize,wxTE_READONLY);
+    MagZInput = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(200,363),wxDefaultSize,wxTE_READONLY);
 
     ReadCurrentX = new wxStaticText(this,ID_MagZRead,_T("Current"));
-    ReadCurrentX->Move(55, 90, wxSIZE_USE_EXISTING);
-    CurrentInputX = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(160,83),wxDefaultSize,wxTE_READONLY);
+    ReadCurrentX->Move(105, 90, wxSIZE_USE_EXISTING);
+    CurrentInputX = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(200,83),wxDefaultSize,wxTE_READONLY);
     ReadCurrentY = new wxStaticText(this,ID_MagZRead,_T("Current"));
-    ReadCurrentY->Move(55, 250, wxSIZE_USE_EXISTING);
-    CurrentInputY = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(160,243),wxDefaultSize,wxTE_READONLY);
+    ReadCurrentY->Move(105, 250, wxSIZE_USE_EXISTING);
+    CurrentInputY = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(200,243),wxDefaultSize,wxTE_READONLY);
     ReadCurrentZ = new wxStaticText(this,ID_MagZRead,_T("Current"));
-    ReadCurrentZ->Move(55, 410, wxSIZE_USE_EXISTING);
-    CurrentInputZ = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(160,403),wxDefaultSize,wxTE_READONLY);
+    ReadCurrentZ->Move(105, 410, wxSIZE_USE_EXISTING);
+    CurrentInputZ = new wxTextCtrl(this,ID_MagXInput, _T(""),wxPoint(200,403),wxDefaultSize,wxTE_READONLY);
 
+
+    SetMode0 = new wxButton(this, SimMode_0 , _T("Set Mode 0"));
+    SetMode0->Move(750, 580, wxSIZE_USE_EXISTING );
+    SetMode0->SetBackgroundColour(0x886421);
+    SetMode0->SetForegroundColour(0xFFFFFF); //foreground is text
+    SetMode1 = new wxButton(this, SimMode_1 , _T("Set Mode 1"));
+    SetMode1->Move(750, 620, wxSIZE_USE_EXISTING );
+    SetMode1->SetBackgroundColour(0x886421);
+    SetMode1->SetForegroundColour(0xFFFFFF); //foreground is text
+    SetMode2 = new wxButton(this, SimMode_2 , _T("Set Mode 2"));
+    SetMode2->Move(750, 660, wxSIZE_USE_EXISTING );
+    SetMode2->SetBackgroundColour(0x886421);
+    SetMode2->SetForegroundColour(0xFFFFFF); //foreground is text
+
+
+    Graph_ToggleX = new wxButton(this, ID_Graph_ToggleX , _T("Toggle X"));
+    Graph_ToggleX->Move(600, 470, wxSIZE_USE_EXISTING );
+    Graph_ToggleX->SetBackgroundColour(0x886421);
+    Graph_ToggleX->SetForegroundColour(0xFFFFFF); //foreground is text
+    Graph_ToggleY = new wxButton(this, ID_Graph_ToggleY , _T("Toggle Y"));
+    Graph_ToggleY->Move(750, 470, wxSIZE_USE_EXISTING );
+    Graph_ToggleY->SetBackgroundColour(0x886421);
+    Graph_ToggleY->SetForegroundColour(0xFFFFFF); //foreground is text
+    Graph_ToggleZ = new wxButton(this, ID_Graph_ToggleZ , _T("Toggle Z"));
+    Graph_ToggleZ->Move(900, 470, wxSIZE_USE_EXISTING );
+    Graph_ToggleZ->SetBackgroundColour(0x886421);
+    Graph_ToggleZ->SetForegroundColour(0xFFFFFF); //foreground is text
 
     //EVT_BUTTON(BUTTON_Hello, &MyFrame::OnButton);
     Bind(wxEVT_BUTTON, &MyFrame::OnSetMagX, this, ID_SetMagX);
@@ -133,7 +164,8 @@ MyFrame::MyFrame()
     // this->SetSizer(sizer);
     // Fit();
     // Centre();
-    this->Fit(); //this works on its own, i don't understand how to use sizers lol
+    //this->Fit(); //this works on its own, i don't understand how to use sizers lol
+    this->SetSize(1200,800);
 }
  
 void MyFrame::OnExit(wxCommandEvent& event)

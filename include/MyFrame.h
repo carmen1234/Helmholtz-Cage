@@ -25,6 +25,7 @@ private:
     wxPanel *YAxisPanel;
     wxPanel *ZAxisPanel;
 
+    /*TODO: CHANGE TO FILE DIALOGUE*/
     /*CSV Functionality*/
     wxButton *ReadCSVButton;
     wxTextCtrl *CSVPathBox;
@@ -52,6 +53,17 @@ private:
     wxRichTextCtrl *XAxisLabel;
     wxRichTextCtrl *YAxisLabel;
     wxRichTextCtrl *ZAxisLabel;
+
+    /*Pre-existing modes*/
+    wxButton *SetMode0;
+    wxButton *SetMode1;
+    wxButton *SetMode2; 
+
+    /*GRAPH TOGGLE BUTTONS*/
+
+    wxButton *Graph_ToggleX;
+    wxButton *Graph_ToggleY;
+    wxButton *Graph_ToggleZ; 
 
 
     /*event functions*/
@@ -83,9 +95,9 @@ enum
     ID_MagZInput = 13,
     ID_CurrentRead = 14,
     ID_CurrentInput = 15,
-    Graph_ToggleX = 16,
-    Graph_ToggleY = 17,
-    Graph_ToggleZ = 18,
+    ID_Graph_ToggleX = 16,
+    ID_Graph_ToggleY = 17,
+    ID_Graph_ToggleZ = 18,
     Axis_LabelX = 19,
     Axis_LabelY = 20,
     Axis_LabelZ = 21,
@@ -94,7 +106,10 @@ enum
     ID_SetMagZ = 24,
     ID_ValX = 25,
     ID_ValY = 26,
-    ID_ValZ = 27
+    ID_ValZ = 27,
+    SimMode_0 = 28, 
+    SimMode_1 = 29,
+    SimMode_2 = 30
 };
 
 #endif
