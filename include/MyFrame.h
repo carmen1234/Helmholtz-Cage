@@ -15,6 +15,10 @@ public:
 private:
     wxButton *XVal_SetButton;
     wxButton *YVal_SetButton;
+    wxButton *ZVal_SetButton; 
+    wxTextCtrl *SetX;
+    wxTextCtrl *SetY;
+    wxTextCtrl *SetZ;
 
     /*Panels*/
     wxPanel *XAxisPanel;
@@ -37,14 +41,20 @@ private:
     wxTextCtrl *MagZInput;
 
     /*Read Current (from current sensor)*/
-    wxStaticText *ReadCurrent;
-    wxTextCtrl *CurrentInput;
+    wxStaticText *ReadCurrentX;
+    wxTextCtrl *CurrentInputX;
+    wxStaticText *ReadCurrentY;
+    wxTextCtrl *CurrentInputY;
+    wxStaticText *ReadCurrentZ;
+    wxTextCtrl *CurrentInputZ;
 
     //labels for X,Y,Z done with Richtext
     wxRichTextCtrl *XAxisLabel;
     wxRichTextCtrl *YAxisLabel;
     wxRichTextCtrl *ZAxisLabel;
 
+
+    /*event functions*/
     void OnImport(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
@@ -81,7 +91,10 @@ enum
     Axis_LabelZ = 21,
     ID_SetMagX = 22,
     ID_SetMagY = 23,
-    ID_SetMagZ = 24
+    ID_SetMagZ = 24,
+    ID_ValX = 25,
+    ID_ValY = 26,
+    ID_ValZ = 27
 };
 
 #endif
