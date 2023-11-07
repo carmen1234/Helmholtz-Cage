@@ -7,6 +7,7 @@
 #include <string>
 
 #include "../mathplot/mathplot.h"
+#include "../../wxFreeChart/include/wx/plot.h"
 
 
 MyFrame::MyFrame()
@@ -154,14 +155,52 @@ MyFrame::MyFrame()
 
 
     //graph
-    m_plot = new mpWindow( this, -1, wxPoint(460,40), wxSize(735,400), wxSUNKEN_BORDER );
-    m_plot->SetMargins(0,0,50,70);
-    mpScaleX* xaxis = new mpScaleX(wxT("x"), mpALIGN_BOTTOM, true);
-    mpScaleY* yaxis = new mpScaleY(wxT("y"), mpALIGN_LEFT, true);
-    xaxis->SetDrawOutsideMargins(false);
-    yaxis->SetDrawOutsideMargins(false);
-    m_plot->AddLayer(xaxis);
-    m_plot->AddLayer(yaxis);
+    // m_plot = new mpWindow( this, -1, wxPoint(460,40), wxSize(735,400), wxSUNKEN_BORDER );
+    // m_plot->SetMargins(0,0,50,70);
+    // mpScaleX* xaxis = new mpScaleX(wxT("x"), mpALIGN_BOTTOM, true);
+    // mpScaleY* yaxis = new mpScaleY(wxT("y"), mpALIGN_LEFT, true);
+    // xaxis->SetDrawOutsideMargins(false);
+    // yaxis->SetDrawOutsideMargins(false);
+    // m_plot->AddLayer(xaxis);
+    // m_plot->AddLayer(yaxis);
+
+    // An XY pair series is constructed using wxRealPoint
+wxVector<wxRealPoint> data;
+data.push_back(wxRealPoint(10, 20));
+data.push_back(wxRealPoint(13, 16));
+data.push_back(wxRealPoint(7, 30));
+data.push_back(wxRealPoint(15, 34));
+data.push_back(wxRealPoint(25, 4));
+// Create the dataset with an initial single series.
+PairDataset *dataset = new PairDataset(new XYScatterSeries(data));
+
+
+// Retrieve the data series.
+XYScatterSeries* costSeries = static_cast<XYScatterSeries*>(dataset->GetSeries(0));
+costSeries->UpdatePoint(2, wxRealPoint(8, 32)); // was (7, 30).
+
+// Set a thick dotted green line for our data.
+LineSymbolRenderer* renderer = static_cast<LineSymbolRenderer>(dataset->GetRenderer(costSeries));
+renderer->SetPen(wxPen(*wxGREEN, 4, wxPENSTYLE_DOT));
+
+// Create an XY scatter plot with a single dataset (can have multiple series).
+XYScatterPlot* plot = new XYScatterPlot(dataset);
+
+// Create the left and bottom number axes.
+NumberAxis *leftAxis = new NumberAxis(AXIS_LEFT);
+NumberAxis *bottomAxis = new NumberAxis(AXIS_BOTTOM);
+bottomAxis->SetFixedBounds(-10, 200);
+// Add the axes to the plot.
+plot->AddAxis(leftAxis);
+plot->AddAxis(bottomAxis);
+
+// Create a chart object with our plot.
+Chart* chart = new Chart(plot, "My First Chart");
+// Create a chart panel to display the chart.
+wxChartPanel* chartPanel(Chart);
+// Normal wxWidgets form / dialog / sizer stuff goes here, e.g.:
+m_pMainSizer->Add(chartPanel, 1, 1, 5);
+
 
     //EVT_BUTTON(BUTTON_Hello, &MyFrame::OnButton);
     Bind(wxEVT_BUTTON, &MyFrame::OnSetMagX, this, ID_SetMagX);
