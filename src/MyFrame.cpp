@@ -154,29 +154,59 @@ MyFrame::MyFrame()
 
 
     //graph
-    m_plot = new mpWindow( this, -1, wxPoint(460,40), wxSize(735,400), wxSUNKEN_BORDER );
-    m_plot->SetMargins(0,0,50,70);
-    mpScaleX* xaxis = new mpScaleX(wxT("field (G)"), mpALIGN_BOTTOM, true);
-    mpScaleY* yaxis = new mpScaleY(wxT("time (s)"), mpALIGN_LEFT, true);
-    xaxis->SetDrawOutsideMargins(false);
-    yaxis->SetDrawOutsideMargins(false);
-    m_plot->AddLayer(xaxis);
-    m_plot->AddLayer(yaxis);
+   // m_plot = new mpWindow( this, -1, wxPoint(460,40), wxSize(735,400), wxSUNKEN_BORDER );
+   // m_plot->SetMargins(0,0,50,70);
+   // mpScaleX* xaxis = new mpScaleX(wxT("field (G)"), mpALIGN_BOTTOM, true);
+    //mpScaleY* yaxis = new mpScaleY(wxT("time (s)"), mpALIGN_LEFT, true);
+   // xaxis->SetDrawOutsideMargins(false);
+   // yaxis->SetDrawOutsideMargins(false);
 
-    mpFXYVector* m_Vector = new mpFXYVector();
+    mpFXYVector *sine = new mpFXYVector("Sine");
 
-     m_plot->AddLayer(m_Vector, true);
+    std::vector<double> x;
+    std::vector<double> y;
+    float pom = -10;
+    for(int i=0; i<200; i++)
+    {
+        x.push_back(pom);
+        y.push_back(3*sin(pom));
+        pom += 0.1;
+    }
 
+    sine->SetData(x,y);
 
-    std::vector<double> vectorX = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    std::vector<double> vectorY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    float xPos = 4;
-    float yPos = 7;     
+    mpLayer* l1 = new mpScaleX;
+    mpLayer* l2 = new mpScaleY;
+    mpLayer* l3 = sine;
 
-    m_Vector->SetData(vectorX, vectorY);
-    //m_Vector->AddData(xPos,yPos,vectorX, vectorY);
-   
+    l3->SetContinuity(true);
+    m_plot = new mpWindow( this, -1, wxPoint(30,30), wxSize(620,620), wxSUNKEN_BORDER );
+
+    m_plot->AddLayer(l1);
+    m_plot->AddLayer(l2);
+    m_plot->AddLayer(l3);
+
     m_plot->Fit();
+
+
+   // m_plot->AddLayer(xaxis);
+   // m_plot->AddLayer(yaxis);
+
+    // mpFXYVector* m_Vector = new mpFXYVector();
+    
+    // std::vector<double> vectorX = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    // std::vector<double> vectorY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    // float xPos = 4;
+    // float yPos = 7;     
+
+    // m_Vector->SetData(vectorX, vectorY);
+
+    //  m_plot->AddLayer(m_Vector, true);
+
+
+    // //m_Vector->AddData(xPos,yPos,vectorX, vectorY);
+   
+    // m_plot->Fit();
 
     //EVT_BUTTON(BUTTON_Hello, &MyFrame::OnButton);
     Bind(wxEVT_BUTTON, &MyFrame::OnSetMagX, this, ID_SetMagX);
