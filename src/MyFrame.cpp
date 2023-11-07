@@ -173,7 +173,12 @@ MyFrame::MyFrame()
         pom += 0.1;
     }
 
-    sine->SetData(x,y);
+   // sine->SetData(x,y);
+   for (int i = 0; i < 100; i++)
+   {
+    sine->AddData(1, i, x, y);
+   }
+   
 
     mpLayer* l1 = new mpScaleX;
     mpLayer* l2 = new mpScaleY;
