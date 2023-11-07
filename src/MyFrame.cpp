@@ -156,12 +156,27 @@ MyFrame::MyFrame()
     //graph
     m_plot = new mpWindow( this, -1, wxPoint(460,40), wxSize(735,400), wxSUNKEN_BORDER );
     m_plot->SetMargins(0,0,50,70);
-    mpScaleX* xaxis = new mpScaleX(wxT("x"), mpALIGN_BOTTOM, true);
-    mpScaleY* yaxis = new mpScaleY(wxT("y"), mpALIGN_LEFT, true);
+    mpScaleX* xaxis = new mpScaleX(wxT("field (G)"), mpALIGN_BOTTOM, true);
+    mpScaleY* yaxis = new mpScaleY(wxT("time (s)"), mpALIGN_LEFT, true);
     xaxis->SetDrawOutsideMargins(false);
     yaxis->SetDrawOutsideMargins(false);
     m_plot->AddLayer(xaxis);
     m_plot->AddLayer(yaxis);
+
+    mpFXYVector* m_Vector = new mpFXYVector();
+
+     m_plot->AddLayer(m_Vector, true);
+
+
+    std::vector<double> vectorX = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    std::vector<double> vectorY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    float xPos = 4;
+    float yPos = 7;     
+
+    m_Vector->SetData(vectorX, vectorY);
+    //m_Vector->AddData(xPos,yPos,vectorX, vectorY);
+   
+    m_plot->Fit();
 
     //EVT_BUTTON(BUTTON_Hello, &MyFrame::OnButton);
     Bind(wxEVT_BUTTON, &MyFrame::OnSetMagX, this, ID_SetMagX);

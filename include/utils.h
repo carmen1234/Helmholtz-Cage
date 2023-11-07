@@ -5,6 +5,9 @@
 #include <vector>
 #include <string>
 
+
+#include "../mathplot/mathplot.h"
+
 /*
 @def
     utility functions that reads CSV files and formats them into a more useful structure
@@ -20,6 +23,7 @@
 */
 void read_csv(std::vector<std::pair<double, double>> & sim, std::string & data_file_path, std::string & status_str);
 
+//void mpFXYVector::AddData(float x, float y, std::vector<double> &xs, std::vector<double> &ys);
 
 
 #endif 

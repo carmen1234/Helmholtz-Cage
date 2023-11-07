@@ -1294,6 +1294,8 @@ public:
     */
     void SetData( const std::vector<double> &xs,const std::vector<double> &ys);
 
+void AddData(float x, float y, std::vector<double> &xs, std::vector<double> &ys);
+
     /** Clears all the data, leaving the layer empty.
       * @sa SetData
       */
