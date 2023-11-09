@@ -58,18 +58,18 @@ class MyFrame(wx.Frame):
         self.CreateStatusBar()
         self.SetStatusText("Designed for UTAT")
 
-        self.XAxisLabel = wx.TextCtrl(self, enum['Axis_LabelX'], "", wx.DefaultPosition, wx.Size(450, 35), wx.TE_READONLY)
-        self.XAxisLabel.WriteText("                                           X-Axis")
+        self.XAxisLabel = wx.TextCtrl(self, enum['Axis_LabelX'], "", wx.DefaultPosition, wx.Size(450, 35), wx.TE_READONLY | wx.ALIGN_CENTER_HORIZONTAL | wx.TE_CENTER)
+        self.XAxisLabel.WriteText("X-Axis")
         self.XAxisLabel.SetBackgroundColour(wx.Colour(0xF7E9DC))
 
 
-        self.YAxisLabel = wx.TextCtrl(self, enum['Axis_LabelY'], "", wx.Point(0, 160), wx.Size(450, 35), wx.TE_READONLY)
-        self.YAxisLabel.WriteText("                                           Y-Axis")
+        self.YAxisLabel = wx.TextCtrl(self, enum['Axis_LabelY'], "", wx.Point(0, 160), wx.Size(450, 35), wx.TE_READONLY | wx.ALIGN_CENTER_HORIZONTAL | wx.TE_CENTER)
+        self.YAxisLabel.WriteText("Y-Axis")
         self.YAxisLabel.SetBackgroundColour(wx.Colour(0xF7E9DC))
 
 
-        self.ZAxisLabel = wx.TextCtrl(self, enum['Axis_LabelZ'], "", wx.Point(0, 320), wx.Size(450, 35), wx.TE_READONLY)
-        self.ZAxisLabel.WriteText("                                           Z-Axis")
+        self.ZAxisLabel = wx.TextCtrl(self, enum['Axis_LabelZ'], "", wx.Point(0, 320), wx.Size(450, 35), wx.TE_READONLY | wx.ALIGN_CENTER_HORIZONTAL | wx.TE_CENTER)
+        self.ZAxisLabel.WriteText("Z-Axis")
         self.ZAxisLabel.SetBackgroundColour(wx.Colour(0xF7E9DC))
    
 
