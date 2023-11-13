@@ -1,18 +1,16 @@
 import serial
 import re
-import threading
-import time
 
-sensor_data = {"current": None, "magnetic_field": None}
+from globals import sensor_data
 
 class Arduino:
-    def __init__(self, port):
+    def __init__(self, port, baud_rate=9600):
         self.port = port
-        self.ser = serial.Serial(port, 9600, timeout=1)
+        self.ser = serial.Serial(port, baud_rate, timeout=1)
 
-    def update_data(self, current, magnetometer):
+    def update_data(self, current, magnetic_field):
         sensor_data["current"] = current
-        sensor_data["magnetic_field"] = magnetometer
+        sensor_data["magnetic_field"] = magnetic_field
 
     def parse_serial_data(self, serial_data):
         match = re.match(r'C:(-?\d+\.\d+),M:(-?\d+\.\d+)', serial_data)
@@ -24,25 +22,11 @@ class Arduino:
     def update_sensor_data(self):
         while True:
             line = self.ser.readline().decode('utf-8').strip()
-            current, magnetometer = self.parse_serial_data(line)
-            if current is not None and magnetometer is not None:
-                self.update_data(current, magnetometer)
+            current, magnetic_field = self.parse_serial_data(line)
+            if current is not None and magnetic_field is not None:
+                self.update_data(current, magnetic_field)
 
     def set_coil_current(self, speed):
         command = f"S:{speed}\n"
         self.ser.write(command.encode('utf-8'))
 
-if __name__ == "__main__":
-    arduino = Arduino("/dev/cu.usbmodem21201")
-    sensor_thread = threading.Thread(target=arduino.update_sensor_data, daemon=True)
-    sensor_thread.start()
-
-    while True:
-        current, magnetometer = sensor_data["current"], sensor_data["magnetic_field"]
-        if current is not None and magnetometer is not None:
-            print(f"Current: {current}, Magnetometer: {magnetometer}")
-
-        coil_current = 150
-        arduino.set_coil_current(coil_current)
-
-        time.sleep(3)
