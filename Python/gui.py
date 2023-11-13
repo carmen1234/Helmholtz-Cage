@@ -2,6 +2,9 @@ import wx
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.figure import Figure
+import numpy  as  np
+import matplotlib.animation as animation
+import datetime as dt
 
 # Define the enum dictionary
 enum = {
@@ -160,20 +163,90 @@ class MyFrame(wx.Frame):
         self.Graph_ToggleZ.SetBackgroundColour(wx.Colour(0x886421))
         self.Graph_ToggleZ.SetForegroundColour(wx.Colour(0xFFFFFF))
 
-        self.figure = Figure()
-        self.m_plot = FigureCanvas(self, -1, self.figure)
-        self.m_plot.SetSize((460, 40, 735, 400))
-        self.figure.subplots_adjust(left=0.08, bottom=0.08, right=0.95, top=0.9)
-        ax = self.figure.add_subplot(111)
-        ax.set_xlabel("x")
-        ax.set_ylabel("y")
-        self.m_plot.draw()
+        self.figure = plt.Figure()
+        #self.m_plot = FigureCanvas(self, -1, self.figure)
+        #self.m_plot.SetSize((460, 40, 735, 400))
+        #self.figure.subplots_adjust(left=0.08, bottom=0.08, right=0.95, top=0.9)
+        #ax = self.figure.add_subplot(111)
+        #ax.set_xlabel("x")
+        #ax.set_ylabel("y")
+        self.subplot = self.figure.add_subplot(111)
+        plt.title('test')
+        self.canvas = FigureCanvas(self, -1, self.figure)  #ToDo: OW 26.10.15 Verstehen
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer.Add(self.canvas, 1, wx.RIGHT | wx.TOP)
+        #self.canvas.SetMinSize(wx.Size(1,1))
+        #self.SetSize((460, 40, 735, 400))
+        self.SetSizer(self.sizer)
+        self.Fit()
+        self.dataSet = []
+        self.animator = animation.FuncAnimation(self.figure,self.anim, interval=1000)
+
+
+
+        #plt.axis([0, 10, 0, 1])
+
+        #for i in range(10):
+        #    y = np.random.random()
+        #    plt.scatter(i, y)
+        #    plt.pause(0.05)
+        # fig, self.ax = plt.subplots()
+
+        # self.x = np.arange(0, 2*np.pi, 0.01)
+        # self.line, = self.ax.plot(self.x, np.sin(self.x))
+
+
+
+
+
+
+        #self.m_plot.draw()
 
         self.Bind(wx.EVT_BUTTON, self.OnSetMagX, id=enum['ID_SetMagX'])
         self.Bind(wx.EVT_BUTTON, self.OnCSVButton, id=enum['UseCSV'])
         self.Bind(wx.EVT_BUTTON, self.OnSetMagY, id=enum['ID_SetMagY'])
 
         self.SetSize(1200, 800)
+
+    # fig = plt.figure()
+    # ax = fig.add_subplot(1, 1, 1)
+    # xs = []
+    # ys = []
+    # # This function is called periodically from FuncAnimation
+    # def animate(i, xs, ys, ax):
+
+    #     # Read temperature (Celsius) from TMP102
+    #     temp_c = round(1, 2)
+
+    #     # Add x and y to lists
+    #     xs.append(dt.datetime.now().strftime('%H:%M:%S.%f'))
+    #     ys.append(temp_c)
+
+    #     # Limit x and y lists to 20 items
+    #     xs = xs[-20:]
+    #     ys = ys[-20:]
+
+    #     # Draw x and y lists
+    #     ax.clear()
+    #     ax.plot(xs, ys)
+
+    #     # Format plot
+    #     plt.xticks(rotation=45, ha='right')
+    #     plt.subplots_adjust(bottom=0.30)
+    #     plt.title('TMP102 Temperature over Time')
+    #     plt.ylabel('Temperature (deg C)')
+    
+    # ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=1000)
+    # plt.show()
+    def anim(self, a):
+        if(len(self.dataSet) == 0):
+            return 0
+        i = a % len(self.dataSet)
+        obj = self.subplot.pcolor(self.dataSet[i], cmap='RdBu')
+        return obj
+
+    def add_data(self, data):
+        self.dataSet.append(data)
 
     def OnImport(self, event):
         # Handle import event
@@ -202,7 +275,32 @@ class MyFrame(wx.Frame):
     def OnExit(self, event):
         self.Close()
 
-app = wx.App()
-frame = MyFrame()
-frame.Show()
-app.MainLoop()
+
+# fig, ax = plt.subplots()
+
+# x = np.arange(0, 2*np.pi, 0.01)
+# line, = ax.plot(x, np.sin(x))
+
+# def animate(self, i):
+#     self.line.set_ydata(np.sin(self.x + i / 50))  # update the data.
+#     return self.line,
+
+# ani = animation.FuncAnimation(
+#     fig, animate, interval=20, blit=True, save_count=50)
+
+#plt.show()
+
+
+class MyApp(wx.App):
+    def OnInit(self):
+        self.frame = MyFrame(None, wx.ID_ANY, "")
+        self.SetTopWindow(self.frame)
+        self.frame.Show()
+        return True
+
+
+if __name__ == "__main__":
+    app = wx.App()
+    frame = MyFrame()
+    frame.Show()
+    app.MainLoop()
