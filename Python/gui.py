@@ -5,6 +5,7 @@ from matplotlib.figure import Figure
 import numpy  as  np
 import matplotlib.animation as animation
 import datetime as dt
+from matplotlib.lines import Line2D
 
 # Define the enum dictionary
 enum = {
@@ -163,6 +164,10 @@ class MyFrame(wx.Frame):
         self.Graph_ToggleZ.SetBackgroundColour(wx.Colour(0x886421))
         self.Graph_ToggleZ.SetForegroundColour(wx.Colour(0xFFFFFF))
 
+        ############################################################
+     
+
+        ########################################################
         self.figure = plt.Figure()
         #self.m_plot = FigureCanvas(self, -1, self.figure)
         #self.m_plot.SetSize((460, 40, 735, 400))
@@ -175,12 +180,24 @@ class MyFrame(wx.Frame):
         self.canvas = FigureCanvas(self, -1, self.figure)  #ToDo: OW 26.10.15 Verstehen
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.canvas, 1, wx.RIGHT | wx.TOP)
+
+        self.ax_list = self.figure.axes
+        self.ax = self.ax_list[0]
+        self.dt = 0.2
+        self.maxt = 2
+        self.tdata = [0]
+        self.ydata = [0]
+        self.line = Line2D(self.tdata, self.ydata)
+        self.ax.add_line(self.line)
+        self.ax.set_ylim(-.1, 1.1)
+        self.ax.set_xlim(0, self.maxt)
+
         #self.canvas.SetMinSize(wx.Size(1,1))
         #self.SetSize((460, 40, 735, 400))
         self.SetSizer(self.sizer)
         self.Fit()
         self.dataSet = []
-        self.animator = animation.FuncAnimation(self.figure,self.anim, interval=1000)
+        self.animator = animation.FuncAnimation(self.figure,self.anim, blit = True, interval=1000, save_count=4000)
 
 
 
@@ -238,12 +255,34 @@ class MyFrame(wx.Frame):
     
     # ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=1000)
     # plt.show()
-    def anim(self, a):
-        if(len(self.dataSet) == 0):
-            return 0
-        i = a % len(self.dataSet)
-        obj = self.subplot.pcolor(self.dataSet[i], cmap='RdBu')
-        return obj
+    def anim(self, y):
+        maxt =2
+        lastt = self.tdata[-1]
+        # if lastt >= self.tdata[0] + self.maxt:  # reset the arrays
+        #     self.tdata = [self.tdata[-1]]
+        #     self.ydata = [self.ydata[-1]]
+        #     self.ax.set_xlim(self.tdata[0], self.tdata[0] + self.maxt)
+        #     self.ax.figure.canvas.draw()
+
+        # This slightly more complex calculation avoids floating-point issues
+        # from just repeatedly adding `self.dt` to the previous value.
+        t = y
+
+        self.tdata.append(t)
+        self.ydata.append(y)
+        self.line.set_data(self.tdata, self.ydata)
+        return self.line,
+        # x = np.arange(0, 2*np.pi, 0.01)
+        # line, = a.plot(x, np.sin(x))
+        # line.set_ydata(np.sin(x + a / 50))  # update the data.
+        # return line,
+        #line.set_ydata(np.sin(a / 50))  # update the data.
+        #return line,
+        #if(len(self.dataSet) == 0):
+        #     return 0
+        # i = a % len(self.dataSet)
+        # obj = self.subplot.pcolor(self.dataSet[i], cmap='RdBu')
+        # return obj
 
     def add_data(self, data):
         self.dataSet.append(data)
