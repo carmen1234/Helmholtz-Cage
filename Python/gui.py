@@ -60,6 +60,9 @@ enum = {
     'SimMode_2': 30
 }
 
+COLOR_NAME = 'black'
+TEST_NUMBER = 1
+
 
 """""
 Sample graph code:
@@ -82,6 +85,8 @@ class DataGen(object):
         r = random.random()
 
         self.data = sensor_data["magnetic_field"]
+
+        self.data = TEST_NUMBER
 
         #if r > 0.9:
             #delta = 1
@@ -321,19 +326,19 @@ class GraphFrame(wx.Frame):
         self.cb_xline = wx.CheckBox(self.panel, -1,
             "Show X axis field",
             style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_xline)
+        self.Bind(wx.EVT_CHECKBOX, self.show_x_plot, self.cb_xline)
         self.cb_xline.SetValue(True)
 
         self.cb_yline = wx.CheckBox(self.panel, -1,
             "Show Y axis field",
             style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_yline)
+        self.Bind(wx.EVT_CHECKBOX, self.show_y_plot, self.cb_yline)
         self.cb_yline.SetValue(False)
 
         self.cb_zline = wx.CheckBox(self.panel, -1,
             "Show Z axis field",
             style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_zline)
+        self.Bind(wx.EVT_CHECKBOX, self.show_z_plot, self.cb_zline)
         self.cb_yline.SetValue(False)
 
        # self.DebugBox = wx.TextCtrl(self.panel, enum['DebugBoxID'])
@@ -378,7 +383,7 @@ class GraphFrame(wx.Frame):
         self.fig = Figure((3.0, 3.0), dpi=self.dpi)
 
         self.axes = self.fig.add_subplot(111)
-        self.axes.set_facecolor('black')
+        self.axes.set_facecolor(COLOR_NAME)
         self.axes.set_title('Magnetometer', size=12)
 
         pylab.setp(self.axes.get_xticklabels(), fontsize=8)
@@ -463,6 +468,18 @@ class GraphFrame(wx.Frame):
         self.draw_plot()
 
     def on_cb_xlab(self, event):
+        self.draw_plot()
+
+    def show_x_plot(self, event):
+        #COLOR_NAME = 'green'
+        self.draw_plot()
+
+    def show_y_plot(self, event):
+        #COLOR_NAME = 'blue'
+        self.draw_plot()
+
+    def show_z_plot(self, event):
+        #COLOR_NAME = 'red'
         self.draw_plot()
 
     def on_save_plot(self, event):
