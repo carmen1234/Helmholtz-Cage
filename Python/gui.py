@@ -15,6 +15,8 @@ import random
 import sys
 import wx
 
+from globals import sensor_data
+
 import matplotlib
 matplotlib.use('WXAgg')
 from matplotlib.figure import Figure
@@ -79,14 +81,21 @@ class DataGen(object):
         delta = random.uniform(-0.5, 0.5)
         r = random.random()
 
-        if r > 0.9:
-            self.data += delta * 15
-        elif r > 0.8:
+        self.data = sensor_data["magnetic_field"]
+
+        #if r > 0.9:
+            #delta = 1
+            #self.data += delta * 15
+            #self.data = sensor_data[magnetic_field]
+            
+        #elif r > 0.8:
             # attraction to the initial value
-            delta += (0.5 if self.init > self.data else -0.5)
-            self.data += delta
-        else:
-            self.data += delta
+            #delta += (0.5 if self.init > self.data else -0.5)
+            #delta = 1
+            #self.data += delta
+        #else:
+            #delta = 1
+            #self.data += delta
 
 
 class ModeControlBox(wx.Panel):
@@ -497,8 +506,11 @@ class GraphFrame(wx.Frame):
         self.statusbar.SetStatusText('')
 
 
-if __name__ == '__main__':
-    app = wx.App()
-    app.frame = GraphFrame()
-    app.frame.Show()
-    app.MainLoop()
+#if __name__ == '__main__':
+
+    # sensor_data["magnetic_field"] = 1
+
+    # app = wx.App()
+    # app.frame = GraphFrame()
+    # app.frame.Show()
+    # app.MainLoop()
