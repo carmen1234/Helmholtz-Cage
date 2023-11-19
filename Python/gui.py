@@ -71,9 +71,13 @@ class MyFrame(wx.Frame):
         self.ZAxisLabel = wx.TextCtrl(self, enum['Axis_LabelZ'], "", wx.Point(0, 320), wx.Size(450, 35), wx.TE_READONLY | wx.ALIGN_CENTER_HORIZONTAL | wx.TE_CENTER)
         self.ZAxisLabel.WriteText("Z-Axis")
         self.ZAxisLabel.SetBackgroundColour(wx.Colour(0xF7E9DC))
+
+        self.CSVFilePicker= wx.FilePickerCtrl(self, enum['UseCSV'],"Open CSV", wildcard="CSV files (*.csv)|*.csv", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+        self.CSVFilePicker.Move((675, 540))
+        
    
 
-        self.CSVPathBox = wx.TextCtrl(self, enum['CSVPathBoxE'], "Type Path to CSV File Here")
+        #self.CSVPathBox = wx.TextCtrl(self, enum['CSVPathBoxE'], "Type Path to CSV File Here")
         self.DebugBox = wx.TextCtrl(self, enum['DebugBoxID'])
 
         self.Bind(wx.EVT_MENU, self.OnImport, id=enum['ID_IMPORT'])
@@ -100,12 +104,12 @@ class MyFrame(wx.Frame):
         self.SetY = wx.TextCtrl(self, enum['ID_ValY'], "", wx.Point(200, 280), wx.DefaultSize)
         self.SetZ = wx.TextCtrl(self, enum['ID_ValZ'], "", wx.Point(200, 440), wx.DefaultSize)
 
-        self.ReadCSVButton = wx.Button(self, enum['UseCSV'], "Import CSV")
-        self.ReadCSVButton.Move((675, 540))
-        self.ReadCSVButton.SetBackgroundColour(wx.Colour(0x886421))
-        self.ReadCSVButton.SetForegroundColour(wx.Colour(0xFFFFFF))
-        self.CSVPathBox.Move(790, 536, wx.EXPAND | wx.ALL | wx.HORIZONTAL | wx.TE_CHARWRAP | wx.GROW)
-        self.CSVPathBox.SetSize(790, 536, 250, 40, wx.HORIZONTAL | wx.GROW)
+        # self.ReadCSVButton = wx.Button(self, enum['UseCSV'], "Import CSV")
+        # self.ReadCSVButton.Move((675, 540))
+        # self.ReadCSVButton.SetBackgroundColour(wx.Colour(0x886421))
+        # self.ReadCSVButton.SetForegroundColour(wx.Colour(0xFFFFFF))
+        # self.CSVPathBox.Move(790, 536, wx.EXPAND | wx.ALL | wx.HORIZONTAL | wx.TE_CHARWRAP | wx.GROW)
+        # self.CSVPathBox.SetSize(790, 536, 250, 40, wx.HORIZONTAL | wx.GROW)
         self.DebugBox.SetSize(0, 500, 450, 200, wx.VERTICAL | wx.GROW)
 
         self.ReadMagX = wx.StaticText(self, enum['ID_MagXRead'], "M. Field Strength")
@@ -188,8 +192,9 @@ class MyFrame(wx.Frame):
         pass
 
     def OnCSVButton(self, event):
-        # Handle CSVButton event
-        pass
+        #when clicked, read from CSV Path box
+        csv_path = self.CSVFilePicker.GetPath()
+       
 
     def OnHowTo(self, event):
         # Handle HowTo event
