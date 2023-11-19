@@ -8,9 +8,9 @@ from globals import sensor_data, port
 from gui import GraphFrame
 
 if __name__ == "__main__":
-    #arduino = Arduino(port)
-   # sensor_thread = threading.Thread(target=arduino.update_sensor_data, daemon=True)
-    #sensor_thread.start()
+    arduino = Arduino(port)
+    sensor_thread = threading.Thread(target=arduino.update_sensor_data, daemon=True)
+    sensor_thread.start()
 
     while True:
         # Read and print current/field values
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         #coil_current = 150
         #arduino.set_coil_current(coil_current)
 
-        sensor_data["magnetic_field"] = 1
+        #sensor_data["current"] = 1
 
         app = wx.App()
         app.frame = GraphFrame()

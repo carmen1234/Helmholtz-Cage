@@ -427,7 +427,7 @@ class GraphFrame(wx.Frame):
         else:
             ymax = int(self.mode_control.manual_value())
 
-        self.axes.set_xbound(lower=xmin, upper=xmax)
+        self.axes.set_xbound(lower=0, upper=xmax)
         self.axes.set_ybound(lower=ymin, upper=ymax)
 
         # anecdote: axes.grid assumes b=True if any other flag is

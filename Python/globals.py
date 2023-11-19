@@ -6,6 +6,6 @@ port = "/dev/cu.usbmodem21201"
 
 
 # Data
-sensor_data = {"current": None, # float
-               "magnetic_field": None # float
+sensor_data = {"current": 0.0, # float
+               "magnetic_field": 0.0 # float
               }
