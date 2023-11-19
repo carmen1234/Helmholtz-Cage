@@ -1,8 +1,11 @@
 import threading
 import time
+import wx
 
 from arduino import Arduino
 from globals import sensor_data, port
+
+from gui import GraphFrame
 
 if __name__ == "__main__":
     #arduino = Arduino(port)
