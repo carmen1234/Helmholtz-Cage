@@ -247,11 +247,11 @@ class AxisControlBox(wx.Panel):
     def is_auto(self):
        return True
 
-    def on_set_value_button_X(self):
+    def on_set_value_button_X(self,dummy=0):
         #called when button pressed
-
+       
         #get value from textbox
-        input_mag = ReadMagX.GetLineText()
+        input_mag = self.SetX.GetLineText(0)
 
         if input_mag == "":
             #if empty probably write to console as error
