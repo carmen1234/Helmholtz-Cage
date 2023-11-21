@@ -16,6 +16,9 @@ import sys
 import wx
 
 from globals import sensor_data
+from arduino import Arduino
+import util
+
 
 import matplotlib
 matplotlib.use('WXAgg')
@@ -215,7 +218,7 @@ class AxisControlBox(wx.Panel):
         self.CurrentInputX = wx.TextCtrl(self, enum['ID_MagXInput'], "", wx.Point(200, 83), wx.DefaultSize, wx.TE_READONLY)
 
         self.XVal_SetButton = wx.Button(self, enum['ID_SetMagX'], "Set Value")
-        self.Bind(wx.EVT_BUTTON, self.on_set_value_button, self.XVal_SetButton)
+        self.Bind(wx.EVT_BUTTON, self.on_set_value_button_X, self.XVal_SetButton)
         self.XVal_SetButton.Move((80, 160))
         self.XVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
         self.XVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
@@ -244,9 +247,22 @@ class AxisControlBox(wx.Panel):
     def is_auto(self):
        return True
 
-    def on_set_value_button(self):
+    def on_set_value_button_X(self):
         #called when button pressed
-       pass
+
+        #get value from textbox
+        input_mag = ReadMagX.GetLineText()
+
+        if input_mag == "":
+            #if empty probably write to console as error
+            print("Error, input empty")
+        else:
+            #get current from mag field
+            current = get_current_from_mag_field(float(input_mag))
+            arduino.set_coil_current(current)
+
+
+        
 
 
 
@@ -506,11 +522,11 @@ class GraphFrame(wx.Frame):
         self.statusbar.SetStatusText('')
 
 
-#if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    # sensor_data["magnetic_field"] = 1
+#     sensor_data["magnetic_field"] = 1
 
-    # app = wx.App()
-    # app.frame = GraphFrame()
-    # app.frame.Show()
-    # app.MainLoop()
+#     app = wx.App()
+#     app.frame = GraphFrame()
+#     app.frame.Show()
+#     app.MainLoop()

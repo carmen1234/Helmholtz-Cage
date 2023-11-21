@@ -1,5 +1,5 @@
 
-# consts (tune)
+# consts (tune) (should I move these to globals.py?)
 epsilon = 0.000001
 Kp = 1
 Kd = 1
