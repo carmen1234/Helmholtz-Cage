@@ -83,7 +83,7 @@ class DataGen(object):
 
         #print(TEST_NUMBER)
 
-        self.data = sensor_data["magnetic_field"]
+        self.data = sensor_data["mag_field_x"]
         print(TEST_NUMBER)
         self.data = testing
        # self.data = get_axis_to_print()
@@ -116,7 +116,7 @@ class ModeControlBox(wx.Panel):
         #self.CSVPathBox.SetSize(790, 536, 250, 40, wx.HORIZONTAL | wx.GROW)
         #self.DebugBox.SetSize(0, 500, 450, 200, wx.VERTICAL | wx.GROW)
 
-            
+
         self.SetMode0 = wx.Button(self, enum['SimMode_0'], "Set Mode 0")
         self.Bind(wx.EVT_BUTTON, self.on_mode_0, self.SetMode0)
         self.SetMode0.Move((25, 0))
@@ -180,7 +180,7 @@ class DebugConsoleBox(wx.Panel):
 
         box = wx.StaticBox(self, -1, label)
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-            
+
         self.DebugBox = wx.TextCtrl(self, enum['DebugBoxID'])
 
         sizer.Add(self.DebugBox, 0, wx.ALL, 10)
@@ -200,7 +200,7 @@ class AxisControlBox(wx.Panel):
 
         box = wx.StaticBox(self, -1, label)
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-            
+
         self.ReadMagX = wx.StaticText(self, enum['ID_MagXRead'], "M. Field Strength: ")
 
         self.MagXInput = wx.TextCtrl(self, enum['ID_MagXInput'], "", wx.Point(200, 43), wx.DefaultSize, wx.TE_READONLY)
@@ -383,7 +383,7 @@ class GraphFrame(wx.Frame):
         self.vbox.Add(self.hbox1, 0, flag=wx.ALIGN_LEFT | wx.TOP)
         self.vbox.Add(self.hbox2, 0, flag=wx.ALIGN_LEFT | wx.TOP)
 
-        
+
         self.panel.SetSizer(self.vbox)
         self.vbox.Fit(self)
 
@@ -522,7 +522,8 @@ class GraphFrame(wx.Frame):
         #COLOR_NAME = 'green'
         label =  "test"
         if (self.cb_xline.GetValue()):
-            label = "x plot" 
+            label = "x plot"
+
         elif (self.cb_yline.GetValue()):
             label = "y plot"
         else:
@@ -530,24 +531,24 @@ class GraphFrame(wx.Frame):
         self.update_button.SetLabel(label)
         TEST_NUMBER = 3
         self.draw_plot()
-    
+
     def show_x_plot(self, event):
         #COLOR_NAME = 'green'
-        label = "x plot" 
+        label = "x plot"
         self.pause_button.SetLabel(label)
         TEST_NUMBER = 3
         self.draw_plot()
 
     def show_y_plot(self, event):
         #COLOR_NAME = 'blue'
-        label = "y plot" 
+        label = "y plot"
         self.pause_button.SetLabel(label)
         TEST_NUMBER = 3
         self.draw_plot()
 
     def show_z_plot(self, event):
         #COLOR_NAME = 'red'
-        label = "z plot" 
+        label = "z plot"
         self.pause_button.SetLabel(label)
         TEST_NUMBER = 3
         self.draw_plot()
@@ -579,14 +580,18 @@ class GraphFrame(wx.Frame):
         self.draw_plot()
 
     def update_sensor_data(self, event):
-        self.testing = 4.1
+        self.testing = 0
 
         if (self.cb_xline.GetValue()):
-           self.testing = -0.1
+           #self.testing = -0.1
+           self.testing = sensor_data["mag_field_x"]
+
         elif (self.cb_yline.GetValue()):
-            self.testing = 2.2
+            #self.testing = 2.2
+            self.testing = sensor_data["mag_field_y"]
         else:
-            self.testing = 3.5
+            #self.testing = 3.5
+            self.testing = sensor_data["mag_field_z"]
 
     def on_exit(self, event):
         self.Destroy()
