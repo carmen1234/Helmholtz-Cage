@@ -61,7 +61,7 @@ enum = {
 }
 
 COLOR_NAME = 'black'
-TEST_NUMBER = 1
+TEST_NUMBER = 2.3
 
 
 """""
@@ -70,37 +70,27 @@ Eli Bendersky (eliben@gmail.com)
 License: this code is in the public domain
 """""
 class DataGen(object):
-    """ A silly class that generates pseudo-random data for
-        display in the plot.
-    """
     def __init__(self, init=50):
         self.data = self.init = init
 
-    def next(self):
-        self._recalc_data()
+    def next(self, testing):
+        self._recalc_data(testing)
         return self.data
 
-    def _recalc_data(self):
-        delta = random.uniform(-0.5, 0.5)
-        r = random.random()
+    def _recalc_data(self, testing):
+        #delta = random.uniform(-0.5, 0.5)
+        #r = random.random()
+
+        #print(TEST_NUMBER)
 
         self.data = sensor_data["magnetic_field"]
+        print(TEST_NUMBER)
+        self.data = testing
+       # self.data = get_axis_to_print()
 
-        self.data = TEST_NUMBER
-
-        #if r > 0.9:
-            #delta = 1
-            #self.data += delta * 15
-            #self.data = sensor_data[magnetic_field]
-            
-        #elif r > 0.8:
-            # attraction to the initial value
-            #delta += (0.5 if self.init > self.data else -0.5)
-            #delta = 1
-            #self.data += delta
-        #else:
-            #delta = 1
-            #self.data += delta
+    def get_axis_to_print(self):
+        a = 1
+        return 3.3
 
 
 class ModeControlBox(wx.Panel):
@@ -264,7 +254,7 @@ class GraphFrame(wx.Frame):
         wx.Frame.__init__(self, None, -1, self.title)
 
         self.datagen = DataGen()
-        self.data = [self.datagen.next()]
+        self.data = [self.datagen.next(3.3)]
         self.paused = False
 
         self.create_menu()
@@ -274,6 +264,20 @@ class GraphFrame(wx.Frame):
         self.redraw_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
         self.redraw_timer.Start(100)
+
+    # def next(self, TEST_NUMBER):
+    #     self._recalc_data()
+    #     return self.data
+
+    # def _recalc_data(self, TEST_NUMBER):
+    #     #delta = random.uniform(-0.5, 0.5)
+    #     #r = random.random()
+
+    #     #print(TEST_NUMBER)
+
+    #     self.data = sensor_data["magnetic_field"]
+    #     print(TEST_NUMBER)
+    #     self.data = 1
 
     def create_menu(self):
         self.menubar = wx.MenuBar()
@@ -323,38 +327,47 @@ class GraphFrame(wx.Frame):
         self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_xlab)
         self.cb_xlab.SetValue(True)
 
-        self.cb_xline = wx.CheckBox(self.panel, -1,
+        self.cb_xline = wx.RadioButton(self.panel, -1,
             "Show X axis field",
             style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.show_x_plot, self.cb_xline)
+        self.Bind(wx.EVT_BUTTON, self.show_x_plot, self.cb_xline)
         self.cb_xline.SetValue(True)
+        self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_xline)
 
-        self.cb_yline = wx.CheckBox(self.panel, -1,
+        self.cb_yline = wx.RadioButton(self.panel, -1,
             "Show Y axis field",
             style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.show_y_plot, self.cb_yline)
+        self.Bind(wx.EVT_BUTTON, self.show_y_plot, self.cb_yline)
         self.cb_yline.SetValue(False)
+        self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_yline)
 
-        self.cb_zline = wx.CheckBox(self.panel, -1,
+        self.cb_zline = wx.RadioButton(self.panel, -1,
             "Show Z axis field",
             style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.show_z_plot, self.cb_zline)
+        self.Bind(wx.EVT_UPDATE_UI, self.show_z_plot, self.cb_zline)
         self.cb_yline.SetValue(False)
+        self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_zline)
+
+        self.update_button = wx.Button(self.panel, -1, "Update")
+        self.Bind(wx.EVT_BUTTON, self.on_update_button, self.update_button)
+        #self.Bind(wx.EVT_UPDATE_UI, self.on_update_pause_button, self.update_button)
 
        # self.DebugBox = wx.TextCtrl(self.panel, enum['DebugBoxID'])
 
         self.hbox1 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox1.Add(self.pause_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.AddSpacer(20)
-        self.hbox1.Add(self.cb_grid, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-        self.hbox1.AddSpacer(10)
-        self.hbox1.Add(self.cb_xlab, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-        self.hbox1.AddSpacer(10)
+        #self.hbox1.Add(self.cb_grid, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+        #self.hbox1.AddSpacer(10)
+       # self.hbox1.Add(self.cb_xlab, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+        #self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.cb_xline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.cb_yline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.cb_zline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+        self.hbox1.AddSpacer(10)
+        self.hbox1.Add(self.update_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
 
         self.hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2.Add(self.mode_control, border=5, flag=wx.ALL)
@@ -401,6 +414,7 @@ class GraphFrame(wx.Frame):
     def draw_plot(self):
         """ Redraws the plot
         """
+        print("test")
         # when xmin (edit: mode_control) is on auto, it "follows" xmax to produce a
         # sliding window effect. therefore, xmin is assigned after
         # xmax.
@@ -445,6 +459,36 @@ class GraphFrame(wx.Frame):
         else:
             self.axes.grid(False)
 
+        #if self.cb_xline.GetValue():
+            #do something
+        #     TEST_NUMBER = 3
+        #     self.cb_yline.SetValue(False)
+        #     self.cb_zline.SetValue(False)
+        # else:
+        #     #do something else
+        #     #TEST_NUMBER = 2
+        #     a = 1
+
+        # if self.cb_yline.GetValue():
+        #     #do something
+        #     TEST_NUMBER = 4
+        #     self.cb_xline.SetValue(False)
+        #     self.cb_zline.SetValue(False)
+        # else:
+        #     #do something else
+        #     #TEST_NUMBER = 2
+        #     a = 1
+
+        # if self.cb_zline.GetValue():
+        #     #do something
+        #     TEST_NUMBER = 0
+        #     self.cb_yline.SetValue(False)
+        #     self.cb_xline.SetValue(False)
+        # else:
+        #     #do something else
+        #     #TEST_NUMBER = 2
+        #     a = 1
+
         # Using setp here is convenient, because get_xticklabels
         # returns a list over which one needs to explicitly
         # iterate, and setp already handles this.
@@ -460,6 +504,10 @@ class GraphFrame(wx.Frame):
     def on_pause_button(self, event):
         self.paused = not self.paused
 
+    def on_update_button(self, event):
+        TEST_NUMBER = 3.1
+        return TEST_NUMBER
+
     def on_update_pause_button(self, event):
         label = "Resume" if self.paused else "Pause"
         self.pause_button.SetLabel(label)
@@ -470,16 +518,38 @@ class GraphFrame(wx.Frame):
     def on_cb_xlab(self, event):
         self.draw_plot()
 
+    def on_update_line_value(self, event):
+        #COLOR_NAME = 'green'
+        label =  "test"
+        if (self.cb_xline.GetValue()):
+            label = "x plot" 
+        elif (self.cb_yline.GetValue()):
+            label = "y plot"
+        else:
+            label = "z plot"
+        self.update_button.SetLabel(label)
+        TEST_NUMBER = 3
+        self.draw_plot()
+    
     def show_x_plot(self, event):
         #COLOR_NAME = 'green'
+        label = "x plot" 
+        self.pause_button.SetLabel(label)
+        TEST_NUMBER = 3
         self.draw_plot()
 
     def show_y_plot(self, event):
         #COLOR_NAME = 'blue'
+        label = "y plot" 
+        self.pause_button.SetLabel(label)
+        TEST_NUMBER = 3
         self.draw_plot()
 
     def show_z_plot(self, event):
         #COLOR_NAME = 'red'
+        label = "z plot" 
+        self.pause_button.SetLabel(label)
+        TEST_NUMBER = 3
         self.draw_plot()
 
     def on_save_plot(self, event):
@@ -503,9 +573,20 @@ class GraphFrame(wx.Frame):
         # (to respond to scale modifications, grid change, etc.)
         #
         if not self.paused:
-            self.data.append(self.datagen.next())
+            self.update_sensor_data(event)
+            self.data.append(self.datagen.next(self.testing))
 
         self.draw_plot()
+
+    def update_sensor_data(self, event):
+        self.testing = 4.1
+
+        if (self.cb_xline.GetValue()):
+           self.testing = -0.1
+        elif (self.cb_yline.GetValue()):
+            self.testing = 2.2
+        else:
+            self.testing = 3.5
 
     def on_exit(self, event):
         self.Destroy()
