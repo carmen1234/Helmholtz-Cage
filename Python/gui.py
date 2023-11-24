@@ -474,7 +474,7 @@ class GraphFrame(wx.Frame):
     def draw_plot(self):
         """ Redraws the plot
         """
-        print("test")
+        #print("test")
         #global axis_int
 
         if (self.cb_xline.GetValue()):
