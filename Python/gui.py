@@ -640,16 +640,18 @@ class GraphFrame(wx.Frame):
             self.update_sensor_data(event)
             
             if (self.cb_xline.GetValue()):
-                self.testing = -0.1
+                #self.testing = -0.1
+                self.testing = sensor_data["mag_field_x"]
                 self.data.append(self.datagen.next(self.testing))
-           #self.testing = sensor_data["mag_field_x"]
 
             elif (self.cb_yline.GetValue()):
-                self.testing = 2.2
+                #self.testing = 2.2
+                self.testing = sensor_data["mag_field_y"]
                 self.dataY.append(self.datagenY.next(self.testing))
-            #self.testing = sensor_data["mag_field_y"]
+        
             else:
-                self.testing = 3.5
+                #self.testing = 3.5
+                self.testing = sensor_data["mag_field_z"]
                 self.dataZ.append(self.datagenZ.next(self.testing))
             #self.data.append(self.datagen.next(self.testing))
 
