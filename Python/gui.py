@@ -315,17 +315,17 @@ class GraphFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.on_pause_button, self.pause_button)
         self.Bind(wx.EVT_UPDATE_UI, self.on_update_pause_button, self.pause_button)
 
-        self.cb_grid = wx.CheckBox(self.panel, -1,
-            "Show Grid",
-            style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_cb_grid, self.cb_grid)
-        self.cb_grid.SetValue(True)
+        # self.cb_grid = wx.CheckBox(self.panel, -1,
+        #     "Show Grid",
+        #     style=wx.ALIGN_RIGHT)
+        # self.Bind(wx.EVT_CHECKBOX, self.on_cb_grid, self.cb_grid)
+        # self.cb_grid.SetValue(True)
 
-        self.cb_xlab = wx.CheckBox(self.panel, -1,
-            "Show X labels",
-            style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_xlab)
-        self.cb_xlab.SetValue(True)
+        # self.cb_xlab = wx.CheckBox(self.panel, -1,
+        #     "Show X labels",
+        #     style=wx.ALIGN_RIGHT)
+        # self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_xlab)
+        # self.cb_xlab.SetValue(True)
 
         self.cb_xline = wx.RadioButton(self.panel, -1,
             "Show X axis field",
@@ -357,10 +357,6 @@ class GraphFrame(wx.Frame):
         self.hbox1 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox1.Add(self.pause_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.AddSpacer(20)
-        #self.hbox1.Add(self.cb_grid, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-        #self.hbox1.AddSpacer(10)
-       # self.hbox1.Add(self.cb_xlab, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-        #self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.cb_xline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.cb_yline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
@@ -371,17 +367,31 @@ class GraphFrame(wx.Frame):
 
         self.hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2.Add(self.mode_control, border=5, flag=wx.ALL)
-        self.hbox2.AddSpacer(24)
-        self.hbox2.Add(self.x_axis_control, border=5, flag=wx.ALL)
-        self.hbox2.Add(self.y_axis_control, border=5, flag=wx.ALL)
-        self.hbox2.Add(self.z_axis_control, border=5, flag=wx.ALL)
-        self.hbox2.AddSpacer(24)
         self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
+        self.hbox2.AddSpacer(24)
+        #self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
 
-        self.vbox = wx.BoxSizer(wx.VERTICAL)
-        self.vbox.Add(self.canvas, 1, flag=wx.LEFT | wx.TOP | wx.GROW)
-        self.vbox.Add(self.hbox1, 0, flag=wx.ALIGN_LEFT | wx.TOP)
-        self.vbox.Add(self.hbox2, 0, flag=wx.ALIGN_LEFT | wx.TOP)
+        self.axis_control_vbox = wx.BoxSizer(wx.VERTICAL)
+        self.axis_control_vbox.Add(self.x_axis_control, border=5, flag=wx.ALL)
+        self.axis_control_vbox.Add(self.y_axis_control, border=5, flag=wx.ALL)
+        self.axis_control_vbox.Add(self.z_axis_control, border=5, flag=wx.ALL)
+       
+
+        #self.axis_control_vbox.AddSpacer(24)
+
+        self.graph_control_vbox =  wx.BoxSizer(wx.VERTICAL)
+        self.graph_control_vbox.Add(self.canvas, 1, flag=wx.TOP | wx.TOP | wx.GROW)
+        self.graph_control_vbox.Add(self.hbox1, border=5, flag=wx.ALL)
+        self.graph_control_vbox.Add(self.hbox2, border=5, flag=wx.ALL)
+
+        self.vbox = wx.BoxSizer(wx.HORIZONTAL)
+       
+        self.vbox.Add(self.axis_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
+        self.vbox.Add(self.graph_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
+        #self.vbox.Add(self.hbox2, 0, flag=wx.ALIGN_TOP | wx.TOP)
+        #self.vbox.Add(self.canvas, 1, flag=wx.TOP | wx.TOP | wx.GROW)
+
+        self.vbox2 =  wx.BoxSizer(wx.VERTICAL)
 
 
         self.panel.SetSizer(self.vbox)
@@ -454,10 +464,10 @@ class GraphFrame(wx.Frame):
         # so just passing the flag into the first statement won't
         # work.
         #
-        if self.cb_grid.IsChecked():
-            self.axes.grid(True, color='gray')
-        else:
-            self.axes.grid(False)
+        #if self.cb_grid.IsChecked():
+        self.axes.grid(True, color='gray')
+        #else:
+            #self.axes.grid(False)
 
         #if self.cb_xline.GetValue():
             #do something
@@ -494,7 +504,7 @@ class GraphFrame(wx.Frame):
         # iterate, and setp already handles this.
         #
         pylab.setp(self.axes.get_xticklabels(),
-            visible=self.cb_xlab.IsChecked())
+            visible=True)
 
         self.plot_data.set_xdata(np.arange(len(self.data)))
         self.plot_data.set_ydata(np.array(self.data))
@@ -512,11 +522,11 @@ class GraphFrame(wx.Frame):
         label = "Resume" if self.paused else "Pause"
         self.pause_button.SetLabel(label)
 
-    def on_cb_grid(self, event):
-        self.draw_plot()
+    # def on_cb_grid(self, event):
+    #     self.draw_plot()
 
-    def on_cb_xlab(self, event):
-        self.draw_plot()
+    # def on_cb_xlab(self, event):
+    #     self.draw_plot()
 
     def on_update_line_value(self, event):
         #COLOR_NAME = 'green'
@@ -529,28 +539,28 @@ class GraphFrame(wx.Frame):
         else:
             label = "z plot"
         self.update_button.SetLabel(label)
-        TEST_NUMBER = 3
+        #TEST_NUMBER = 3
         self.draw_plot()
 
     def show_x_plot(self, event):
         #COLOR_NAME = 'green'
-        label = "x plot"
-        self.pause_button.SetLabel(label)
-        TEST_NUMBER = 3
+        # label = "x plot"
+        # self.pause_button.SetLabel(label)
+        # TEST_NUMBER = 3
         self.draw_plot()
 
     def show_y_plot(self, event):
         #COLOR_NAME = 'blue'
-        label = "y plot"
-        self.pause_button.SetLabel(label)
-        TEST_NUMBER = 3
+       # label = "y plot"
+       # self.pause_button.SetLabel(label)
+        #TEST_NUMBER = 3
         self.draw_plot()
 
     def show_z_plot(self, event):
         #COLOR_NAME = 'red'
-        label = "z plot"
-        self.pause_button.SetLabel(label)
-        TEST_NUMBER = 3
+        #label = "z plot"
+       # self.pause_button.SetLabel(label)
+        #TEST_NUMBER = 3
         self.draw_plot()
 
     def on_save_plot(self, event):
@@ -567,7 +577,7 @@ class GraphFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self.canvas.print_figure(path, dpi=self.dpi)
-            self.flash_status_message("Saved to %s" % path)
+            #self.flash_status_message("Saved to %s" % path)
 
     def on_redraw_timer(self, event):
         # if paused do not add data, but still redraw the plot
@@ -583,30 +593,30 @@ class GraphFrame(wx.Frame):
         self.testing = 0
 
         if (self.cb_xline.GetValue()):
-           #self.testing = -0.1
-           self.testing = sensor_data["mag_field_x"]
+           self.testing = -0.1
+           #self.testing = sensor_data["mag_field_x"]
 
         elif (self.cb_yline.GetValue()):
-            #self.testing = 2.2
-            self.testing = sensor_data["mag_field_y"]
+            self.testing = 2.2
+            #self.testing = sensor_data["mag_field_y"]
         else:
-            #self.testing = 3.5
-            self.testing = sensor_data["mag_field_z"]
+            self.testing = 3.5
+            #self.testing = sensor_data["mag_field_z"]
 
     def on_exit(self, event):
         self.Destroy()
 
-    def flash_status_message(self, msg, flash_len_ms=1500):
-        self.statusbar.SetStatusText(msg)
-        self.timeroff = wx.Timer(self)
-        self.Bind(
-            wx.EVT_TIMER,
-            self.on_flash_status_off,
-            self.timeroff)
-        self.timeroff.Start(flash_len_ms, oneShot=True)
+    # def flash_status_message(self, msg, flash_len_ms=1500):
+    #     self.statusbar.SetStatusText(msg)
+    #     self.timeroff = wx.Timer(self)
+    #     self.Bind(
+    #         wx.EVT_TIMER,
+    #         self.on_flash_status_off,
+    #         self.timeroff)
+    #     self.timeroff.Start(flash_len_ms, oneShot=True)
 
-    def on_flash_status_off(self, event):
-        self.statusbar.SetStatusText('')
+    # def on_flash_status_off(self, event):
+    #     self.statusbar.SetStatusText('')
 
 
 #if __name__ == '__main__':
