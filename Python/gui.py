@@ -523,7 +523,7 @@ class GraphFrame(wx.Frame):
             ymax = int(self.mode_control.manual_value())
 
         self.axes.set_xbound(lower=0, upper=xmax)
-        self.axes.set_ybound(lower=ymin, upper=ymax)
+        self.axes.set_ybound(lower=-10000, upper=10000)
 
         self.axes.grid(True, color='gray')
         #else:
