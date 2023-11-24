@@ -88,10 +88,29 @@ class DataGen(object):
         self.data = testing
        # self.data = get_axis_to_print()
 
-    def get_axis_to_print(self):
-        a = 1
-        return 3.3
+class DataGenYAxis(object):
+    def __init__(self, init=50):
+        self.data = self.init = init
 
+    def next(self, testing_yaxis):
+        self._recalc_data(testing_yaxis)
+        return self.data
+
+    def _recalc_data(self, testing_yaxis):
+        self.data = sensor_data["mag_field_y"]
+        self.data = testing_yaxis
+
+class DataGenZAxis(object):
+    def __init__(self, init=50):
+        self.data = self.init = init
+
+    def next(self, testing_zaxis):
+        self._recalc_data(testing_zaxis)
+        return self.data
+
+    def _recalc_data(self, testing_zaxis):
+        self.data = sensor_data["mag_field_z"]
+        self.data = testing_zaxis
 
 class ModeControlBox(wx.Panel):
     """ A static box with csv upload and 3 preset mode buttons (preset csv files).
@@ -255,6 +274,13 @@ class GraphFrame(wx.Frame):
 
         self.datagen = DataGen()
         self.data = [self.datagen.next(3.3)]
+
+        self.datagenY = DataGenYAxis()
+        self.dataY = [self.datagenY.next(3.3)]
+
+        self.datagenZ = DataGenZAxis()
+        self.dataZ = [self.datagenZ.next(3.3)]
+
         self.paused = False
 
         self.create_menu()
@@ -425,10 +451,25 @@ class GraphFrame(wx.Frame):
         """ Redraws the plot
         """
         print("test")
+
+        if (self.cb_xline.GetValue()):
+            self.data = self.data
+           #self.testing = sensor_data["mag_field_x"]
+
+        elif (self.cb_yline.GetValue()):
+            self.data = self.dataY
+            #self.testing = sensor_data["mag_field_y"]
+        else:
+            self.data = self.dataZ
+
         # when xmin (edit: mode_control) is on auto, it "follows" xmax to produce a
         # sliding window effect. therefore, xmin is assigned after
         # xmax.
         #
+
+
+        
+
         if self.mode_control.is_auto():
             xmax = len(self.data) if len(self.data) > 50 else 50
         else:
@@ -522,12 +563,6 @@ class GraphFrame(wx.Frame):
         label = "Resume" if self.paused else "Pause"
         self.pause_button.SetLabel(label)
 
-    # def on_cb_grid(self, event):
-    #     self.draw_plot()
-
-    # def on_cb_xlab(self, event):
-    #     self.draw_plot()
-
     def on_update_line_value(self, event):
         #COLOR_NAME = 'green'
         label =  "test"
@@ -539,7 +574,6 @@ class GraphFrame(wx.Frame):
         else:
             label = "z plot"
         self.update_button.SetLabel(label)
-        #TEST_NUMBER = 3
         self.draw_plot()
 
     def show_x_plot(self, event):
@@ -585,7 +619,20 @@ class GraphFrame(wx.Frame):
         #
         if not self.paused:
             self.update_sensor_data(event)
-            self.data.append(self.datagen.next(self.testing))
+            
+            if (self.cb_xline.GetValue()):
+                self.testing = -0.1
+                self.data.append(self.datagen.next(self.testing))
+           #self.testing = sensor_data["mag_field_x"]
+
+            elif (self.cb_yline.GetValue()):
+                self.testing = 2.2
+                self.dataY.append(self.datagenY.next(self.testing))
+            #self.testing = sensor_data["mag_field_y"]
+            else:
+                self.testing = 3.5
+                self.dataZ.append(self.datagenZ.next(self.testing))
+            #self.data.append(self.datagen.next(self.testing))
 
         self.draw_plot()
 
