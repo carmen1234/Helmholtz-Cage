@@ -586,12 +586,12 @@ class GraphFrame(wx.Frame):
         #COLOR_NAME = 'green'
         label =  "test"
         if (self.cb_xline.GetValue()):
-            label = "x plot"
+            label = "x axis"
 
         elif (self.cb_yline.GetValue()):
-            label = "y plot"
+            label = "y axis"
         else:
-            label = "z plot"
+            label = "z axis"
         self.update_button.SetLabel(label)
         self.draw_plot()
 
