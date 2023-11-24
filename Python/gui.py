@@ -60,7 +60,7 @@ enum = {
     'SimMode_2': 30
 }
 
-COLOR_NAME = 'white'
+COLOR_NAME = 'black'
 #TEST_NUMBER = 2.3
 axis_int = 0
 
@@ -448,7 +448,7 @@ class GraphFrame(wx.Frame):
             self.plot_data = self.axes.plot(
             self.data,
             linewidth=2,
-            color=(0.5, 0, 0.5),
+            color=(1, 0, 1),
             )[0]
 
         elif (axis_int == 1):
@@ -473,7 +473,7 @@ class GraphFrame(wx.Frame):
     def draw_plot(self):
         """ Redraws the plot
         """
-        print("test")
+        #print("test")
         #global axis_int
 
         if (self.cb_xline.GetValue()):
