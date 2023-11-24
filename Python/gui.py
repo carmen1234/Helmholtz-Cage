@@ -443,6 +443,7 @@ class GraphFrame(wx.Frame):
         # to the plotted line series
         #
         test = axis_int
+        #test_bool = self.cb_xline.GetValue()
 
         if (axis_int == 0):
             self.plot_data = self.axes.plot(
@@ -486,7 +487,26 @@ class GraphFrame(wx.Frame):
         else:
             self.data = self.dataZ
             axis_int = 2
+######################################################
+        if (axis_int == 0):
+            self.plot_data = self.axes.plot(
+            self.data,
+            linewidth=2,
+            color=(0.5, 0, 0.5),
+            )[0]
 
+        elif (axis_int == 1):
+            self.plot_data = self.axes.plot(
+            self.data,
+            linewidth=1,
+            color=(0, 1, 1),
+            )[0]
+        else:
+            self.plot_data = self.axes.plot(
+            self.data,
+            linewidth=1,
+            color=(1, 0, 1),
+            )[0]
         # when xmin (edit: mode_control) is on auto, it "follows" xmax to produce a
         # sliding window effect. therefore, xmin is assigned after
         # xmax.
