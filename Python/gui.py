@@ -60,8 +60,9 @@ enum = {
     'SimMode_2': 30
 }
 
-COLOR_NAME = 'black'
-TEST_NUMBER = 2.3
+COLOR_NAME = 'white'
+#TEST_NUMBER = 2.3
+axis_int = 0
 
 
 """""
@@ -84,7 +85,7 @@ class DataGen(object):
         #print(TEST_NUMBER)
 
         self.data = sensor_data["mag_field_x"]
-        print(TEST_NUMBER)
+        #print(TEST_NUMBER)
         self.data = testing
        # self.data = get_axis_to_print()
 
@@ -441,26 +442,50 @@ class GraphFrame(wx.Frame):
         # plot the data as a line series, and save the reference
         # to the plotted line series
         #
-        self.plot_data = self.axes.plot(
+        test = axis_int
+
+        if (axis_int == 0):
+            self.plot_data = self.axes.plot(
+            self.data,
+            linewidth=2,
+            color=(0.5, 0, 0.5),
+            )[0]
+
+        elif (axis_int == 1):
+            self.plot_data = self.axes.plot(
             self.data,
             linewidth=1,
-            color=(1, 1, 0),
+            color=(0, 1, 1),
             )[0]
+        else:
+            self.plot_data = self.axes.plot(
+            self.data,
+            linewidth=1,
+            color=(1, 0, 1),
+            )[0]
+        
+        # self.plot_data = self.axes.plot(
+        #     self.data,
+        #     linewidth=1,
+        #     color=(1, 1, 0),
+        #     )[0]
 
     def draw_plot(self):
         """ Redraws the plot
         """
         print("test")
+        #global axis_int
 
         if (self.cb_xline.GetValue()):
             self.data = self.data
-           #self.testing = sensor_data["mag_field_x"]
+            axis_int = 0
 
         elif (self.cb_yline.GetValue()):
             self.data = self.dataY
-            #self.testing = sensor_data["mag_field_y"]
+            axis_int = 1
         else:
             self.data = self.dataZ
+            axis_int = 2
 
         # when xmin (edit: mode_control) is on auto, it "follows" xmax to produce a
         # sliding window effect. therefore, xmin is assigned after
@@ -500,12 +525,6 @@ class GraphFrame(wx.Frame):
         self.axes.set_xbound(lower=0, upper=xmax)
         self.axes.set_ybound(lower=ymin, upper=ymax)
 
-        # anecdote: axes.grid assumes b=True if any other flag is
-        # given even if b is set to False.
-        # so just passing the flag into the first statement won't
-        # work.
-        #
-        #if self.cb_grid.IsChecked():
         self.axes.grid(True, color='gray')
         #else:
             #self.axes.grid(False)
