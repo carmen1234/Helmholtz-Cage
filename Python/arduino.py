@@ -14,6 +14,16 @@ class Arduino:
         sensor_data["mag_field_y"] = mag_field_y
         sensor_data["mag_field_z"] = mag_field_z
 
+        write_header = 1
+
+        with open('magnetic_field.csv', 'a', newline='') as csvfile:
+            fieldnames = ['x_axis', 'y_axis', 'z_axis']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            if (write_header == 1):
+                writer.writeheader()
+                write_header = 0
+            writer.writerow({'x_axis':  mag_field_x, 'y_axis':  mag_field_y,'z_axis':  mag_field_z})
+
     def parse_serial_data(self, serial_data):
         match = re.match(r'C:(-?\d+\.?\d+),X:(-?\d+\.?\d+),Y:(-?\d+\.?\d+),Z:(-?\d+\.?\d+)', serial_data)
         if match:

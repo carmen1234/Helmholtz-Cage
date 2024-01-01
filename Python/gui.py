@@ -14,6 +14,7 @@ import pprint
 import random
 import sys
 import wx
+import csv
 
 from globals import sensor_data
 
@@ -89,8 +90,7 @@ class DataGenXAxis(object):
         self.dataX = sensor_data["mag_field_x"]
         #print(TEST_NUMBER)
         self.dataX = testing_xaxis
-       # self.data = get_axis_to_print()
-
+    
 class DataGenYAxis(object):
     def __init__(self, init=50):
         self.dataY = self.init = init
@@ -446,19 +446,21 @@ class GraphFrame(wx.Frame):
         #
         test = axis_int
 
+        #x-axis
         if (axis_int == 0):
             self.plot_data = self.axes.plot(
             self.dataX,
             linewidth=2,
             color=(1, 0, 1),
             )[0]
-
+        #y-axis
         elif (axis_int == 1):
             self.plot_data = self.axes.plot(
             self.dataY,
             linewidth=1,
             color=(0, 1, 1),
             )[0]
+        #z-axis
         else:
             self.plot_data = self.axes.plot(
             self.dataZ,
