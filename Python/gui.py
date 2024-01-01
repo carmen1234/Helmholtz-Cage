@@ -215,10 +215,23 @@ class DebugConsoleBox(wx.Panel):
 class AxisControlBox(wx.Panel):
     """ A static box with a box for reading magnetometer and current sensor values, and setting a current
     """
-    def __init__(self, parent, ID, label, initval):
+    def __init__(self, parent, ID, label, initval, axis):
         wx.Panel.__init__(self, parent, ID)
 
         self.value = initval
+        self.axis = axis
+        self.mag_field = 0
+
+        if (axis == 1):
+            #something
+            self.mag_field = sensor_data["mag_field_x"]
+        elif (axis == 2):
+            #something
+             self.mag_field = sensor_data["mag_field_y"]
+        else:
+             self.mag_field = sensor_data["mag_field_z"]
+
+        self.mag_field_str = str(self.mag_field)
 
         box = wx.StaticBox(self, -1, label)
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
@@ -226,6 +239,7 @@ class AxisControlBox(wx.Panel):
         self.ReadMagX = wx.StaticText(self, enum['ID_MagXRead'], "M. Field Strength: ")
 
         self.MagXInput = wx.TextCtrl(self, enum['ID_MagXInput'], "", wx.Point(200, 43), wx.DefaultSize, wx.TE_READONLY)
+        self.MagXInput.SetValue(self.mag_field_str)
 
         self.ReadCurrentX = wx.StaticText(self, enum['ID_CurrentRead'], "Current: ")
         self.ReadCurrentX.Move(105, 90, wx.SIZE_USE_EXISTING)
@@ -260,6 +274,38 @@ class AxisControlBox(wx.Panel):
 
     def is_auto(self):
        return True
+
+    def update_value(self, axis):
+        self.axis = axis
+        self.mag_field = 0
+
+        if (axis == 1):
+            #something
+            self.mag_field = sensor_data["mag_field_x"]
+        elif (axis == 2):
+            #something
+             self.mag_field = sensor_data["mag_field_y"]
+        else:
+             self.mag_field = sensor_data["mag_field_z"]
+
+        self.mag_field_str = str(self.mag_field)
+        self.MagXInput.SetValue(self.mag_field_str)
+
+    def update_current(self, axis):
+        self.axis = axis
+        self.current = 0
+
+        if (axis == 1):
+            #something
+            self.current = sensor_data["current"]
+        elif (axis == 2):
+            #something
+             self.current = sensor_data["current"]
+        else:
+             self.current = sensor_data["current"]
+
+        self.current_str = str(self.current)
+        self.CurrentInputX.SetValue(self.current_str)
 
     def on_set_value_button(self):
         #called when button pressed
@@ -335,9 +381,9 @@ class GraphFrame(wx.Frame):
         self.canvas = FigCanvas(self.panel, -1, self.fig)
 
         self.mode_control = ModeControlBox(self.panel, -1, "SET MODES", 0)
-        self.x_axis_control = AxisControlBox(self.panel, -1, "X AXIS", 50)
-        self.y_axis_control = AxisControlBox(self.panel, -1, "Y AXIS", 75)
-        self.z_axis_control = AxisControlBox(self.panel, -1, "Z AXIS", 100)
+        self.x_axis_control = AxisControlBox(self.panel, -1, "X AXIS", 50, 1)
+        self.y_axis_control = AxisControlBox(self.panel, -1, "Y AXIS", 75, 2)
+        self.z_axis_control = AxisControlBox(self.panel, -1, "Z AXIS", 100, 3)
         self.debug_console = DebugConsoleBox(self.panel, -1, "CONSOLE", 125)
 
         self.pause_button = wx.Button(self.panel, -1, "Pause")
@@ -479,6 +525,14 @@ class GraphFrame(wx.Frame):
         """
         #print("test")
         #global axis_int
+        #doesnt work right now
+        self.x_axis_control.update_value(1)
+        self.y_axis_control.update_value(2)
+        self.z_axis_control.update_value(3)
+
+        self.x_axis_control.update_current(1)
+        self.y_axis_control.update_current(2)
+        self.z_axis_control.update_current(3)
 
         if (self.cb_xline.GetValue()):
             self.data = self.dataX
