@@ -66,52 +66,54 @@ axis_int = 0
 
 
 """""
+(used for sliding window part of graph display)
 Sample graph code:
 Eli Bendersky (eliben@gmail.com)
 License: this code is in the public domain
 """""
-class DataGen(object):
+
+class DataGenXAxis(object):
     def __init__(self, init=50):
-        self.data = self.init = init
+        self.dataX = self.init = init
 
-    def next(self, testing):
-        self._recalc_data(testing)
-        return self.data
+    def next(self, testing_xaxis):
+        self._recalc_data(testing_xaxis)
+        return self.dataX
 
-    def _recalc_data(self, testing):
+    def _recalc_data(self, testing_xaxis):
         #delta = random.uniform(-0.5, 0.5)
         #r = random.random()
 
         #print(TEST_NUMBER)
 
-        self.data = sensor_data["mag_field_x"]
+        self.dataX = sensor_data["mag_field_x"]
         #print(TEST_NUMBER)
-        self.data = testing
+        self.dataX = testing_xaxis
        # self.data = get_axis_to_print()
 
 class DataGenYAxis(object):
     def __init__(self, init=50):
-        self.data = self.init = init
+        self.dataY = self.init = init
 
     def next(self, testing_yaxis):
         self._recalc_data(testing_yaxis)
-        return self.data
+        return self.dataY
 
     def _recalc_data(self, testing_yaxis):
-        self.data = sensor_data["mag_field_y"]
-        self.data = testing_yaxis
+        self.dataY = sensor_data["mag_field_y"]
+        self.dataY = testing_yaxis
 
 class DataGenZAxis(object):
     def __init__(self, init=50):
-        self.data = self.init = init
+        self.dataZ = self.init = init
 
     def next(self, testing_zaxis):
         self._recalc_data(testing_zaxis)
-        return self.data
+        return self.dataZ
 
     def _recalc_data(self, testing_zaxis):
-        self.data = sensor_data["mag_field_z"]
-        self.data = testing_zaxis
+        self.dataZ = sensor_data["mag_field_z"]
+        self.dataZ = testing_zaxis
 
 class ModeControlBox(wx.Panel):
     """ A static box with csv upload and 3 preset mode buttons (preset csv files).
@@ -273,8 +275,8 @@ class GraphFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, -1, self.title)
 
-        self.datagen = DataGen()
-        self.data = [self.datagen.next(3.3)]
+        self.datagenX = DataGenXAxis()
+        self.dataX = [self.datagenX.next(3.3)]
 
         self.datagenY = DataGenYAxis()
         self.dataY = [self.datagenY.next(3.3)]
@@ -446,20 +448,20 @@ class GraphFrame(wx.Frame):
 
         if (axis_int == 0):
             self.plot_data = self.axes.plot(
-            self.data,
+            self.dataX,
             linewidth=2,
             color=(1, 0, 1),
             )[0]
 
         elif (axis_int == 1):
             self.plot_data = self.axes.plot(
-            self.data,
+            self.dataY,
             linewidth=1,
             color=(0, 1, 1),
             )[0]
         else:
             self.plot_data = self.axes.plot(
-            self.data,
+            self.dataZ,
             linewidth=1,
             color=(1, 0, 1),
             )[0]
@@ -477,7 +479,7 @@ class GraphFrame(wx.Frame):
         #global axis_int
 
         if (self.cb_xline.GetValue()):
-            self.data = self.data
+            self.data = self.dataX
             axis_int = 0
 
         elif (self.cb_yline.GetValue()):
@@ -641,18 +643,18 @@ class GraphFrame(wx.Frame):
             
             if (self.cb_xline.GetValue()):
                 #self.testing = -0.1
-                self.testing = sensor_data["mag_field_x"]
-                self.data.append(self.datagen.next(self.testing))
+                self.testingX = sensor_data["mag_field_x"]
+                self.dataX.append(self.datagenX.next(self.testingX))
 
             elif (self.cb_yline.GetValue()):
                 #self.testing = 2.2
-                self.testing = sensor_data["mag_field_y"]
-                self.dataY.append(self.datagenY.next(self.testing))
+                self.testingY = sensor_data["mag_field_y"]
+                self.dataY.append(self.datagenY.next(self.testingY))
         
             else:
                 #self.testing = 3.5
-                self.testing = sensor_data["mag_field_z"]
-                self.dataZ.append(self.datagenZ.next(self.testing))
+                self.testingZ = sensor_data["mag_field_z"]
+                self.dataZ.append(self.datagenZ.next(self.testingZ))
             #self.data.append(self.datagen.next(self.testing))
 
         self.draw_plot()
