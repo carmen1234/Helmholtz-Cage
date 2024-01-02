@@ -15,6 +15,8 @@ import random
 import sys
 import wx
 import csv
+import math
+from math import pi
 
 from globals import sensor_data
 
@@ -25,6 +27,7 @@ from matplotlib.backends.backend_wxagg import \
     FigureCanvasWxAgg as FigCanvas, \
     NavigationToolbar2WxAgg as NavigationToolbar
 import numpy as np
+from numpy import sqrt
 import pylab
 
 # Define the enum dictionary
@@ -307,9 +310,28 @@ class AxisControlBox(wx.Panel):
         self.current_str = str(self.current)
         self.CurrentInputX.SetValue(self.current_str)
 
-    def on_set_value_button(self):
+    def on_set_value_button(self, axis):
         #called when button pressed
-       pass
+        #-----------------------------------------------
+        #1. get magnetic field value from text box
+        desired_mag_field = self.SetX.GetValue()
+        
+        #for testing:
+        #self.CurrentInputX.SetValue(desired_mag_field)
+        #-----------------------------------------------
+        #2. calculate required current (theoretical)
+        #turns: 2*5 
+        #size: 0.6m -> a = 0.3m
+        a = 0.3 #constant, TODO add somehwere else
+        miu_0 = 4*pi*pow(10, -7) #also a constant
+
+        #check equation
+        # b = (sqrt(2)*miu_0*I)/(pi*a)
+        # I = b*(pi*a)/(sqrt(2)*miu_0)
+        I = float(desired_mag_field)*(pi*a)/(sqrt(2)*miu_0)
+
+        #3. call control system loop
+       #pass
 
 
 
