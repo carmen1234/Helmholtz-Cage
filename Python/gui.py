@@ -14,6 +14,9 @@ import pprint
 import random
 import sys
 import wx
+import csv
+import math
+from math import pi
 
 from globals import sensor_data
 
@@ -24,6 +27,7 @@ from matplotlib.backends.backend_wxagg import \
     FigureCanvasWxAgg as FigCanvas, \
     NavigationToolbar2WxAgg as NavigationToolbar
 import numpy as np
+from numpy import sqrt
 import pylab
 
 # Define the enum dictionary
@@ -60,43 +64,59 @@ enum = {
     'SimMode_2': 30
 }
 
+COLOR_NAME = 'black'
+#TEST_NUMBER = 2.3
+axis_int = 0
+
 
 """""
+(used for sliding window part of graph display)
 Sample graph code:
 Eli Bendersky (eliben@gmail.com)
 License: this code is in the public domain
 """""
-class DataGen(object):
-    """ A silly class that generates pseudo-random data for
-        display in the plot.
-    """
+
+class DataGenXAxis(object):
     def __init__(self, init=50):
-        self.data = self.init = init
+        self.dataX = self.init = init
 
-    def next(self):
-        self._recalc_data()
-        return self.data
+    def next(self, testing_xaxis):
+        self._recalc_data(testing_xaxis)
+        return self.dataX
 
-    def _recalc_data(self):
-        delta = random.uniform(-0.5, 0.5)
-        r = random.random()
+    def _recalc_data(self, testing_xaxis):
+        #delta = random.uniform(-0.5, 0.5)
+        #r = random.random()
 
-        self.data = sensor_data["magnetic_field"]
+        #print(TEST_NUMBER)
 
-        #if r > 0.9:
-            #delta = 1
-            #self.data += delta * 15
-            #self.data = sensor_data[magnetic_field]
-            
-        #elif r > 0.8:
-            # attraction to the initial value
-            #delta += (0.5 if self.init > self.data else -0.5)
-            #delta = 1
-            #self.data += delta
-        #else:
-            #delta = 1
-            #self.data += delta
+        self.dataX = sensor_data["mag_field_x"]
+        #print(TEST_NUMBER)
+        self.dataX = testing_xaxis
+    
+class DataGenYAxis(object):
+    def __init__(self, init=50):
+        self.dataY = self.init = init
 
+    def next(self, testing_yaxis):
+        self._recalc_data(testing_yaxis)
+        return self.dataY
+
+    def _recalc_data(self, testing_yaxis):
+        self.dataY = sensor_data["mag_field_y"]
+        self.dataY = testing_yaxis
+
+class DataGenZAxis(object):
+    def __init__(self, init=50):
+        self.dataZ = self.init = init
+
+    def next(self, testing_zaxis):
+        self._recalc_data(testing_zaxis)
+        return self.dataZ
+
+    def _recalc_data(self, testing_zaxis):
+        self.dataZ = sensor_data["mag_field_z"]
+        self.dataZ = testing_zaxis
 
 class ModeControlBox(wx.Panel):
     """ A static box with csv upload and 3 preset mode buttons (preset csv files).
@@ -121,7 +141,7 @@ class ModeControlBox(wx.Panel):
         #self.CSVPathBox.SetSize(790, 536, 250, 40, wx.HORIZONTAL | wx.GROW)
         #self.DebugBox.SetSize(0, 500, 450, 200, wx.VERTICAL | wx.GROW)
 
-            
+
         self.SetMode0 = wx.Button(self, enum['SimMode_0'], "Set Mode 0")
         self.Bind(wx.EVT_BUTTON, self.on_mode_0, self.SetMode0)
         self.SetMode0.Move((25, 0))
@@ -185,7 +205,7 @@ class DebugConsoleBox(wx.Panel):
 
         box = wx.StaticBox(self, -1, label)
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-            
+
         self.DebugBox = wx.TextCtrl(self, enum['DebugBoxID'])
 
         sizer.Add(self.DebugBox, 0, wx.ALL, 10)
@@ -198,17 +218,31 @@ class DebugConsoleBox(wx.Panel):
 class AxisControlBox(wx.Panel):
     """ A static box with a box for reading magnetometer and current sensor values, and setting a current
     """
-    def __init__(self, parent, ID, label, initval):
+    def __init__(self, parent, ID, label, initval, axis):
         wx.Panel.__init__(self, parent, ID)
 
         self.value = initval
+        self.axis = axis
+        self.mag_field = 0
+
+        if (axis == 1):
+            #something
+            self.mag_field = sensor_data["mag_field_x"]
+        elif (axis == 2):
+            #something
+             self.mag_field = sensor_data["mag_field_y"]
+        else:
+             self.mag_field = sensor_data["mag_field_z"]
+
+        self.mag_field_str = str(self.mag_field)
 
         box = wx.StaticBox(self, -1, label)
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-            
+
         self.ReadMagX = wx.StaticText(self, enum['ID_MagXRead'], "M. Field Strength: ")
 
         self.MagXInput = wx.TextCtrl(self, enum['ID_MagXInput'], "", wx.Point(200, 43), wx.DefaultSize, wx.TE_READONLY)
+        self.MagXInput.SetValue(self.mag_field_str)
 
         self.ReadCurrentX = wx.StaticText(self, enum['ID_CurrentRead'], "Current: ")
         self.ReadCurrentX.Move(105, 90, wx.SIZE_USE_EXISTING)
@@ -244,9 +278,60 @@ class AxisControlBox(wx.Panel):
     def is_auto(self):
        return True
 
-    def on_set_value_button(self):
+    def update_value(self, axis):
+        self.axis = axis
+        self.mag_field = 0
+
+        if (axis == 1):
+            #something
+            self.mag_field = sensor_data["mag_field_x"]
+        elif (axis == 2):
+            #something
+             self.mag_field = sensor_data["mag_field_y"]
+        else:
+             self.mag_field = sensor_data["mag_field_z"]
+
+        self.mag_field_str = str(self.mag_field)
+        self.MagXInput.SetValue(self.mag_field_str)
+
+    def update_current(self, axis):
+        self.axis = axis
+        self.current = 0
+
+        if (axis == 1):
+            #something
+            self.current = sensor_data["current"]
+        elif (axis == 2):
+            #something
+             self.current = sensor_data["current"]
+        else:
+             self.current = sensor_data["current"]
+
+        self.current_str = str(self.current)
+        self.CurrentInputX.SetValue(self.current_str)
+
+    def on_set_value_button(self, axis):
         #called when button pressed
-       pass
+        #-----------------------------------------------
+        #1. get magnetic field value from text box
+        desired_mag_field = self.SetX.GetValue()
+        
+        #for testing:
+        #self.CurrentInputX.SetValue(desired_mag_field)
+        #-----------------------------------------------
+        #2. calculate required current (theoretical)
+        #turns: 2*5 
+        #size: 0.6m -> a = 0.3m
+        a = 0.3 #constant, TODO add somehwere else
+        miu_0 = 4*pi*pow(10, -7) #also a constant
+
+        #check equation
+        # b = (sqrt(2)*miu_0*I)/(pi*a)
+        # I = b*(pi*a)/(sqrt(2)*miu_0)
+        I = float(desired_mag_field)*(pi*a)/(sqrt(2)*miu_0)
+
+        #3. call control system loop
+       #pass
 
 
 
@@ -258,8 +343,15 @@ class GraphFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, -1, self.title)
 
-        self.datagen = DataGen()
-        self.data = [self.datagen.next()]
+        self.datagenX = DataGenXAxis()
+        self.dataX = [self.datagenX.next(3.3)]
+
+        self.datagenY = DataGenYAxis()
+        self.dataY = [self.datagenY.next(3.3)]
+
+        self.datagenZ = DataGenZAxis()
+        self.dataZ = [self.datagenZ.next(3.3)]
+
         self.paused = False
 
         self.create_menu()
@@ -269,6 +361,20 @@ class GraphFrame(wx.Frame):
         self.redraw_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
         self.redraw_timer.Start(100)
+
+    # def next(self, TEST_NUMBER):
+    #     self._recalc_data()
+    #     return self.data
+
+    # def _recalc_data(self, TEST_NUMBER):
+    #     #delta = random.uniform(-0.5, 0.5)
+    #     #r = random.random()
+
+    #     #print(TEST_NUMBER)
+
+    #     self.data = sensor_data["magnetic_field"]
+    #     print(TEST_NUMBER)
+    #     self.data = 1
 
     def create_menu(self):
         self.menubar = wx.MenuBar()
@@ -297,75 +403,94 @@ class GraphFrame(wx.Frame):
         self.canvas = FigCanvas(self.panel, -1, self.fig)
 
         self.mode_control = ModeControlBox(self.panel, -1, "SET MODES", 0)
-        self.x_axis_control = AxisControlBox(self.panel, -1, "X AXIS", 50)
-        self.y_axis_control = AxisControlBox(self.panel, -1, "Y AXIS", 75)
-        self.z_axis_control = AxisControlBox(self.panel, -1, "Z AXIS", 100)
+        self.x_axis_control = AxisControlBox(self.panel, -1, "X AXIS", 50, 1)
+        self.y_axis_control = AxisControlBox(self.panel, -1, "Y AXIS", 75, 2)
+        self.z_axis_control = AxisControlBox(self.panel, -1, "Z AXIS", 100, 3)
         self.debug_console = DebugConsoleBox(self.panel, -1, "CONSOLE", 125)
 
         self.pause_button = wx.Button(self.panel, -1, "Pause")
         self.Bind(wx.EVT_BUTTON, self.on_pause_button, self.pause_button)
         self.Bind(wx.EVT_UPDATE_UI, self.on_update_pause_button, self.pause_button)
 
-        self.cb_grid = wx.CheckBox(self.panel, -1,
-            "Show Grid",
-            style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_cb_grid, self.cb_grid)
-        self.cb_grid.SetValue(True)
+        # self.cb_grid = wx.CheckBox(self.panel, -1,
+        #     "Show Grid",
+        #     style=wx.ALIGN_RIGHT)
+        # self.Bind(wx.EVT_CHECKBOX, self.on_cb_grid, self.cb_grid)
+        # self.cb_grid.SetValue(True)
 
-        self.cb_xlab = wx.CheckBox(self.panel, -1,
-            "Show X labels",
-            style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_xlab)
-        self.cb_xlab.SetValue(True)
+        # self.cb_xlab = wx.CheckBox(self.panel, -1,
+        #     "Show X labels",
+        #     style=wx.ALIGN_RIGHT)
+        # self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_xlab)
+        # self.cb_xlab.SetValue(True)
 
-        self.cb_xline = wx.CheckBox(self.panel, -1,
+        self.cb_xline = wx.RadioButton(self.panel, -1,
             "Show X axis field",
             style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_xline)
+        self.Bind(wx.EVT_BUTTON, self.show_x_plot, self.cb_xline)
         self.cb_xline.SetValue(True)
+        self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_xline)
 
-        self.cb_yline = wx.CheckBox(self.panel, -1,
+        self.cb_yline = wx.RadioButton(self.panel, -1,
             "Show Y axis field",
             style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_yline)
+        self.Bind(wx.EVT_BUTTON, self.show_y_plot, self.cb_yline)
         self.cb_yline.SetValue(False)
+        self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_yline)
 
-        self.cb_zline = wx.CheckBox(self.panel, -1,
+        self.cb_zline = wx.RadioButton(self.panel, -1,
             "Show Z axis field",
             style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_zline)
+        self.Bind(wx.EVT_UPDATE_UI, self.show_z_plot, self.cb_zline)
         self.cb_yline.SetValue(False)
+        self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_zline)
+
+        self.update_button = wx.Button(self.panel, -1, "Update")
+        self.Bind(wx.EVT_BUTTON, self.on_update_button, self.update_button)
+        #self.Bind(wx.EVT_UPDATE_UI, self.on_update_pause_button, self.update_button)
 
        # self.DebugBox = wx.TextCtrl(self.panel, enum['DebugBoxID'])
 
         self.hbox1 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox1.Add(self.pause_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.AddSpacer(20)
-        self.hbox1.Add(self.cb_grid, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-        self.hbox1.AddSpacer(10)
-        self.hbox1.Add(self.cb_xlab, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-        self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.cb_xline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.cb_yline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.cb_zline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+        self.hbox1.AddSpacer(10)
+        self.hbox1.Add(self.update_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
 
         self.hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2.Add(self.mode_control, border=5, flag=wx.ALL)
-        self.hbox2.AddSpacer(24)
-        self.hbox2.Add(self.x_axis_control, border=5, flag=wx.ALL)
-        self.hbox2.Add(self.y_axis_control, border=5, flag=wx.ALL)
-        self.hbox2.Add(self.z_axis_control, border=5, flag=wx.ALL)
-        self.hbox2.AddSpacer(24)
         self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
+        self.hbox2.AddSpacer(24)
+        #self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
 
-        self.vbox = wx.BoxSizer(wx.VERTICAL)
-        self.vbox.Add(self.canvas, 1, flag=wx.LEFT | wx.TOP | wx.GROW)
-        self.vbox.Add(self.hbox1, 0, flag=wx.ALIGN_LEFT | wx.TOP)
-        self.vbox.Add(self.hbox2, 0, flag=wx.ALIGN_LEFT | wx.TOP)
+        self.axis_control_vbox = wx.BoxSizer(wx.VERTICAL)
+        self.axis_control_vbox.Add(self.x_axis_control, border=5, flag=wx.ALL)
+        self.axis_control_vbox.Add(self.y_axis_control, border=5, flag=wx.ALL)
+        self.axis_control_vbox.Add(self.z_axis_control, border=5, flag=wx.ALL)
+       
 
-        
+        #self.axis_control_vbox.AddSpacer(24)
+
+        self.graph_control_vbox =  wx.BoxSizer(wx.VERTICAL)
+        self.graph_control_vbox.Add(self.canvas, 1, flag=wx.TOP | wx.TOP | wx.GROW)
+        self.graph_control_vbox.Add(self.hbox1, border=5, flag=wx.ALL)
+        self.graph_control_vbox.Add(self.hbox2, border=5, flag=wx.ALL)
+
+        self.vbox = wx.BoxSizer(wx.HORIZONTAL)
+       
+        self.vbox.Add(self.axis_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
+        self.vbox.Add(self.graph_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
+        #self.vbox.Add(self.hbox2, 0, flag=wx.ALIGN_TOP | wx.TOP)
+        #self.vbox.Add(self.canvas, 1, flag=wx.TOP | wx.TOP | wx.GROW)
+
+        self.vbox2 =  wx.BoxSizer(wx.VERTICAL)
+
+
         self.panel.SetSizer(self.vbox)
         self.vbox.Fit(self)
 
@@ -378,7 +503,7 @@ class GraphFrame(wx.Frame):
         self.fig = Figure((3.0, 3.0), dpi=self.dpi)
 
         self.axes = self.fig.add_subplot(111)
-        self.axes.set_facecolor('black')
+        self.axes.set_facecolor(COLOR_NAME)
         self.axes.set_title('Magnetometer', size=12)
 
         pylab.setp(self.axes.get_xticklabels(), fontsize=8)
@@ -387,19 +512,69 @@ class GraphFrame(wx.Frame):
         # plot the data as a line series, and save the reference
         # to the plotted line series
         #
-        self.plot_data = self.axes.plot(
-            self.data,
-            linewidth=1,
-            color=(1, 1, 0),
+        test = axis_int
+
+        #x-axis
+        if (axis_int == 0):
+            self.plot_data = self.axes.plot(
+            self.dataX,
+            linewidth=2,
+            color=(1, 0, 1),
             )[0]
+        #y-axis
+        elif (axis_int == 1):
+            self.plot_data = self.axes.plot(
+            self.dataY,
+            linewidth=1,
+            color=(0, 1, 1),
+            )[0]
+        #z-axis
+        else:
+            self.plot_data = self.axes.plot(
+            self.dataZ,
+            linewidth=1,
+            color=(1, 0, 1),
+            )[0]
+        
+        # self.plot_data = self.axes.plot(
+        #     self.data,
+        #     linewidth=1,
+        #     color=(1, 1, 0),
+        #     )[0]
 
     def draw_plot(self):
         """ Redraws the plot
         """
+        #print("test")
+        #global axis_int
+        #doesnt work right now
+        self.x_axis_control.update_value(1)
+        self.y_axis_control.update_value(2)
+        self.z_axis_control.update_value(3)
+
+        self.x_axis_control.update_current(1)
+        self.y_axis_control.update_current(2)
+        self.z_axis_control.update_current(3)
+
+        if (self.cb_xline.GetValue()):
+            self.data = self.dataX
+            axis_int = 0
+
+        elif (self.cb_yline.GetValue()):
+            self.data = self.dataY
+            axis_int = 1
+        else:
+            self.data = self.dataZ
+            axis_int = 2
+
         # when xmin (edit: mode_control) is on auto, it "follows" xmax to produce a
         # sliding window effect. therefore, xmin is assigned after
         # xmax.
         #
+
+
+        
+
         if self.mode_control.is_auto():
             xmax = len(self.data) if len(self.data) > 50 else 50
         else:
@@ -428,24 +603,48 @@ class GraphFrame(wx.Frame):
             ymax = int(self.mode_control.manual_value())
 
         self.axes.set_xbound(lower=0, upper=xmax)
-        self.axes.set_ybound(lower=ymin, upper=ymax)
+        self.axes.set_ybound(lower=-10000, upper=10000)
 
-        # anecdote: axes.grid assumes b=True if any other flag is
-        # given even if b is set to False.
-        # so just passing the flag into the first statement won't
-        # work.
-        #
-        if self.cb_grid.IsChecked():
-            self.axes.grid(True, color='gray')
-        else:
-            self.axes.grid(False)
+        self.axes.grid(True, color='gray')
+        #else:
+            #self.axes.grid(False)
+
+        #if self.cb_xline.GetValue():
+            #do something
+        #     TEST_NUMBER = 3
+        #     self.cb_yline.SetValue(False)
+        #     self.cb_zline.SetValue(False)
+        # else:
+        #     #do something else
+        #     #TEST_NUMBER = 2
+        #     a = 1
+
+        # if self.cb_yline.GetValue():
+        #     #do something
+        #     TEST_NUMBER = 4
+        #     self.cb_xline.SetValue(False)
+        #     self.cb_zline.SetValue(False)
+        # else:
+        #     #do something else
+        #     #TEST_NUMBER = 2
+        #     a = 1
+
+        # if self.cb_zline.GetValue():
+        #     #do something
+        #     TEST_NUMBER = 0
+        #     self.cb_yline.SetValue(False)
+        #     self.cb_xline.SetValue(False)
+        # else:
+        #     #do something else
+        #     #TEST_NUMBER = 2
+        #     a = 1
 
         # Using setp here is convenient, because get_xticklabels
         # returns a list over which one needs to explicitly
         # iterate, and setp already handles this.
         #
         pylab.setp(self.axes.get_xticklabels(),
-            visible=self.cb_xlab.IsChecked())
+            visible=True)
 
         self.plot_data.set_xdata(np.arange(len(self.data)))
         self.plot_data.set_ydata(np.array(self.data))
@@ -455,14 +654,46 @@ class GraphFrame(wx.Frame):
     def on_pause_button(self, event):
         self.paused = not self.paused
 
+    def on_update_button(self, event):
+        TEST_NUMBER = 3.1
+        return TEST_NUMBER
+
     def on_update_pause_button(self, event):
         label = "Resume" if self.paused else "Pause"
         self.pause_button.SetLabel(label)
 
-    def on_cb_grid(self, event):
+    def on_update_line_value(self, event):
+        #COLOR_NAME = 'green'
+        label =  "test"
+        if (self.cb_xline.GetValue()):
+            label = "x axis"
+
+        elif (self.cb_yline.GetValue()):
+            label = "y axis"
+        else:
+            label = "z axis"
+        self.update_button.SetLabel(label)
         self.draw_plot()
 
-    def on_cb_xlab(self, event):
+    def show_x_plot(self, event):
+        #COLOR_NAME = 'green'
+        # label = "x plot"
+        # self.pause_button.SetLabel(label)
+        # TEST_NUMBER = 3
+        self.draw_plot()
+
+    def show_y_plot(self, event):
+        #COLOR_NAME = 'blue'
+       # label = "y plot"
+       # self.pause_button.SetLabel(label)
+        #TEST_NUMBER = 3
+        self.draw_plot()
+
+    def show_z_plot(self, event):
+        #COLOR_NAME = 'red'
+        #label = "z plot"
+       # self.pause_button.SetLabel(label)
+        #TEST_NUMBER = 3
         self.draw_plot()
 
     def on_save_plot(self, event):
@@ -479,31 +710,61 @@ class GraphFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self.canvas.print_figure(path, dpi=self.dpi)
-            self.flash_status_message("Saved to %s" % path)
+            #self.flash_status_message("Saved to %s" % path)
 
     def on_redraw_timer(self, event):
         # if paused do not add data, but still redraw the plot
         # (to respond to scale modifications, grid change, etc.)
         #
         if not self.paused:
-            self.data.append(self.datagen.next())
+            self.update_sensor_data(event)
+            
+            if (self.cb_xline.GetValue()):
+                #self.testing = -0.1
+                self.testingX = sensor_data["mag_field_x"]
+                self.dataX.append(self.datagenX.next(self.testingX))
+
+            elif (self.cb_yline.GetValue()):
+                #self.testing = 2.2
+                self.testingY = sensor_data["mag_field_y"]
+                self.dataY.append(self.datagenY.next(self.testingY))
+        
+            else:
+                #self.testing = 3.5
+                self.testingZ = sensor_data["mag_field_z"]
+                self.dataZ.append(self.datagenZ.next(self.testingZ))
+            #self.data.append(self.datagen.next(self.testing))
 
         self.draw_plot()
+
+    def update_sensor_data(self, event):
+        self.testing = 0
+
+        if (self.cb_xline.GetValue()):
+           self.testing = -0.1
+           #self.testing = sensor_data["mag_field_x"]
+
+        elif (self.cb_yline.GetValue()):
+            self.testing = 2.2
+            #self.testing = sensor_data["mag_field_y"]
+        else:
+            self.testing = 3.5
+            #self.testing = sensor_data["mag_field_z"]
 
     def on_exit(self, event):
         self.Destroy()
 
-    def flash_status_message(self, msg, flash_len_ms=1500):
-        self.statusbar.SetStatusText(msg)
-        self.timeroff = wx.Timer(self)
-        self.Bind(
-            wx.EVT_TIMER,
-            self.on_flash_status_off,
-            self.timeroff)
-        self.timeroff.Start(flash_len_ms, oneShot=True)
+    # def flash_status_message(self, msg, flash_len_ms=1500):
+    #     self.statusbar.SetStatusText(msg)
+    #     self.timeroff = wx.Timer(self)
+    #     self.Bind(
+    #         wx.EVT_TIMER,
+    #         self.on_flash_status_off,
+    #         self.timeroff)
+    #     self.timeroff.Start(flash_len_ms, oneShot=True)
 
-    def on_flash_status_off(self, event):
-        self.statusbar.SetStatusText('')
+    # def on_flash_status_off(self, event):
+    #     self.statusbar.SetStatusText('')
 
 
 #if __name__ == '__main__':
