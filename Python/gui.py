@@ -19,9 +19,6 @@ import math
 from math import pi
 
 from globals import sensor_data
-from arduino import Arduino
-import util
-
 
 import matplotlib
 matplotlib.use('WXAgg')
@@ -252,7 +249,7 @@ class AxisControlBox(wx.Panel):
         self.CurrentInputX = wx.TextCtrl(self, enum['ID_MagXInput'], "", wx.Point(200, 83), wx.DefaultSize, wx.TE_READONLY)
 
         self.XVal_SetButton = wx.Button(self, enum['ID_SetMagX'], "Set Value")
-        self.Bind(wx.EVT_BUTTON, self.on_set_value_button_X, self.XVal_SetButton)
+        self.Bind(wx.EVT_BUTTON, self.on_set_value_button, self.XVal_SetButton)
         self.XVal_SetButton.Move((80, 160))
         self.XVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
         self.XVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
@@ -770,11 +767,11 @@ class GraphFrame(wx.Frame):
     #     self.statusbar.SetStatusText('')
 
 
-# if __name__ == '__main__':
+#if __name__ == '__main__':
 
-#     sensor_data["magnetic_field"] = 1
+    # sensor_data["magnetic_field"] = 1
 
-#     app = wx.App()
-#     app.frame = GraphFrame()
-#     app.frame.Show()
-#     app.MainLoop()
+    # app = wx.App()
+    # app.frame = GraphFrame()
+    # app.frame.Show()
+    # app.MainLoop()
