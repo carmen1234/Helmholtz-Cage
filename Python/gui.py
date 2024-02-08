@@ -195,6 +195,38 @@ class ModeControlBox(wx.Panel):
        # return self.value
        pass
 
+class InputControlBox(wx.Panel):
+    def __init__(self,parent, ID, label, initval):
+        wx.Panel.__init__(self, parent, ID)
+
+        self.value = initval
+
+        box = wx.StaticBox(self, -1, label)
+        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+
+        self.XVal_SetButton = wx.Button(self, enum['ID_SetMagX'], "Set Mag X")
+        self.Bind(wx.EVT_BUTTON, self.on_set_value_button, self.XVal_SetButton)
+        self.XVal_SetButton.Move((80, 160))
+        self.XVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
+        self.XVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
+        #self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "", wx.Point(105, 180), wx.DefaultSize)
+        self.SetX = wx.TextCtrl(self, enum['ID_ValX']) 
+
+        #self.XVal_SetButton.Move((0, 75))
+
+        set_value_box = wx.BoxSizer(wx.HORIZONTAL)
+        set_value_box.Add(self.XVal_SetButton, flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.Add(self.SetX, flag=wx.ALIGN_CENTER_VERTICAL)
+
+
+        sizer.Add(set_value_box, 0, wx.ALL, 10)
+
+        self.SetSizer(sizer)
+        sizer.Fit(self)
+
+    def on_set_value_button(self):
+        pass
+
 class DebugConsoleBox(wx.Panel):
     """ A static box with a debug console.
     """
@@ -212,7 +244,6 @@ class DebugConsoleBox(wx.Panel):
 
         self.SetSizer(sizer)
         sizer.Fit(self)
-
 
 
 class AxisControlBox(wx.Panel):
@@ -248,16 +279,16 @@ class AxisControlBox(wx.Panel):
         self.ReadCurrentX.Move(105, 90, wx.SIZE_USE_EXISTING)
         self.CurrentInputX = wx.TextCtrl(self, enum['ID_MagXInput'], "", wx.Point(200, 83), wx.DefaultSize, wx.TE_READONLY)
 
-        self.XVal_SetButton = wx.Button(self, enum['ID_SetMagX'], "Set Value")
-        self.Bind(wx.EVT_BUTTON, self.on_set_value_button, self.XVal_SetButton)
-        self.XVal_SetButton.Move((80, 160))
-        self.XVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
-        self.XVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
-        self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "", wx.Point(105, 180), wx.DefaultSize)
+        # self.XVal_SetButton = wx.Button(self, enum['ID_SetMagX'], "Set Value")
+        # self.Bind(wx.EVT_BUTTON, self.on_set_value_button, self.XVal_SetButton)
+        # self.XVal_SetButton.Move((80, 160))
+        # self.XVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
+        # self.XVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
+        # self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "", wx.Point(105, 180), wx.DefaultSize)
 
         read_mag_box = wx.BoxSizer(wx.HORIZONTAL)
         read_current_box = wx.BoxSizer(wx.HORIZONTAL)
-        set_value_box = wx.BoxSizer(wx.HORIZONTAL)
+        # set_value_box = wx.BoxSizer(wx.HORIZONTAL)
 
         read_mag_box.Add(self.ReadMagX, flag=wx.ALIGN_LEFT)
         read_mag_box.Add(self.MagXInput, flag=wx.ALIGN_LEFT)
@@ -265,12 +296,12 @@ class AxisControlBox(wx.Panel):
         read_current_box.Add(self.ReadCurrentX, flag=wx.ALIGN_LEFT)
         read_current_box.Add(self.CurrentInputX, flag=wx.ALIGN_LEFT)
 
-        set_value_box.Add(self.XVal_SetButton, flag=wx.ALIGN_LEFT)
-        set_value_box.Add(self.SetX, flag=wx.ALIGN_LEFT)
+        # set_value_box.Add(self.XVal_SetButton, flag=wx.ALIGN_LEFT)
+        # set_value_box.Add(self.SetX, flag=wx.ALIGN_LEFT)
 
         sizer.Add(read_mag_box, 0, wx.ALL, 10)
         sizer.Add(read_current_box, 0, wx.ALL, 10)
-        sizer.Add(set_value_box, 0, wx.ALL, 10)
+        # sizer.Add(set_value_box, 0, wx.ALL, 10)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
@@ -402,11 +433,12 @@ class GraphFrame(wx.Frame):
         self.init_plot()
         self.canvas = FigCanvas(self.panel, -1, self.fig)
 
-        self.mode_control = ModeControlBox(self.panel, -1, "SET MODES", 0)
+        self.mode_control = ModeControlBox(self.panel, -1, "DYNAMIC CONTROL", 0)
         self.x_axis_control = AxisControlBox(self.panel, -1, "X AXIS", 50, 1)
         self.y_axis_control = AxisControlBox(self.panel, -1, "Y AXIS", 75, 2)
         self.z_axis_control = AxisControlBox(self.panel, -1, "Z AXIS", 100, 3)
-        self.debug_console = DebugConsoleBox(self.panel, -1, "CONSOLE", 125)
+        self.static_control = InputControlBox(self.panel, -1, "STATIC CONTROL", 125)
+        self.debug_console = DebugConsoleBox(self.panel, -1, "CONSOLE", 150)
 
         self.pause_button = wx.Button(self.panel, -1, "Pause")
         self.Bind(wx.EVT_BUTTON, self.on_pause_button, self.pause_button)
@@ -465,6 +497,7 @@ class GraphFrame(wx.Frame):
         self.hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2.Add(self.mode_control, border=5, flag=wx.ALL)
         self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
+        self.hbox2.Add(self.static_control, border=5,flag=wx.ALL | wx.GROW)
         self.hbox2.AddSpacer(24)
         #self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
 

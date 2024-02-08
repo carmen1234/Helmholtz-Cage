@@ -13,9 +13,16 @@ def get_current_from_mag_field(mag_field):
     I = mag_field/(pow(1.257,-6)*n)
     return I
 
-def convert_raw_mag_input_to_gauss(raw_mag_data):
+def convert_raw_mag_input_to_gauss(raw_mag_data): # might need to change this if conversion is 3000 raw = 1 Gauss
     mag_val = (((max_guass - min_gauss)*(raw_mag_data - raw_mag_min))/(raw_mag_max - raw_mag_min)) + raw_mag_min
     return mag_val
+
+def tesla_to_gauss(tesla_val):
+    return 10000*tesla_val  #1T = 10000G
+
+def gauss_to_tesla(gauss_val):
+    return gauss_val/10000
+
 
 
 
