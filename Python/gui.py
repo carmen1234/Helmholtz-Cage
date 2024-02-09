@@ -253,14 +253,32 @@ class InputControlBox(wx.Panel):
     def on_set_value_buttonX(self, event):
         inputX_mag = self.SetX.GetValue()
         print("X Mag Input = " + inputX_mag) # for debugging purposes
+
+        if not (float(inputX_mag) <= 1.0 and float(inputX_mag) >= -1.0):
+            print("Error, invalid input range")
+        else:
+            print("Setting pwm to: " + str(int(255*float(inputX_mag))))
+            set_coil_current(int(255*float(inputX_mag)))
     
     def on_set_value_buttonY(self, event):
         inputY_mag = self.SetY.GetValue()
         print("Y Mag Input = " + inputY_mag) # for debugging purposes
+
+        if not (float(inputY_mag) <= 1.0 and float(inputY_mag) >= -1.0):
+            print("Error, invalid input range")
+        else:
+            print("Setting pwm to: " + str(int(255*float(inputY_mag))))
+            set_coil_current(int(255*float(inputY_mag)))
     
     def on_set_value_buttonZ(self, event):
         inputZ_mag = self.SetZ.GetValue()
         print("Z Mag Input = " + inputZ_mag) # for debugging purposes
+
+        if not (float(inputZ_mag) <= 1.0 and float(inputZ_mag) >= -1.0):
+            print("Error, invalid input range")
+        else:
+            print("Setting pwm to: " + str(int(255*float(inputZ_mag))))
+            set_coil_current(int(255*float(inputZ_mag)))
 
 class DebugConsoleBox(wx.Panel):
     """ A static box with a debug console.
