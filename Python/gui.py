@@ -258,7 +258,7 @@ class InputControlBox(wx.Panel):
             print("Error, invalid input range")
         else:
             print("Setting pwm to: " + str(int(255*float(inputX_mag))))
-            set_coil_current(int(255*float(inputX_mag)))
+            #arduino.set_coil_current(int(255*float(inputX_mag)))
     
     def on_set_value_buttonY(self, event):
         inputY_mag = self.SetY.GetValue()
@@ -268,7 +268,7 @@ class InputControlBox(wx.Panel):
             print("Error, invalid input range")
         else:
             print("Setting pwm to: " + str(int(255*float(inputY_mag))))
-            set_coil_current(int(255*float(inputY_mag)))
+            #arduino.set_coil_current(int(255*float(inputY_mag)))
     
     def on_set_value_buttonZ(self, event):
         inputZ_mag = self.SetZ.GetValue()
@@ -278,7 +278,7 @@ class InputControlBox(wx.Panel):
             print("Error, invalid input range")
         else:
             print("Setting pwm to: " + str(int(255*float(inputZ_mag))))
-            set_coil_current(int(255*float(inputZ_mag)))
+            #arduino.set_coil_current(int(255*float(inputZ_mag)))
 
 class DebugConsoleBox(wx.Panel):
     """ A static box with a debug console.
