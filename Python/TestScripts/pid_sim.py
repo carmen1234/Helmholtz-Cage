@@ -62,7 +62,7 @@ plt.plot(xpoints,setpoint_list, label="setpoint")
 plt.xlabel("Time(s)")
 plt.ylabel("Guass")
 
-plt.title("PID Controller Shit")
+plt.title("PID Controller")
 
 plt.legend()
 
