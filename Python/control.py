@@ -7,6 +7,7 @@ class PID_controller:
         self.Kd = Kd
         self.Ki = Ki
         self.err_integ = 0
+        self.prev_err = 0
     
     def update_values(self, setpoint,process_var,time_interval):
         self.setpoint = setpoint
@@ -19,7 +20,8 @@ class PID_controller:
 
     def differential(self, setpoint,process_var,time_interval):
         err = setpoint - process_var
-        err_diff = err/time_interval
+        err_diff = (self.prev_err - err)/time_interval
+        self.prev_err = err
         return self.Kd*err_diff
 
     def integral(self, setpoint,process_var,time_interval):
