@@ -878,13 +878,17 @@ class GraphFrame(wx.Frame):
             pass
         elif command_terms[0] == "set0": #turn all coils 'off' by setting current to 0, will need to call set_coil_current
             pass
+            #arduino.set_coil_current(0)
         elif command_terms[0] == "clear": # clear debug output box
             pass
         elif command_terms[0] == "tune_pid": # set kd,kp,ki vals
             pass
+        elif command_terms[0] == "set_pwm": # also calls set coil current, will only check 
+            pass
         else:
             self.debug_console.DebugOutput.write("Invalid Command\n") #maybe something like this should be a try_catch instead?
-            console_command = "" #it's one line but I could make this its own function?
+        
+        console_command = "" #it's one line but I could make this its own function?
 
     def on_exit(self, event):
         self.Destroy()
