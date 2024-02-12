@@ -308,6 +308,7 @@ class DebugConsoleBox(wx.Panel):
         input_str = self.DebugBox.GetValue()
         self.DebugBox.SetValue("")
         self.DebugOutput.write("Command: " + input_str + "\n")
+        global console_command #this is dumb why is python like this
         console_command = input_str
         print(input_str)
 
@@ -457,6 +458,11 @@ class GraphFrame(wx.Frame):
         self.redraw_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
         self.redraw_timer.Start(100)
+        
+        #this is basically polling, should look into getting it to be 'interrupt style'
+        self.command_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.process_command, self.command_timer)
+        self.command_timer.Start(100)
 
     # def next(self, TEST_NUMBER):
     #     self._recalc_data()
@@ -863,8 +869,22 @@ class GraphFrame(wx.Frame):
             self.testing = 3.5
             #self.testing = sensor_data["mag_field_z"]
 
-    def process_command(self):
-        pass
+        #all of these commands will need to reset the global 'console_command' global var 
+    def process_command(self, event):
+        global console_command
+        command_terms = console_command.split(" ")
+
+        if command_terms[0] == "":
+            pass
+        elif command_terms[0] == "set0": #turn all coils 'off' by setting current to 0, will need to call set_coil_current
+            pass
+        elif command_terms[0] == "clear": # clear debug output box
+            pass
+        elif command_terms[0] == "tune_pid": # set kd,kp,ki vals
+            pass
+        else:
+            self.debug_console.DebugOutput.write("Invalid Command\n") #maybe something like this should be a try_catch instead?
+            console_command = "" #it's one line but I could make this its own function?
 
     def on_exit(self, event):
         self.Destroy()
