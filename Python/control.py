@@ -14,6 +14,11 @@ class PID_controller:
         self.process_var = process_var
         self.time_interval = time_interval
 
+    def tune_constants(self, Kp, Kd, Ki):
+        self.Kp = Kp
+        self.Kd = Kd
+        self.Ki = Ki
+
     def proportional(self,setpoint,process_var):
         err = setpoint - process_var
         return (self.Kp*err)     
