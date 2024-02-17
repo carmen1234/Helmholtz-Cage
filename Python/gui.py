@@ -6,8 +6,6 @@ Rudaina Khalil
 Vimal Raj
 Date: 2023-11-13
 
-Note: currently includes sample code for plotting a random realtime graph, update to read sensor values
-
 """
 import os
 import pprint
@@ -65,7 +63,6 @@ enum = {
 }
 
 COLOR_NAME = 'black'
-#TEST_NUMBER = 2.3
 axis_int = 0
 
 
@@ -76,6 +73,9 @@ Eli Bendersky (eliben@gmail.com)
 License: this code is in the public domain
 """""
 
+""""" 
+Class for data from sensor for plotting  X axis of cage 
+"""""
 class DataGenXAxis(object):
     def __init__(self, init=50):
         self.dataX = self.init = init
@@ -85,15 +85,13 @@ class DataGenXAxis(object):
         return self.dataX
 
     def _recalc_data(self, testing_xaxis):
-        #delta = random.uniform(-0.5, 0.5)
-        #r = random.random()
-
-        #print(TEST_NUMBER)
 
         self.dataX = sensor_data["mag_field_x"]
-        #print(TEST_NUMBER)
         self.dataX = testing_xaxis
     
+""""" 
+Class for data from sensor for plotting  Y axis of cage 
+"""""
 class DataGenYAxis(object):
     def __init__(self, init=50):
         self.dataY = self.init = init
@@ -106,6 +104,9 @@ class DataGenYAxis(object):
         self.dataY = sensor_data["mag_field_y"]
         self.dataY = testing_yaxis
 
+""""" 
+Class for data from sensor for plotting  Z axis of cage 
+"""""
 class DataGenZAxis(object):
     def __init__(self, init=50):
         self.dataZ = self.init = init
@@ -174,11 +175,6 @@ class ModeControlBox(wx.Panel):
 
         self.SetSizer(sizer)
         sizer.Fit(self)
-
-    #this is currently used for auto scrolling for the graph, move somewhere more logical later
-    def is_auto(self):
-       #return self.radio_auto.GetValue()
-       return True
 
     def on_mode_0(self):
        pass
@@ -318,6 +314,14 @@ class AxisControlBox(wx.Panel):
         else:
              self.mag_field = sensor_data["mag_field_z"]
 
+        #Writing the values to a csv
+        with open("mag_field_values.csv", "w", newline="") as f:
+            writer = csv.writer(f)
+            start_values = [["X", "Y", "Z"],
+            [sensor_data["mag_field_x"], sensor_data["mag_field_y"], sensor_data["mag_field_z"]],
+            ]
+            writer.writerows(start_values)
+
         self.mag_field_str = str(self.mag_field)
 
         box = wx.StaticBox(self, -1, label)
@@ -359,8 +363,8 @@ class AxisControlBox(wx.Panel):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    def is_auto(self):
-       return True
+    #def is_auto(self):
+    #   return True
 
     def update_value(self, axis):
         self.axis = axis
@@ -374,6 +378,14 @@ class AxisControlBox(wx.Panel):
              self.mag_field = sensor_data["mag_field_y"]
         else:
              self.mag_field = sensor_data["mag_field_z"]
+
+        #Writing the values to a csv
+        with open("mag_field_values.csv", "a", newline="") as f:
+            writer = csv.writer(f)
+            values = [
+            [sensor_data["mag_field_x"], sensor_data["mag_field_y"], sensor_data["mag_field_z"]],
+            ]
+            writer.writerows(values)
 
         self.mag_field_str = str(self.mag_field)
         self.MagXInput.SetValue(self.mag_field_str)
@@ -531,7 +543,7 @@ class GraphFrame(wx.Frame):
         self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_zline)
 
         self.update_button = wx.Button(self.panel, -1, "Update")
-        self.Bind(wx.EVT_BUTTON, self.on_update_button, self.update_button)
+        #self.Bind(wx.EVT_BUTTON, self.on_update_button, self.update_button)
         #self.Bind(wx.EVT_UPDATE_UI, self.on_update_pause_button, self.update_button)
 
        # self.DebugBox = wx.TextCtrl(self.panel, enum['DebugBoxID'])
@@ -585,6 +597,8 @@ class GraphFrame(wx.Frame):
         self.SetStatusText("Designed for UTAT")
 
     def init_plot(self):
+        """ Sets up the initial plot and data objects
+        """
         self.dpi = 100
         self.fig = Figure((3.0, 3.0), dpi=self.dpi)
 
@@ -622,12 +636,6 @@ class GraphFrame(wx.Frame):
             color=(1, 0, 1),
             )[0]
         
-        # self.plot_data = self.axes.plot(
-        #     self.data,
-        #     linewidth=1,
-        #     color=(1, 1, 0),
-        #     )[0]
-
     def draw_plot(self):
         """ Redraws the plot
         """
@@ -653,23 +661,13 @@ class GraphFrame(wx.Frame):
             self.data = self.dataZ
             axis_int = 2
 
-        # when xmin (edit: mode_control) is on auto, it "follows" xmax to produce a
-        # sliding window effect. therefore, xmin is assigned after
-        # xmax.
-        #
-
-
+        # when xmin is set as the lower bound in set_xbound,
+        # it "follows" xmax to produce a sliding window effect. 
+        # therefore, xmin is assigned after xmax.
         
 
-        if self.mode_control.is_auto():
-            xmax = len(self.data) if len(self.data) > 50 else 50
-        else:
-            xmax = int(self.mode_control.manual_value())
-
-        if self.mode_control.is_auto():
-            xmin = xmax - 50
-        else:
-            xmin = int(self.mode_control.manual_value())
+        xmax = len(self.data) if len(self.data) > 50 else 50
+        xmin = xmax - 50
 
         # for ymin and ymax, find the minimal and maximal values
         # in the data set and add a mininal margin.
@@ -677,53 +675,15 @@ class GraphFrame(wx.Frame):
         # note that it's easy to change this scheme to the
         # minimal/maximal value in the current display, and not
         # the whole data set.
-        # (edit: mode_control replaced xmin, xmax, ymin, ymax)
-        if self.mode_control.is_auto():
-            ymin = round(min(self.data), 0) - 1
-        else:
-            ymin = int(self.mode_control.manual_value())
+    
+        ymin = round(min(self.data), 0) - 1
+        ymax = round(max(self.data), 0) + 1
 
-        if self.mode_control.is_auto():
-            ymax = round(max(self.data), 0) + 1
-        else:
-            ymax = int(self.mode_control.manual_value())
-
-        self.axes.set_xbound(lower=0, upper=xmax)
+        #set the bounds of the x axis (sliding window or not)
+        self.axes.set_xbound(lower=xmin, upper=xmax)
         self.axes.set_ybound(lower=-10000, upper=10000)
 
         self.axes.grid(True, color='gray')
-        #else:
-            #self.axes.grid(False)
-
-        #if self.cb_xline.GetValue():
-            #do something
-        #     TEST_NUMBER = 3
-        #     self.cb_yline.SetValue(False)
-        #     self.cb_zline.SetValue(False)
-        # else:
-        #     #do something else
-        #     #TEST_NUMBER = 2
-        #     a = 1
-
-        # if self.cb_yline.GetValue():
-        #     #do something
-        #     TEST_NUMBER = 4
-        #     self.cb_xline.SetValue(False)
-        #     self.cb_zline.SetValue(False)
-        # else:
-        #     #do something else
-        #     #TEST_NUMBER = 2
-        #     a = 1
-
-        # if self.cb_zline.GetValue():
-        #     #do something
-        #     TEST_NUMBER = 0
-        #     self.cb_yline.SetValue(False)
-        #     self.cb_xline.SetValue(False)
-        # else:
-        #     #do something else
-        #     #TEST_NUMBER = 2
-        #     a = 1
 
         # Using setp here is convenient, because get_xticklabels
         # returns a list over which one needs to explicitly
@@ -738,13 +698,14 @@ class GraphFrame(wx.Frame):
         self.canvas.draw()
 
     def on_pause_button(self, event):
+        """ Pauses the graphing
+        (used for debug/demo purposes only)
+        """
         self.paused = not self.paused
 
-    def on_update_button(self, event):
-        TEST_NUMBER = 3.1
-        return TEST_NUMBER
-
     def on_update_pause_button(self, event):
+        """ Changes pause button label
+        """
         label = "Resume" if self.paused else "Pause"
         self.pause_button.SetLabel(label)
 
@@ -762,27 +723,18 @@ class GraphFrame(wx.Frame):
         self.draw_plot()
 
     def show_x_plot(self, event):
-        #COLOR_NAME = 'green'
-        # label = "x plot"
-        # self.pause_button.SetLabel(label)
-        # TEST_NUMBER = 3
         self.draw_plot()
 
     def show_y_plot(self, event):
-        #COLOR_NAME = 'blue'
-       # label = "y plot"
-       # self.pause_button.SetLabel(label)
-        #TEST_NUMBER = 3
         self.draw_plot()
 
     def show_z_plot(self, event):
-        #COLOR_NAME = 'red'
-        #label = "z plot"
-       # self.pause_button.SetLabel(label)
-        #TEST_NUMBER = 3
         self.draw_plot()
 
     def on_save_plot(self, event):
+        """ Should save the plot as a png
+        TODO: get this working? decide if it's needed?
+        """
         file_choices = "PNG (*.png)|*.png"
 
         dlg = wx.FileDialog(
@@ -824,6 +776,8 @@ class GraphFrame(wx.Frame):
         self.draw_plot()
 
     def update_sensor_data(self, event):
+        """ Testing data, for when GUI isn't connected to sensor
+        """
         self.testing = 0
 
         if (self.cb_xline.GetValue()):
@@ -839,18 +793,6 @@ class GraphFrame(wx.Frame):
 
     def on_exit(self, event):
         self.Destroy()
-
-    # def flash_status_message(self, msg, flash_len_ms=1500):
-    #     self.statusbar.SetStatusText(msg)
-    #     self.timeroff = wx.Timer(self)
-    #     self.Bind(
-    #         wx.EVT_TIMER,
-    #         self.on_flash_status_off,
-    #         self.timeroff)
-    #     self.timeroff.Start(flash_len_ms, oneShot=True)
-
-    # def on_flash_status_off(self, event):
-    #     self.statusbar.SetStatusText('')
 
 
 #if __name__ == '__main__':
