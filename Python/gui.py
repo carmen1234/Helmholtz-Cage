@@ -243,8 +243,6 @@ class InputControlBox(wx.Panel):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    # def on_set_value_button(self):
-    #     pass
 
     def on_set_value_buttonX(self, event):
         inputX_mag = self.SetX.GetValue()
@@ -363,9 +361,8 @@ class AxisControlBox(wx.Panel):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    #def is_auto(self):
-    #   return True
-
+    #Update the value of the "magnetic field" variable, which gets used for plotting,
+    #based on which axis is selected for plotting
     def update_value(self, axis):
         self.axis = axis
         self.mag_field = 0
@@ -439,6 +436,7 @@ class GraphFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, -1, self.title)
 
+        #Initializing the objects for X, Y, and Z axis data:
         self.datagenX = DataGenXAxis()
         self.dataX = [self.datagenX.next(3.3)]
 
@@ -458,19 +456,6 @@ class GraphFrame(wx.Frame):
         self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
         self.redraw_timer.Start(100)
 
-    # def next(self, TEST_NUMBER):
-    #     self._recalc_data()
-    #     return self.data
-
-    # def _recalc_data(self, TEST_NUMBER):
-    #     #delta = random.uniform(-0.5, 0.5)
-    #     #r = random.random()
-
-    #     #print(TEST_NUMBER)
-
-    #     self.data = sensor_data["magnetic_field"]
-    #     print(TEST_NUMBER)
-    #     self.data = 1
 
     def create_menu(self):
         self.menubar = wx.MenuBar()
@@ -612,7 +597,6 @@ class GraphFrame(wx.Frame):
         # plot the data as a line series, and save the reference
         # to the plotted line series
         #
-        test = axis_int
 
         #x-axis
         if (axis_int == 0):
