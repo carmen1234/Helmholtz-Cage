@@ -20,3 +20,6 @@ class HW_params(float, Enum):
     raw_mag_max = 32767.0
     min_gauss = -8.0
     max_guass = 8.0
+
+# Command Processing
+console_command = ""

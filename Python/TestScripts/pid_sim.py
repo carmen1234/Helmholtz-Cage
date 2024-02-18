@@ -15,16 +15,16 @@ def pwm_to_mag(pwm):
     return float(pwm)/float(255)
 
 # starting values
-setpoint = -0.4
+setpoint = 0.6
 measurement = 0.1
 pwm = mag_to_pwm(measurement) 
-time_interval = 0.1 
+time_interval = 0.002 
 
 
 # tune these
 Kp = 0.1
-Ki = 0.6
-Kd = 0.1
+Ki = 0.01
+Kd = 0.001
 
 c = PID_controller(setpoint, measurement, time_interval, Kp, Kd, Ki)
 
@@ -62,7 +62,7 @@ plt.plot(xpoints,setpoint_list, label="setpoint")
 plt.xlabel("Time(s)")
 plt.ylabel("Guass")
 
-plt.title("PID Controller")
+plt.title("PID Controller (Kp = " + str(Kp) + " | Ki = " + str(Ki) + " | Kd = " + str(Kd) + ")")
 
 plt.legend()
 

@@ -18,7 +18,7 @@ import csv
 import math
 from math import pi
 
-from globals import sensor_data
+from globals import sensor_data, console_command
 
 import matplotlib
 matplotlib.use('WXAgg')
@@ -61,7 +61,8 @@ enum = {
     'ID_ValZ': 27,
     'SimMode_0': 28,
     'SimMode_1': 29,
-    'SimMode_2': 30
+    'SimMode_2': 30,
+    'DebugOutputID' : 31
 }
 
 COLOR_NAME = 'black'
@@ -291,13 +292,25 @@ class DebugConsoleBox(wx.Panel):
         box = wx.StaticBox(self, -1, label)
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 
-        self.DebugBox = wx.TextCtrl(self, enum['DebugBoxID'])
 
+        self.DebugOutput = wx.TextCtrl(self, enum['DebugOutputID'], size=wx.Size(400,72), style=wx.TE_READONLY | wx.TE_MULTILINE)
+        self.DebugBox = wx.TextCtrl(self, enum['DebugBoxID'], size=wx.Size(400,24), style= wx.TE_PROCESS_ENTER) #probably want to change this to 'CommandBox'
+
+        self.Bind(wx.EVT_TEXT_ENTER, self.on_command_enter, self.DebugBox)        
+
+        sizer.Add(self.DebugOutput, 0, wx.ALL, 10)
         sizer.Add(self.DebugBox, 0, wx.ALL, 10)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
 
+    def on_command_enter(self,event):
+        input_str = self.DebugBox.GetValue()
+        self.DebugBox.SetValue("")
+        self.DebugOutput.write("Command: " + input_str + "\n")
+        global console_command #this is dumb why is python like this
+        console_command = input_str
+        print(input_str)
 
 class AxisControlBox(wx.Panel):
     """ A static box with a box for reading magnetometer and current sensor values, and setting a current
@@ -445,6 +458,11 @@ class GraphFrame(wx.Frame):
         self.redraw_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
         self.redraw_timer.Start(100)
+        
+        #this is basically polling, should look into getting it to be 'interrupt style'
+        self.command_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.process_command, self.command_timer)
+        self.command_timer.Start(100)
 
     # def next(self, TEST_NUMBER):
     #     self._recalc_data()
@@ -549,7 +567,7 @@ class GraphFrame(wx.Frame):
 
         self.hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2.Add(self.mode_control, border=5, flag=wx.ALL)
-        self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
+        #self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
         self.hbox2.Add(self.static_control, border=5,flag=wx.ALL | wx.GROW)
         self.hbox2.AddSpacer(24)
         #self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
@@ -567,14 +585,28 @@ class GraphFrame(wx.Frame):
         self.graph_control_vbox.Add(self.hbox1, border=5, flag=wx.ALL)
         self.graph_control_vbox.Add(self.hbox2, border=5, flag=wx.ALL)
 
+        self.console_vbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.console_vbox.Add(self.debug_console, border=10, flag=wx.ALL | wx.GROW)
+        self.graph_control_vbox.Add(self.console_vbox, border=5, flag=wx.ALL)
+
         self.vbox = wx.BoxSizer(wx.HORIZONTAL)
+
        
         self.vbox.Add(self.axis_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
         self.vbox.Add(self.graph_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
+
+
+        #testing obj methods from outside
+        #self.debug_console.DebugOutput.SetValue("test from outside")
+
+
+
         #self.vbox.Add(self.hbox2, 0, flag=wx.ALIGN_TOP | wx.TOP)
         #self.vbox.Add(self.canvas, 1, flag=wx.TOP | wx.TOP | wx.GROW)
 
         self.vbox2 =  wx.BoxSizer(wx.VERTICAL)
+
+        
 
 
         self.panel.SetSizer(self.vbox)
@@ -836,6 +868,27 @@ class GraphFrame(wx.Frame):
         else:
             self.testing = 3.5
             #self.testing = sensor_data["mag_field_z"]
+
+        #all of these commands will need to reset the global 'console_command' global var 
+    def process_command(self, event):
+        global console_command
+        command_terms = console_command.split(" ")
+
+        if command_terms[0] == "":
+            pass
+        elif command_terms[0] == "set0": #turn all coils 'off' by setting current to 0, will need to call set_coil_current
+            pass
+            #arduino.set_coil_current(0)
+        elif command_terms[0] == "clear": # clear debug output box
+            pass
+        elif command_terms[0] == "tune_pid": # set kd,kp,ki vals
+            pass
+        elif command_terms[0] == "set_pwm": # also calls set coil current, will only check 
+            pass
+        else:
+            self.debug_console.DebugOutput.write("Invalid Command\n") #maybe something like this should be a try_catch instead?
+        
+        console_command = "" #it's one line but I could make this its own function?
 
     def on_exit(self, event):
         self.Destroy()
