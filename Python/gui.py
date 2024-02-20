@@ -17,6 +17,8 @@ import math
 from math import pi
 
 from globals import sensor_data, console_command
+from arduino import arduino
+from control import PID
 
 import matplotlib
 matplotlib.use('WXAgg')
@@ -74,8 +76,8 @@ Eli Bendersky (eliben@gmail.com)
 License: this code is in the public domain
 """""
 
-""""" 
-Class for data from sensor for plotting  X axis of cage 
+"""""
+Class for data from sensor for plotting  X axis of cage
 """""
 class DataGenXAxis(object):
     def __init__(self, init=50):
@@ -89,9 +91,9 @@ class DataGenXAxis(object):
 
         self.dataX = sensor_data["mag_field_x"]
         self.dataX = testing_xaxis
-    
-""""" 
-Class for data from sensor for plotting  Y axis of cage 
+
+"""""
+Class for data from sensor for plotting  Y axis of cage
 """""
 class DataGenYAxis(object):
     def __init__(self, init=50):
@@ -105,8 +107,8 @@ class DataGenYAxis(object):
         self.dataY = sensor_data["mag_field_y"]
         self.dataY = testing_yaxis
 
-""""" 
-Class for data from sensor for plotting  Z axis of cage 
+"""""
+Class for data from sensor for plotting  Z axis of cage
 """""
 class DataGenZAxis(object):
     def __init__(self, init=50):
@@ -204,26 +206,26 @@ class InputControlBox(wx.Panel):
         self.XVal_SetButton = wx.Button(self, enum['ID_SetMagX'], "Set Mag X")
         self.Bind(wx.EVT_BUTTON, self.on_set_value_buttonX, self.XVal_SetButton)
         self.XVal_SetButton.Move((80, 160))
-        self.XVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
+        #self.XVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
         self.XVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
         #self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "", wx.Point(105, 180), wx.DefaultSize)
-        self.SetX = wx.TextCtrl(self, enum['ID_ValX']) 
+        self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "         ")
 
         self.YVal_SetButton = wx.Button(self, enum['ID_SetMagY'], "Set Mag Y")
         self.Bind(wx.EVT_BUTTON, self.on_set_value_buttonY, self.YVal_SetButton)
         self.YVal_SetButton.Move((80, 160))
-        self.YVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
+        #self.YVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
         self.YVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
         #self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "", wx.Point(105, 180), wx.DefaultSize)
-        self.SetY = wx.TextCtrl(self, enum['ID_ValY']) 
+        self.SetY = wx.TextCtrl(self, enum['ID_ValY'], "         ")
 
         self.ZVal_SetButton = wx.Button(self, enum['ID_SetMagZ'], "Set Mag Z")
         self.Bind(wx.EVT_BUTTON, self.on_set_value_buttonZ, self.ZVal_SetButton)
         self.ZVal_SetButton.Move((80, 160))
-        self.ZVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
+        #self.ZVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
         self.ZVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
         #self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "", wx.Point(105, 180), wx.DefaultSize)
-        self.SetZ = wx.TextCtrl(self, enum['ID_ValZ']) 
+        self.SetZ = wx.TextCtrl(self, enum['ID_ValZ'], "         ")
 
         set_value_boxX = wx.BoxSizer(wx.HORIZONTAL)
         set_value_boxX.Add(self.XVal_SetButton, flag=wx.ALIGN_CENTER_VERTICAL)
@@ -251,10 +253,22 @@ class InputControlBox(wx.Panel):
 
         if not (float(inputX_mag) <= 1.0 and float(inputX_mag) >= -1.0):
             print("Error, invalid input range")
+            return -1
         else:
-            print("Setting pwm to: " + str(int(255*float(inputX_mag))))
+            pass
+
+            PID.set_setpoint(float(inputX_mag))
+
+            # PID.update_values(float(inputX_mag), sensor_data["mag_field_x"], 1000)
+            # new_inputX = PID.get_PID()
+
+            # sensor_data['pwm_x'] = sensor_data['pwm_x'] + int(255*new_inputX)
+            # print("New Input Val: " + str(new_inputX))
+            # print("New PWM Val: " + str(sensor_data['pwm_x']))
+
+            #arduino.set_coil_current(sensor_data['pwm_x'])
             #arduino.set_coil_current(int(255*float(inputX_mag)))
-    
+
     def on_set_value_buttonY(self, event):
         inputY_mag = self.SetY.GetValue()
         print("Y Mag Input = " + inputY_mag) # for debugging purposes
@@ -262,9 +276,9 @@ class InputControlBox(wx.Panel):
         if not (float(inputY_mag) <= 1.0 and float(inputY_mag) >= -1.0):
             print("Error, invalid input range")
         else:
-            print("Setting pwm to: " + str(int(255*float(inputY_mag))))
-            #arduino.set_coil_current(int(255*float(inputY_mag)))
-    
+            PID.set_setpoint(float(inputY_mag))
+
+
     def on_set_value_buttonZ(self, event):
         inputZ_mag = self.SetZ.GetValue()
         print("Z Mag Input = " + inputZ_mag) # for debugging purposes
@@ -272,8 +286,8 @@ class InputControlBox(wx.Panel):
         if not (float(inputZ_mag) <= 1.0 and float(inputZ_mag) >= -1.0):
             print("Error, invalid input range")
         else:
-            print("Setting pwm to: " + str(int(255*float(inputZ_mag))))
-            #arduino.set_coil_current(int(255*float(inputZ_mag)))
+            PID.set_setpoint(float(inputZ_mag))
+
 
 class DebugConsoleBox(wx.Panel):
     """ A static box with a debug console.
@@ -290,7 +304,7 @@ class DebugConsoleBox(wx.Panel):
         self.DebugOutput = wx.TextCtrl(self, enum['DebugOutputID'], size=wx.Size(400,72), style=wx.TE_READONLY | wx.TE_MULTILINE)
         self.DebugBox = wx.TextCtrl(self, enum['DebugBoxID'], size=wx.Size(400,24), style= wx.TE_PROCESS_ENTER) #probably want to change this to 'CommandBox'
 
-        self.Bind(wx.EVT_TEXT_ENTER, self.on_command_enter, self.DebugBox)        
+        self.Bind(wx.EVT_TEXT_ENTER, self.on_command_enter, self.DebugBox)
 
         sizer.Add(self.DebugOutput, 0, wx.ALL, 10)
         sizer.Add(self.DebugBox, 0, wx.ALL, 10)
@@ -345,7 +359,7 @@ class AxisControlBox(wx.Panel):
 
         self.ReadCurrentX = wx.StaticText(self, enum['ID_CurrentRead'], "Current: ")
         self.ReadCurrentX.Move(105, 90, wx.SIZE_USE_EXISTING)
-        self.CurrentInputX = wx.TextCtrl(self, enum['ID_MagXInput'], "", wx.Point(200, 83), wx.DefaultSize, wx.TE_READONLY)
+        self.CurrentInputX = wx.TextCtrl(self, enum['ID_MagXInput'], "                ", wx.Point(200, 83), wx.DefaultSize, wx.TE_READONLY)
 
         # self.XVal_SetButton = wx.Button(self, enum['ID_SetMagX'], "Set Value")
         # self.Bind(wx.EVT_BUTTON, self.on_set_value_button, self.XVal_SetButton)
@@ -409,7 +423,7 @@ class AxisControlBox(wx.Panel):
             self.current = sensor_data["current"]
         elif (axis == 2):
             #something
-             self.current = sensor_data["current"]
+             self.current = sensor_data["pwm_x"]
         else:
              self.current = sensor_data["current"]
 
@@ -421,12 +435,12 @@ class AxisControlBox(wx.Panel):
         #-----------------------------------------------
         #1. get magnetic field value from text box
         desired_mag_field = self.SetX.GetValue()
-        
+
         #for testing:
         #self.CurrentInputX.SetValue(desired_mag_field)
         #-----------------------------------------------
         #2. calculate required current (theoretical)
-        #turns: 2*5 
+        #turns: 2*5
         #size: 0.6m -> a = 0.3m
         a = 0.3 #constant, TODO add somehwere else
         miu_0 = 4*pi*pow(10, -7) #also a constant
@@ -468,7 +482,7 @@ class GraphFrame(wx.Frame):
         self.redraw_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
         self.redraw_timer.Start(100)
-        
+
         #this is basically polling, should look into getting it to be 'interrupt style'
         self.command_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.process_command, self.command_timer)
@@ -573,7 +587,7 @@ class GraphFrame(wx.Frame):
         self.axis_control_vbox.Add(self.x_axis_control, border=5, flag=wx.ALL)
         self.axis_control_vbox.Add(self.y_axis_control, border=5, flag=wx.ALL)
         self.axis_control_vbox.Add(self.z_axis_control, border=5, flag=wx.ALL)
-       
+
 
         #self.axis_control_vbox.AddSpacer(24)
 
@@ -588,7 +602,7 @@ class GraphFrame(wx.Frame):
 
         self.vbox = wx.BoxSizer(wx.HORIZONTAL)
 
-       
+
         self.vbox.Add(self.axis_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
         self.vbox.Add(self.graph_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
 
@@ -603,7 +617,7 @@ class GraphFrame(wx.Frame):
 
         self.vbox2 =  wx.BoxSizer(wx.VERTICAL)
 
-        
+
 
 
         self.panel.SetSizer(self.vbox)
@@ -651,7 +665,7 @@ class GraphFrame(wx.Frame):
             linewidth=1,
             color=(1, 0, 1),
             )[0]
-        
+
     def draw_plot(self):
         """ Redraws the plot
         """
@@ -678,9 +692,9 @@ class GraphFrame(wx.Frame):
             axis_int = 2
 
         # when xmin is set as the lower bound in set_xbound,
-        # it "follows" xmax to produce a sliding window effect. 
+        # it "follows" xmax to produce a sliding window effect.
         # therefore, xmin is assigned after xmax.
-        
+
 
         xmax = len(self.data) if len(self.data) > 50 else 50
         xmin = xmax - 50
@@ -691,13 +705,12 @@ class GraphFrame(wx.Frame):
         # note that it's easy to change this scheme to the
         # minimal/maximal value in the current display, and not
         # the whole data set.
-    
+
         ymin = round(min(self.data), 0) - 1
         ymax = round(max(self.data), 0) + 1
 
-        #set the bounds of the x axis (sliding window or not)
-        self.axes.set_xbound(lower=xmin, upper=xmax)
-        self.axes.set_ybound(lower=-10000, upper=10000)
+        self.axes.set_xbound(lower=0, upper=xmax)
+        self.axes.set_ybound(lower=-0.5, upper=0)
 
         self.axes.grid(True, color='gray')
 
@@ -772,7 +785,7 @@ class GraphFrame(wx.Frame):
         #
         if not self.paused:
             self.update_sensor_data(event)
-            
+
             if (self.cb_xline.GetValue()):
                 #self.testing = -0.1
                 self.testingX = sensor_data["mag_field_x"]
@@ -782,7 +795,7 @@ class GraphFrame(wx.Frame):
                 #self.testing = 2.2
                 self.testingY = sensor_data["mag_field_y"]
                 self.dataY.append(self.datagenY.next(self.testingY))
-        
+
             else:
                 #self.testing = 3.5
                 self.testingZ = sensor_data["mag_field_z"]
@@ -807,7 +820,7 @@ class GraphFrame(wx.Frame):
             self.testing = 3.5
             #self.testing = sensor_data["mag_field_z"]
 
-        #all of these commands will need to reset the global 'console_command' global var 
+        #all of these commands will need to reset the global 'console_command' global var
     def process_command(self, event):
         global console_command
         command_terms = console_command.split(" ")
@@ -821,11 +834,11 @@ class GraphFrame(wx.Frame):
             pass
         elif command_terms[0] == "tune_pid": # set kd,kp,ki vals
             pass
-        elif command_terms[0] == "set_pwm": # also calls set coil current, will only check 
+        elif command_terms[0] == "set_pwm": # also calls set coil current, will only check
             pass
         else:
             self.debug_console.DebugOutput.write("Invalid Command\n") #maybe something like this should be a try_catch instead?
-        
+
         console_command = "" #it's one line but I could make this its own function?
 
     def on_exit(self, event):

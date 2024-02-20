@@ -1,7 +1,7 @@
 import serial
 import re
 
-from globals import sensor_data
+from globals import sensor_data, port
 
 class Arduino:
     def __init__(self, port, baud_rate=9600):
@@ -14,15 +14,17 @@ class Arduino:
         sensor_data["mag_field_y"] = mag_field_y
         sensor_data["mag_field_z"] = mag_field_z
 
-        write_header = 1
 
-        with open('magnetic_field.csv', 'a', newline='') as csvfile:
-            fieldnames = ['x_axis', 'y_axis', 'z_axis']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            if (write_header == 1):
-                writer.writeheader()
-                write_header = 0
-            writer.writerow({'x_axis':  mag_field_x, 'y_axis':  mag_field_y,'z_axis':  mag_field_z})
+        # # NOTE: we should move this to it's own function to keep things modular
+        # write_header = 1
+
+        # with open('magnetic_field.csv', 'a', newline='') as csvfile:
+        #     fieldnames = ['x_axis', 'y_axis', 'z_axis']
+        #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        #     if (write_header == 1):
+        #         writer.writeheader()
+        #         write_header = 0
+        #     writer.writerow({'x_axis':  mag_field_x, 'y_axis':  mag_field_y,'z_axis':  mag_field_z})
 
     def parse_serial_data(self, serial_data):
         match = re.match(r'C:(-?\d+\.?\d+),X:(-?\d+\.?\d+),Y:(-?\d+\.?\d+),Z:(-?\d+\.?\d+)', serial_data)
@@ -35,10 +37,17 @@ class Arduino:
         while True:
             line = self.ser.readline().decode('utf-8').strip()
             current, mag_field_x, mag_field_y, mag_field_z = self.parse_serial_data(line)
+
             if current is not None and mag_field_x is not None and mag_field_y is not None and mag_field_z is not None:
+                # Convert to Gauss
+                mag_field_x, mag_field_y, mag_field_z = mag_field_x / 3000, mag_field_y / 3000, mag_field_z / 3000
+
                 self.update_data(current, mag_field_x, mag_field_y, mag_field_z)
 
     def set_coil_current(self, speed):
-        command = f"S:{speed}\n"
+        command = f"S:{-speed}\n"
         self.ser.write(command.encode('utf-8'))
+
+
+arduino = Arduino(port)
 

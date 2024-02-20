@@ -4,14 +4,18 @@
 from enum import Enum
 
 # Config
-port = "/dev/cu.usbmodem21201"
+port = "/dev/cu.usbmodem101"
 
 
 # Data
 sensor_data = {"current": 0.0, # float
                "mag_field_x": 0.0, # float
                "mag_field_y": 0.0,# float
-               "mag_field_z": 0.0 # float
+               "mag_field_z": 0.0, # float
+               "pwm_x": 1,
+               "pwm_y": 1,
+               "pwm_z": 1,
+               "time_interval": 0.1
               }
 
 # HW parameters

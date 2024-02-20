@@ -2,17 +2,20 @@ import threading
 import time
 import wx
 
-from arduino import Arduino
-from globals import sensor_data, port
+from arduino import arduino
+from globals import sensor_data
+from control import PID
 
 from gui import GraphFrame
 
 if __name__ == "__main__":
 
     #Comment out to test GUI without arduino
-    #arduino = Arduino(port)
-    #sensor_thread = threading.Thread(target=arduino.update_arduino_data, daemon=True)
-    #sensor_thread.start()
+    sensor_thread = threading.Thread(target=arduino.update_arduino_data, daemon=True)
+    sensor_thread.start()
+
+    controller_thread = threading.Thread(target=PID.run_PID, daemon=True)
+    controller_thread.start()
 
     while True:
         # Read and print current/field values
