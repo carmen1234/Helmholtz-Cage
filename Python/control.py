@@ -6,7 +6,7 @@ class PID_controller:
     def __init__(self, setpoint,process_var,time_interval, Kp, Kd, Ki):
         self.setpoint = setpoint
         self.process_var = sensor_data["mag_field_x"]
-        self.time_interval = sensor_data["time_interval"]
+        self.time_interval = sensor_data["time_interval"] #in seconds
         self.Kp = Kp
         self.Kd = Kd
         self.Ki = Ki
@@ -19,11 +19,13 @@ class PID_controller:
 
     def set_setpoint(self, setpoint):
         self.setpoint = setpoint
+        self.err_integ = 0 # need to reset these for next value I think
+        self.prev_err = 0
 
-    def tune_constants(self, Kp, Kd, Ki):
+    def tune_constants(self, Kp, Ki, Kd):
         self.Kp = Kp
-        self.Kd = Kd
         self.Ki = Ki
+        self.Kd = Kd
 
     def proportional(self,setpoint,process_var):
         err = setpoint - process_var
@@ -31,14 +33,14 @@ class PID_controller:
 
     def differential(self, setpoint,process_var,time_interval):
         err = setpoint - process_var
-        err_diff = (self.prev_err - err)/time_interval
+        err_diff = self.Kd*(self.prev_err - err)/time_interval
         self.prev_err = err
-        return self.Kd*err_diff
+        return err_diff
 
     def integral(self, setpoint,process_var,time_interval):
         err = setpoint - process_var
-        self.err_integ += err*time_interval
-        return self.Ki*self.err_integ
+        self.err_integ += err*self.Ki*time_interval
+        return self.err_integ
 
     def get_PID(self):
         return (self.proportional(self.setpoint,self.process_var)

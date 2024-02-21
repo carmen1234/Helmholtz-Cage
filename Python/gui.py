@@ -832,8 +832,8 @@ class GraphFrame(wx.Frame):
             #arduino.set_coil_current(0)
         elif command_terms[0] == "clear": # clear debug output box
             pass
-        elif command_terms[0] == "tune_pid": # set kd,kp,ki vals
-            pass
+        elif command_terms[0] == "tune_pid": # set kp,ki,kd vals, atm only does single coil pair
+            PID.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
         elif command_terms[0] == "set_pwm": # also calls set coil current, will only check
             pass
         else:
