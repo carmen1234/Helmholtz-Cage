@@ -15,10 +15,13 @@ import wx
 import csv
 import math
 from math import pi
+import time
+import threading
 
 from globals import sensor_data, console_command
 from arduino import arduino
 from control import PID
+from logger import logger, log_stream
 
 import matplotlib
 matplotlib.use('WXAgg')
@@ -312,13 +315,27 @@ class DebugConsoleBox(wx.Panel):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
+        # Create a timer to periodically update the GUI
+        self.update_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.update_debug_output, self.update_timer)
+
+        # Start the timer to update every second (1000 milliseconds)
+        self.update_timer.Start(1000)
+
     def on_command_enter(self,event):
         input_str = self.DebugBox.GetValue()
         self.DebugBox.SetValue("")
-        self.DebugOutput.write("Command: " + input_str + "\n")
-        global console_command #this is dumb why is python like this
+        logger.info("Command: " + input_str)
+        global console_command
         console_command = input_str
-        print(input_str)
+        self.update_debug_output()
+
+    def update_debug_output(self, event):
+        # Get the latest logs from the StringIO stream
+        new_logs = log_stream.getvalue()
+
+        # Update the DebugOutput text control
+        self.DebugOutput.SetValue(new_logs)
 
 class AxisControlBox(wx.Panel):
     """ A static box with a box for reading magnetometer and current sensor values, and setting a current
@@ -420,12 +437,12 @@ class AxisControlBox(wx.Panel):
 
         if (axis == 1):
             #something
-            self.current = sensor_data["current"]
+            self.current = sensor_data["current_x"]
         elif (axis == 2):
             #something
              self.current = sensor_data["pwm_x"]
         else:
-             self.current = sensor_data["current"]
+             self.current = sensor_data["current_x"]
 
         self.current_str = str(self.current)
         self.CurrentInputX.SetValue(self.current_str)

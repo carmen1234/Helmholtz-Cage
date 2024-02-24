@@ -5,13 +5,16 @@ from enum import Enum
 
 # Config
 port = "/dev/cu.usbmodem101"
+debug = 0
 
 
 # Data
-sensor_data = {"current": 0.0, # float
-               "mag_field_x": 0.0, # float
-               "mag_field_y": 0.0,# float
-               "mag_field_z": 0.0, # float
+sensor_data = {"current_x": 0.0,
+               "current_y": 0.0,
+               "current_z": 0.0,
+               "mag_field_x": 0.0,
+               "mag_field_y": 0.0,
+               "mag_field_z": 0.0,
                "pwm_x": 1,
                "pwm_y": 1,
                "pwm_z": 1,
