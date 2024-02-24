@@ -320,15 +320,31 @@ class DebugConsoleBox(wx.Panel):
         self.Bind(wx.EVT_TIMER, self.update_debug_output, self.update_timer)
 
         # Start the timer to update every second (1000 milliseconds)
-        self.update_timer.Start(1000)
+        self.update_timer.Start(100)
 
     def on_command_enter(self,event):
         input_str = self.DebugBox.GetValue()
         self.DebugBox.SetValue("")
-        logger.info("Command: " + input_str)
-        global console_command
-        console_command = input_str
-        self.update_debug_output()
+        logger.info("Received CMD: " + input_str)
+        self.process_command(input_str)
+
+    def process_command(self, command):
+        command_terms = command.split(" ")
+        if command_terms[0] == "":
+            pass
+        elif command_terms[0] == "set0": #turn all coils 'off' by setting current to 0, will need to call set_coil_current
+            arduino.set_coil_current(0)
+        elif command_terms[0] == "clear": # clear debug output box
+            self.DebugOutput.Clear()
+        elif command_terms[0] == "tune_pid": # set kp,ki,kd vals, atm only does single coil pair
+            PID.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
+        elif command_terms[0] == "set_pwm": # also calls set coil current, will only check
+            arduino.set_coil_current(int(command_terms[1]))
+            logger.info(f"Setting PWM to {command_terms[1]}")
+            print("uh")
+        else:
+            logger.error(f"Invalid command - {command}")
+
 
     def update_debug_output(self, event):
         # Get the latest logs from the StringIO stream
@@ -429,11 +445,6 @@ class GraphFrame(wx.Frame):
         self.redraw_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
         self.redraw_timer.Start(100)
-
-        #this is basically polling, should look into getting it to be 'interrupt style'
-        self.command_timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.process_command, self.command_timer)
-        self.command_timer.Start(100)
 
 
     def create_menu(self):
@@ -759,27 +770,6 @@ class GraphFrame(wx.Frame):
         else:
             self.testing = 3.5
             #self.testing = sensor_data["mag_field_z"]
-
-        #all of these commands will need to reset the global 'console_command' global var
-    def process_command(self, event):
-        global console_command
-        command_terms = console_command.split(" ")
-
-        if command_terms[0] == "":
-            pass
-        elif command_terms[0] == "set0": #turn all coils 'off' by setting current to 0, will need to call set_coil_current
-            pass
-            #arduino.set_coil_current(0)
-        elif command_terms[0] == "clear": # clear debug output box
-            pass
-        elif command_terms[0] == "tune_pid": # set kp,ki,kd vals, atm only does single coil pair
-            PID.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
-        elif command_terms[0] == "set_pwm": # also calls set coil current, will only check
-            pass
-        else:
-            self.debug_console.DebugOutput.write("Invalid Command\n") #maybe something like this should be a try_catch instead?
-
-        console_command = "" #it's one line but I could make this its own function?
 
     def on_exit(self, event):
         self.Destroy()

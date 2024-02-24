@@ -1,5 +1,6 @@
 from globals import sensor_data
 from arduino import arduino
+from logger import logger
 from time import sleep
 
 class PID_controller:
@@ -23,9 +24,11 @@ class PID_controller:
         self.prev_err = 0
 
     def tune_constants(self, Kp, Ki, Kd):
+        logger.info(f"Updated PID Constants -- Kp: {Kp}, Ki: {Ki}, Kd: {Kd}")
         self.Kp = Kp
         self.Ki = Ki
         self.Kd = Kd
+
 
     def proportional(self,setpoint,process_var):
         err = setpoint - process_var

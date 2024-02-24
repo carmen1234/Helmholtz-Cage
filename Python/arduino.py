@@ -60,6 +60,9 @@ class Arduino:
         else:
             logger.debug(f"Arduino not connected. Command not sent: {command}")
 
+    def close_connection(self):
+        self.ser.close()
+
 
 arduino = Arduino(port)
 

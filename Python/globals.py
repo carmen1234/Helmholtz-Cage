@@ -28,5 +28,3 @@ class HW_params(float, Enum):
     min_gauss = -8.0
     max_guass = 8.0
 
-# Command Processing
-console_command = ""

@@ -5,6 +5,7 @@ import wx
 from arduino import arduino
 from globals import sensor_data
 from control import PID
+from logger import logger
 
 from gui import GraphFrame
 
@@ -35,4 +36,11 @@ if __name__ == "__main__":
     app.frame.Show()
     app.MainLoop()
 
-        # time.sleep(1)
+    # Exit Sequence
+    logger.info("Exiting GUI")
+    arduino.set_coil_current(0)
+    logger.info("Turned off all coils")
+    sensor_thread.kill()
+    controller_thread.kill()
+    arduino.ser.close()
+    logger.info("Closed Arduino connection")
