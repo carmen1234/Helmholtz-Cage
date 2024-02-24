@@ -6,6 +6,8 @@ from enum import Enum
 # Config
 port = "/dev/cu.usbmodem101"
 debug = 0
+graph_y_max = -0.5
+graph_y_min = 0
 
 
 # Data
@@ -15,9 +17,9 @@ sensor_data = {"current_x": 0.0,
                "mag_field_x": 0.0,
                "mag_field_y": 0.0,
                "mag_field_z": 0.0,
-               "pwm_x": 1,
-               "pwm_y": 1,
-               "pwm_z": 1,
+               "pwm_x": 0,
+               "pwm_y": 0,
+               "pwm_z": 0,
                "mag_field_x_setpoint": 0.0,
                "mag_field_y_setpoint": 0.0,
                "mag_field_z_setpoint": 0.0,

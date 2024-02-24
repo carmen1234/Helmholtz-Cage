@@ -18,7 +18,7 @@ from math import pi
 import time
 import threading
 
-from globals import sensor_data
+from globals import sensor_data, graph_y_max, graph_y_min
 from arduino import arduino
 from control import pid
 from logger import logger, log_stream
@@ -420,8 +420,11 @@ class GraphFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_save_plot, m_expt)
         self.Bind(wx.EVT_MENU, self.on_save_plot, m_import)
         menu_file.AppendSeparator()
+
+        # Bind on_exit to both the exit menu item and the frame close event
         m_exit = menu_file.Append(-1, "E&xit\tCtrl-X", "Exit")
         self.Bind(wx.EVT_MENU, self.on_exit, m_exit)
+        self.Bind(wx.EVT_CLOSE, self.on_exit)
 
         menuHelp = wx.Menu()
         menuHelp.Append(wx.ID_ABOUT)
@@ -625,7 +628,7 @@ class GraphFrame(wx.Frame):
         ymax = round(max(self.data), 0) + 1
 
         self.axes.set_xbound(lower=xmin, upper=xmax)
-        self.axes.set_ybound(lower=-1, upper=1)
+        self.axes.set_ybound(lower=graph_y_min, upper=graph_y_max)
 
         self.axes.grid(True, color='gray')
 
@@ -736,14 +739,12 @@ class GraphFrame(wx.Frame):
             #self.testing = sensor_data["mag_field_z"]
 
     def on_exit(self, event):
-        self.Destroy()
+        # Exit Sequence
+        logger.info("Exiting GUI")
+        arduino.set_coil_current(0)
+        logger.info("Turned off all coils")
+        # TODO: add logic to stop threads before closing serial connection
+        #arduino.ser.close()
+        logger.info("Closed Arduino connection")
 
-
-#if __name__ == '__main__':
-
-    # sensor_data["magnetic_field"] = 1
-
-    # app = wx.App()
-    # app.frame = GraphFrame()
-    # app.frame.Show()
-    # app.MainLoop()
+        event.Skip() # Allow the window to close

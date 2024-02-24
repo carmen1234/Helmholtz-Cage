@@ -14,7 +14,7 @@ class PID_controller:
         self.Ki = Ki
         self.err_integ = 0
         self.prev_err = 0
-        self.enable = 0
+        self.enable = 1
 
     def update_values(self, process_var,time_interval):
         self.process_var = process_var
@@ -66,17 +66,22 @@ class PID_controller:
     def run_PID(self):
         while (True):
             self.update_values(sensor_data["mag_field_x"],sensor_data["time_interval"])
+            print("Current Mag Field: ", self.process_var)
+            print("Current PWM: ", sensor_data[f'pwm_{self.axis}'])
+            print("Setpoint: ", self.setpoint)
             new_val = self.get_PID()
+            print("New Value: ", new_val)
             # Ensure that the PWM value is between -255 and 255 (also multiplied by -1 to match the direction of the current)
             if self.enable:
-                sensor_data[f'pwm_{self.axis}'] = max(min((sensor_data[f'pwm_{self.axis}'] + int(255*new_val)) * -1, 255), -255)
-                arduino.set_coil_current(sensor_data[f'pwm_{self.axis}'])
+                sensor_data[f'pwm_{self.axis}'] = (sensor_data[f'pwm_{self.axis}'] + (int(255*new_val)*-1))
+                print("PWM Value: ", sensor_data[f'pwm_{self.axis}'])
+                arduino.set_coil_current((sensor_data[f'pwm_{self.axis}'] + int(255*new_val)))
+                sleep(0.1)
             else:
                 sleep(0.5) # sleep for 0.5 seconds if PID is disabled
                 # TODO: change this so thread sleeps when controller is off
 
 
 
-
-pid = PID_controller("x",-0.3,0,0,0.01,0,0.0)
+pid = PID_controller("x",-0.2,0,0,0.1,0,0)
 

@@ -70,6 +70,8 @@ void processCommand(String command) {
   if (command.startsWith("S:")) {
     int speed = command.substring(2).toInt();
     if (speed > 50) speed = 50;
+    if (speed < -50) speed = -50;
+    // Checks in place while testing^
     driver_x.setSpeed(speed);
   }
 }

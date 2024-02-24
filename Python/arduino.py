@@ -33,7 +33,6 @@ class Arduino:
             return None, None, None, None, None, None
 
     def update_arduino_data(self):
-
         # Open file to log sensor data
         fp = open('sensor_data.csv', 'w')
         fp.write("Current X,Current Y,Current Z,Magnetic Field X,Magnetic Field Y,Magnetic Field Z\n")
