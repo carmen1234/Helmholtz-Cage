@@ -304,8 +304,8 @@ class DebugConsoleBox(wx.Panel):
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 
 
-        self.DebugOutput = wx.TextCtrl(self, enum['DebugOutputID'], size=wx.Size(400,72), style=wx.TE_READONLY | wx.TE_MULTILINE)
-        self.DebugBox = wx.TextCtrl(self, enum['DebugBoxID'], size=wx.Size(400,24), style= wx.TE_PROCESS_ENTER) #probably want to change this to 'CommandBox'
+        self.DebugOutput = wx.TextCtrl(self, enum['DebugOutputID'], size=wx.Size(800,300), style=wx.TE_READONLY | wx.TE_MULTILINE)
+        self.DebugBox = wx.TextCtrl(self, enum['DebugBoxID'], size=wx.Size(800,24), style= wx.TE_PROCESS_ENTER) #probably want to change this to 'CommandBox'
 
         self.Bind(wx.EVT_TEXT_ENTER, self.on_command_enter, self.DebugBox)
 
@@ -337,6 +337,9 @@ class DebugConsoleBox(wx.Panel):
         # Update the DebugOutput text control
         self.DebugOutput.SetValue(new_logs)
 
+        # Scroll to the end of the text
+        self.DebugOutput.ShowPosition(self.DebugOutput.GetLastPosition())
+
 class AxisControlBox(wx.Panel):
     """ A static box with a box for reading magnetometer and current sensor values, and setting a current
     """
@@ -357,12 +360,12 @@ class AxisControlBox(wx.Panel):
              self.mag_field = sensor_data["mag_field_z"]
 
         #Writing the values to a csv
-        with open("mag_field_values.csv", "w", newline="") as f:
-            writer = csv.writer(f)
-            start_values = [["X", "Y", "Z"],
-            [sensor_data["mag_field_x"], sensor_data["mag_field_y"], sensor_data["mag_field_z"]],
-            ]
-            writer.writerows(start_values)
+        # with open("mag_field_values.csv", "w", newline="") as f:
+        #     writer = csv.writer(f)
+        #     start_values = [["X", "Y", "Z"],
+        #     [sensor_data["mag_field_x"], sensor_data["mag_field_y"], sensor_data["mag_field_z"]],
+        #     ]
+        #     writer.writerows(start_values)
 
         self.mag_field_str = str(self.mag_field)
 
@@ -421,12 +424,12 @@ class AxisControlBox(wx.Panel):
              self.mag_field = sensor_data["mag_field_z"]
 
         #Writing the values to a csv
-        with open("mag_field_values.csv", "a", newline="") as f:
-            writer = csv.writer(f)
-            values = [
-            [sensor_data["mag_field_x"], sensor_data["mag_field_y"], sensor_data["mag_field_z"]],
-            ]
-            writer.writerows(values)
+        # with open("mag_field_values.csv", "a", newline="") as f:
+        #     writer = csv.writer(f)
+        #     values = [
+        #     [sensor_data["mag_field_x"], sensor_data["mag_field_y"], sensor_data["mag_field_z"]],
+        #     ]
+        #     writer.writerows(values)
 
         self.mag_field_str = str(self.mag_field)
         self.MagXInput.SetValue(self.mag_field_str)
@@ -726,8 +729,8 @@ class GraphFrame(wx.Frame):
         ymin = round(min(self.data), 0) - 1
         ymax = round(max(self.data), 0) + 1
 
-        self.axes.set_xbound(lower=0, upper=xmax)
-        self.axes.set_ybound(lower=-0.5, upper=0)
+        self.axes.set_xbound(lower=xmin, upper=xmax)
+        self.axes.set_ybound(lower=-1, upper=1)
 
         self.axes.grid(True, color='gray')
 

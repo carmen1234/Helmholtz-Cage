@@ -50,13 +50,13 @@ class PID_controller:
     def run_PID(self):
         while (True):
             self.update_values(sensor_data["mag_field_x"],sensor_data["time_interval"])
-            print("Mag Field X: " + str(sensor_data["mag_field_x"]))
+            #print("Mag Field X: " + str(sensor_data["mag_field_x"]))
             new_val = self.get_PID()
             sensor_data['pwm_x'] = sensor_data['pwm_x'] + int(255*new_val)
             arduino.set_coil_current(sensor_data['pwm_x']*-1)
 
-            print("New PWM Val:" + str(sensor_data['pwm_x']))
-            sleep(0.1)
+            #print("New PWM Val:" + str(sensor_data['pwm_x']))
+            #sleep(0.1)
 
 
 

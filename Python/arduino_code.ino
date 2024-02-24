@@ -52,9 +52,9 @@ void loop() {
 
   Serial.print("CX:");
   Serial.print(curr_x);
-  Serial.print("CY:");
+  Serial.print(",CY:");
   Serial.print(curr_y);
-  Serial.print("CZ:");
+  Serial.print(",CZ:");
   Serial.print(curr_z);
   Serial.print(",X:");
   Serial.print(mag_field_x);
