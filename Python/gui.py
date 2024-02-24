@@ -18,9 +18,9 @@ from math import pi
 import time
 import threading
 
-from globals import sensor_data, console_command
+from globals import sensor_data
 from arduino import arduino
-from control import PID
+from control import pid
 from logger import logger, log_stream
 
 import matplotlib
@@ -198,99 +198,61 @@ class ModeControlBox(wx.Panel):
        pass
 
 class InputControlBox(wx.Panel):
-    def __init__(self,parent, ID, label, initval):
-        wx.Panel.__init__(self, parent, ID)
+    def __init__(self, parent, ID, label, initval):
+        wx.Panel.__init__(self, parent, wx.ID_ANY)
 
         self.value = initval
 
-        box = wx.StaticBox(self, -1, label)
+        box = wx.StaticBox(self, wx.ID_ANY, "Static Control")
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 
-        self.XVal_SetButton = wx.Button(self, enum['ID_SetMagX'], "Set Mag X")
-        self.Bind(wx.EVT_BUTTON, self.on_set_value_buttonX, self.XVal_SetButton)
-        self.XVal_SetButton.Move((80, 160))
-        #self.XVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
-        self.XVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
-        #self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "", wx.Point(105, 180), wx.DefaultSize)
-        self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "         ")
+        self.SetX = wx.TextCtrl(self, wx.ID_ANY, "          ")
+        self.SetY = wx.TextCtrl(self, wx.ID_ANY, "          ")
+        self.SetZ = wx.TextCtrl(self, wx.ID_ANY, "          ")
 
-        self.YVal_SetButton = wx.Button(self, enum['ID_SetMagY'], "Set Mag Y")
-        self.Bind(wx.EVT_BUTTON, self.on_set_value_buttonY, self.YVal_SetButton)
-        self.YVal_SetButton.Move((80, 160))
-        #self.YVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
-        self.YVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
-        #self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "", wx.Point(105, 180), wx.DefaultSize)
-        self.SetY = wx.TextCtrl(self, enum['ID_ValY'], "         ")
+        self.SetPointButton = wx.Button(self, wx.ID_ANY, "Set Setpoint")
+        self.ToggleControllerButton = wx.Button(self, wx.ID_ANY, "Toggle Controller")
 
-        self.ZVal_SetButton = wx.Button(self, enum['ID_SetMagZ'], "Set Mag Z")
-        self.Bind(wx.EVT_BUTTON, self.on_set_value_buttonZ, self.ZVal_SetButton)
-        self.ZVal_SetButton.Move((80, 160))
-        #self.ZVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
-        self.ZVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
-        #self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "", wx.Point(105, 180), wx.DefaultSize)
-        self.SetZ = wx.TextCtrl(self, enum['ID_ValZ'], "         ")
+        self.Bind(wx.EVT_BUTTON, self.on_set_setpoint, self.SetPointButton)
+        self.Bind(wx.EVT_BUTTON, self.on_toggle_controller, self.ToggleControllerButton)
 
-        set_value_boxX = wx.BoxSizer(wx.HORIZONTAL)
-        set_value_boxX.Add(self.XVal_SetButton, flag=wx.ALIGN_CENTER_VERTICAL)
-        set_value_boxX.Add(self.SetX, flag=wx.ALIGN_CENTER_VERTICAL)
+        button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        button_sizer.Add(self.SetPointButton, flag=wx.ALIGN_CENTER)
+        button_sizer.AddSpacer(10)
+        button_sizer.Add(self.ToggleControllerButton, flag=wx.ALIGN_CENTER)
 
-        set_value_boxY = wx.BoxSizer(wx.HORIZONTAL)
-        set_value_boxY.Add(self.YVal_SetButton, flag=wx.ALIGN_CENTER_VERTICAL)
-        set_value_boxY.Add(self.SetY, flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box = wx.BoxSizer(wx.HORIZONTAL)
+        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "X:"), flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.Add(self.SetX, flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.AddSpacer(12)
+        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "Y:"), flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.Add(self.SetY, flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.AddSpacer(12)
+        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "Z:"), flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.Add(self.SetZ, flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.AddSpacer(12)
 
-        set_value_boxZ = wx.BoxSizer(wx.HORIZONTAL)
-        set_value_boxZ.Add(self.ZVal_SetButton, flag=wx.ALIGN_CENTER_VERTICAL)
-        set_value_boxZ.Add(self.SetZ, flag=wx.ALIGN_CENTER_VERTICAL)
-
-        sizer.Add(set_value_boxX, 0, wx.ALL, 10)
-        sizer.Add(set_value_boxY, 0, wx.ALL, 10)
-        sizer.Add(set_value_boxZ, 0, wx.ALL, 10)
+        sizer.Add(set_value_box, 0, wx.ALL, 5)
+        sizer.AddSpacer(10)
+        sizer.Add(button_sizer, 0, wx.ALIGN_CENTER)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
 
+    def on_toggle_controller(self, event):
+        pid.toggle_PID()
 
-    def on_set_value_buttonX(self, event):
+    def on_set_setpoint(self, event):
         inputX_mag = self.SetX.GetValue()
-        print("X Mag Input = " + inputX_mag) # for debugging purposes
+        inputY_mag = self.SetY.GetValue()
+        inputZ_mag = self.SetZ.GetValue()
 
         if not (float(inputX_mag) <= 1.0 and float(inputX_mag) >= -1.0):
-            print("Error, invalid input range")
-            return -1
+            logger.error("Invalid input range for X-axis setpoint")
         else:
-            pass
+            pid.set_setpoint(float(inputX_mag))
 
-            PID.set_setpoint(float(inputX_mag))
-
-            # PID.update_values(float(inputX_mag), sensor_data["mag_field_x"], 1000)
-            # new_inputX = PID.get_PID()
-
-            # sensor_data['pwm_x'] = sensor_data['pwm_x'] + int(255*new_inputX)
-            # print("New Input Val: " + str(new_inputX))
-            # print("New PWM Val: " + str(sensor_data['pwm_x']))
-
-            #arduino.set_coil_current(sensor_data['pwm_x'])
-            #arduino.set_coil_current(int(255*float(inputX_mag)))
-
-    def on_set_value_buttonY(self, event):
-        inputY_mag = self.SetY.GetValue()
-        print("Y Mag Input = " + inputY_mag) # for debugging purposes
-
-        if not (float(inputY_mag) <= 1.0 and float(inputY_mag) >= -1.0):
-            print("Error, invalid input range")
-        else:
-            PID.set_setpoint(float(inputY_mag))
-
-
-    def on_set_value_buttonZ(self, event):
-        inputZ_mag = self.SetZ.GetValue()
-        print("Z Mag Input = " + inputZ_mag) # for debugging purposes
-
-        if not (float(inputZ_mag) <= 1.0 and float(inputZ_mag) >= -1.0):
-            print("Error, invalid input range")
-        else:
-            PID.set_setpoint(float(inputZ_mag))
-
+        # TODO: add for Y and Z axis
 
 class DebugConsoleBox(wx.Panel):
     """ A static box with a debug console.
@@ -304,7 +266,7 @@ class DebugConsoleBox(wx.Panel):
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 
 
-        self.DebugOutput = wx.TextCtrl(self, enum['DebugOutputID'], size=wx.Size(800,300), style=wx.TE_READONLY | wx.TE_MULTILINE)
+        self.DebugOutput = wx.TextCtrl(self, enum['DebugOutputID'], size=wx.Size(800,200), style=wx.TE_READONLY | wx.TE_MULTILINE)
         self.DebugBox = wx.TextCtrl(self, enum['DebugBoxID'], size=wx.Size(800,24), style= wx.TE_PROCESS_ENTER) #probably want to change this to 'CommandBox'
 
         self.Bind(wx.EVT_TEXT_ENTER, self.on_command_enter, self.DebugBox)
@@ -337,11 +299,16 @@ class DebugConsoleBox(wx.Panel):
         elif command_terms[0] == "clear": # clear debug output box
             self.DebugOutput.Clear()
         elif command_terms[0] == "tune_pid": # set kp,ki,kd vals, atm only does single coil pair
-            PID.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
+            pid.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
         elif command_terms[0] == "set_pwm": # also calls set coil current, will only check
-            arduino.set_coil_current(int(command_terms[1]))
-            logger.info(f"Setting PWM to {command_terms[1]}")
-            print("uh")
+            # TODO: add axis argument
+            pwm_val = int(command_terms[1])
+            if pwm_val > 255 or pwm_val < -255:
+                logger.error("Invalid PWM value")
+            else:
+                sensor_data["pwm_x"] = pwm_val
+                arduino.set_coil_current(pwm_val)
+                logger.info(f"Setting PWM to {pwm_val}")
         else:
             logger.error(f"Invalid command - {command}")
 
@@ -359,64 +326,61 @@ class DebugConsoleBox(wx.Panel):
 class AxisControlBox(wx.Panel):
     """ A static box with a box for reading magnetometer and current sensor values, and setting a current
     """
-    def __init__(self, parent, ID, label, initval, axis):
+    def __init__(self, parent, ID, initval, axis):
         wx.Panel.__init__(self, parent, ID)
 
         self.value = initval
         self.axis = axis
-        self.mag_field = sensor_data["mag_field_" + axis]
 
-        self.mag_field_str = str(self.mag_field)
+        self.mag_label = wx.StaticText(self, enum['ID_MagXRead'], "M. Field Strength: ")
+        self.mag_val = wx.TextCtrl(self, enum['ID_MagXInput'], "          ", style=wx.TE_READONLY)
 
-        box = wx.StaticBox(self, -1, label)
-        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        self.curr_label = wx.StaticText(self, enum['ID_CurrentRead'], "Current: ")
+        self.curr_val = wx.TextCtrl(self, enum['ID_MagXInput'], "          ", style=wx.TE_READONLY)
 
-        self.ReadMagX = wx.StaticText(self, enum['ID_MagXRead'], "M. Field Strength (G): ")
+        self.mag_setpoint_label = wx.StaticText(self, wx.ID_ANY, "M. Field Strengh Setpoint: ")
+        self.mag_setpoint_val = wx.TextCtrl(self, wx.ID_ANY, "          ", style=wx.TE_READONLY)
 
-        self.MagXInput = wx.TextCtrl(self, enum['ID_MagXInput'], "                ", wx.Point(200, 43), wx.DefaultSize, wx.TE_READONLY)
-        self.MagXInput.SetValue(self.mag_field_str)
+        self.pwm_label = wx.StaticText(self, wx.ID_ANY, "PWM Value: ")
+        self.pwm_val = wx.TextCtrl(self, wx.ID_ANY, "          ", style=wx.TE_READONLY)
 
-        self.ReadCurrentX = wx.StaticText(self, enum['ID_CurrentRead'], "Current (A): ")
-        self.ReadCurrentX.Move(105, 90, wx.SIZE_USE_EXISTING)
-        self.CurrentInputX = wx.TextCtrl(self, enum['ID_MagXInput'], "                ", wx.Point(200, 83), wx.DefaultSize, wx.TE_READONLY)
+        sizer = wx.FlexGridSizer(4, 2, 2, 2)
+        sizer.AddMany([(self.mag_label, 1, wx.ALIGN_RIGHT), (self.mag_val),
+                       (self.curr_label, 1, wx.ALIGN_RIGHT), (self.curr_val),
+                       (self.mag_setpoint_label, 1, wx.ALIGN_RIGHT), (self.mag_setpoint_val),
+                       (self.pwm_label, 1, wx.ALIGN_RIGHT), (self.pwm_val)])
 
-        # self.XVal_SetButton = wx.Button(self, enum['ID_SetMagX'], "Set Value")
-        # self.Bind(wx.EVT_BUTTON, self.on_set_value_button, self.XVal_SetButton)
-        # self.XVal_SetButton.Move((80, 160))
-        # self.XVal_SetButton.SetBackgroundColour(wx.Colour(0x886421))
-        # self.XVal_SetButton.SetForegroundColour(wx.Colour(0xFFFFFF))
-        # self.SetX = wx.TextCtrl(self, enum['ID_ValX'], "", wx.Point(105, 180), wx.DefaultSize)
+        box = wx.StaticBox(self, wx.ID_ANY, "")
+        box_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        box_sizer.Add(sizer, 1, wx.EXPAND | wx.ALL, 5)
 
-        read_mag_box = wx.BoxSizer(wx.HORIZONTAL)
-        read_current_box = wx.BoxSizer(wx.HORIZONTAL)
-        # set_value_box = wx.BoxSizer(wx.HORIZONTAL)
+        label = wx.StaticText(self, wx.ID_ANY, f"{axis.upper()}-Axis")
+        label.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 
-        read_mag_box.Add(self.ReadMagX, flag=wx.ALIGN_LEFT)
-        read_mag_box.Add(self.MagXInput, flag=wx.ALIGN_LEFT)
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+        main_sizer.Add(label, 0, wx.ALIGN_LEFT)
+        main_sizer.Add(box_sizer, 1, wx.EXPAND | wx.ALL, 5)
 
-        read_current_box.Add(self.ReadCurrentX, flag=wx.ALIGN_LEFT)
-        read_current_box.Add(self.CurrentInputX, flag=wx.ALIGN_LEFT)
-
-        # set_value_box.Add(self.XVal_SetButton, flag=wx.ALIGN_LEFT)
-        # set_value_box.Add(self.SetX, flag=wx.ALIGN_LEFT)
-
-        sizer.Add(read_mag_box, 0, wx.ALL, 10)
-        sizer.Add(read_current_box, 0, wx.ALL, 10)
-        # sizer.Add(set_value_box, 0, wx.ALL, 10)
-
-        self.SetSizer(sizer)
-        sizer.Fit(self)
+        self.SetSizer(main_sizer)
 
     #Update the value of the "magnetic field" variable, which gets used for plotting,
     #based on which axis is selected for plotting
     def update_values(self):
         self.mag_field = round(sensor_data["mag_field_" + self.axis], 3)
         self.mag_field_str = str(self.mag_field)
-        self.MagXInput.SetValue(self.mag_field_str)
+        self.mag_val.SetValue(self.mag_field_str)
 
         self.current = round(sensor_data["current_" + self.axis], 3)
         self.current_str = str(self.current)
-        self.CurrentInputX.SetValue(self.current_str)
+        self.curr_val.SetValue(self.current_str)
+
+        self.mag_setpoint_label = round(sensor_data["mag_field_" + self.axis], 3)
+        self.mag_setpoint_str = str(self.mag_setpoint_label)
+        self.mag_setpoint_val.SetValue(self.mag_setpoint_str)
+
+        self.pwm = round(sensor_data["pwm_" + self.axis], 3)
+        self.pwm_str = str(self.pwm)
+        self.pwm_val.SetValue(self.pwm_str)
 
 class GraphFrame(wx.Frame):
     """ The main frame of the application
@@ -474,9 +438,9 @@ class GraphFrame(wx.Frame):
         self.canvas = FigCanvas(self.panel, -1, self.fig)
 
         self.mode_control = ModeControlBox(self.panel, -1, "DYNAMIC CONTROL", 0)
-        self.x_axis_control = AxisControlBox(self.panel, -1, "X AXIS", 50, "x")
-        self.y_axis_control = AxisControlBox(self.panel, -1, "Y AXIS", 75, "y")
-        self.z_axis_control = AxisControlBox(self.panel, -1, "Z AXIS", 100, "z")
+        self.x_axis_control = AxisControlBox(self.panel, -1, 50, "x")
+        self.y_axis_control = AxisControlBox(self.panel, -1, 75, "y")
+        self.z_axis_control = AxisControlBox(self.panel, -1, 100, "z")
         self.static_control = InputControlBox(self.panel, -1, "STATIC CONTROL", 125)
         self.debug_console = DebugConsoleBox(self.panel, -1, "CONSOLE", 150)
 

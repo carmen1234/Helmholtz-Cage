@@ -1,10 +1,8 @@
 import threading
-import time
 import wx
 
 from arduino import arduino
-from globals import sensor_data
-from control import PID
+from control import pid
 from logger import logger
 
 from gui import GraphFrame
@@ -15,7 +13,7 @@ if __name__ == "__main__":
     sensor_thread = threading.Thread(target=arduino.update_arduino_data, daemon=True)
     sensor_thread.start()
 
-    controller_thread = threading.Thread(target=PID.run_PID, daemon=True)
+    controller_thread = threading.Thread(target=pid.run_PID, daemon=True)
     controller_thread.start()
 
     # while True:
