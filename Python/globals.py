@@ -23,8 +23,14 @@ sensor_data = {"current_x": 0.0,
                "mag_field_x_setpoint": 0.0,
                "mag_field_y_setpoint": 0.0,
                "mag_field_z_setpoint": 0.0,
-               "time_interval": 0.1
+               "time_interval": 0.1,
               }
+
+avg_data = {"avg_mag_x": 0.0,
+            "avg_mag_y": 0.0,
+            "avg_mag_z": 0.0,
+            "reading_cnt": 0
+            }
 
 # HW parameters
 class HW_params(float, Enum):

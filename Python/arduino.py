@@ -3,7 +3,7 @@ import re
 from logger import logger
 import json
 
-from globals import sensor_data, port
+from globals import sensor_data, port, avg_data
 
 class Arduino:
     def __init__(self, port, baud_rate=9600):
@@ -24,6 +24,12 @@ class Arduino:
         sensor_data["mag_field_x"] = mag_field_x
         sensor_data["mag_field_y"] = mag_field_y
         sensor_data["mag_field_z"] = mag_field_z
+
+    def update_avg(self):
+        avg_data["reading_cnt"] = avg_data["reading_cnt"] + 1
+        avg_data["avg_mag_x"] = (avg_data["avg_mag_x"] + sensor_data["current_x"])/avg_data["reading_cnt"]
+        avg_data["avg_mag_y"] = (avg_data["avg_mag_y"] + sensor_data["current_y"])/avg_data["reading_cnt"]
+        avg_data["avg_mag_z"] = (avg_data["avg_mag_z"] + sensor_data["current_z"])/avg_data["reading_cnt"]
 
     def parse_serial_data(self, serial_data):
         match = re.match(r'CX:(-?\d+),CY:(-?\d+),CZ:(-?\d+),X:(-?\d+),Y:(-?\d+),Z:(-?\d+)', serial_data)
@@ -47,9 +53,11 @@ class Arduino:
                 mag_field_x, mag_field_y, mag_field_z = mag_field_x / 3000, mag_field_y / 3000, mag_field_z / 3000
                 current_x, current_y, current_z = current_x / 1000, current_y / 1000, current_z / 1000
                 self.update_data(current_x, current_y, current_z, mag_field_x, mag_field_y, mag_field_z)
+                self.update_avg()
 
                 # Log sensor data to file
                 fp.write(f"{current_x},{current_y},{current_z},{mag_field_x},{mag_field_y},{mag_field_z}\n")
+                #do we want to print avg data as well?
 
     def set_coil_current(self, speed):
         command = f"S:{-speed}\n"

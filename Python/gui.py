@@ -18,7 +18,7 @@ from math import pi
 import time
 import threading
 
-from globals import sensor_data, graph_y_max, graph_y_min
+from globals import sensor_data, graph_y_max, graph_y_min, avg_data
 from arduino import arduino
 from control import pid
 from logger import logger, log_stream
@@ -309,6 +309,11 @@ class DebugConsoleBox(wx.Panel):
                 sensor_data["pwm_x"] = pwm_val
                 arduino.set_coil_current(pwm_val)
                 logger.info(f"Setting PWM to {pwm_val}")
+        elif command_terms[0] == "reset_avg":
+            avg_data["avg_mag_x"] = 0
+            avg_data["avg_mag_y"] = 0
+            avg_data["avg_mag_z"] = 0
+            avg_data["reading_cnt"] = 0
         else:
             logger.error(f"Invalid command - {command}")
 
@@ -338,17 +343,21 @@ class AxisControlBox(wx.Panel):
         self.curr_label = wx.StaticText(self, enum['ID_CurrentRead'], "Current: ")
         self.curr_val = wx.TextCtrl(self, enum['ID_MagXInput'], "          ", style=wx.TE_READONLY)
 
+        self.avg_mag_label = wx.StaticText(self, enum['ID_MagXRead'], "Avg M. Field Strength: ")
+        self.avg_mag_val = wx.TextCtrl(self, enum['ID_MagXInput'], "          ", style=wx.TE_READONLY)
+
         self.mag_setpoint_label = wx.StaticText(self, wx.ID_ANY, "M. Field Strengh Setpoint: ")
         self.mag_setpoint_val = wx.TextCtrl(self, wx.ID_ANY, "          ", style=wx.TE_READONLY)
 
         self.pwm_label = wx.StaticText(self, wx.ID_ANY, "PWM Value: ")
         self.pwm_val = wx.TextCtrl(self, wx.ID_ANY, "          ", style=wx.TE_READONLY)
 
-        sizer = wx.FlexGridSizer(4, 2, 2, 2)
+        sizer = wx.FlexGridSizer(5, 2, 2, 2)
         sizer.AddMany([(self.mag_label, 1, wx.ALIGN_RIGHT), (self.mag_val),
                        (self.curr_label, 1, wx.ALIGN_RIGHT), (self.curr_val),
                        (self.mag_setpoint_label, 1, wx.ALIGN_RIGHT), (self.mag_setpoint_val),
-                       (self.pwm_label, 1, wx.ALIGN_RIGHT), (self.pwm_val)])
+                       (self.pwm_label, 1, wx.ALIGN_RIGHT), (self.pwm_val),
+                       (self.avg_mag_label, 1, wx.ALIGN_RIGHT), (self.avg_mag_val)])
 
         box = wx.StaticBox(self, wx.ID_ANY, f"{axis.upper()}-Axis")
         box_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
@@ -369,6 +378,10 @@ class AxisControlBox(wx.Panel):
         self.current = round(sensor_data["current_" + self.axis], 3)
         self.current_str = str(self.current)
         self.curr_val.SetValue(self.current_str)
+
+        self.avg_mag_field = round(avg_data["avg_mag_" + self.axis], 3)
+        self.avg_mag_field_str = str(self.avg_mag_field)
+        self.avg_mag_val.SetValue(self.avg_mag_field_str)
 
         self.mag_setpoint_label = round(pid.setpoint, 3)
         self.mag_setpoint_str = str(self.mag_setpoint_label)
@@ -556,7 +569,7 @@ class GraphFrame(wx.Frame):
         """ Sets up the initial plot and data objects
         """
         self.dpi = 100
-        self.fig = Figure((3.0, 3.0), dpi=self.dpi)
+        self.fig = Figure((3.0, 3.0), dpi=self.dpi) #note this needs to be adjusted on windows, plot doesnt completely show up
 
         self.axes = self.fig.add_subplot(111)
         self.axes.set_facecolor(COLOR_NAME)

@@ -82,5 +82,7 @@ class PID_controller:
 
 
 
-pid = PID_controller("x",0,0.05,0,0)
+pid = PID_controller("x",0,0.05,0,0) #todo: change pid to pid_x
+pid_y = PID_controller("y",0,0.05,0,0)
+pid_z = PID_controller("z",0,0.05,0,0)
 
