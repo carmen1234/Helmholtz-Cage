@@ -133,13 +133,14 @@ class ModeControlBox(wx.Panel):
 
         self.value = initval
 
-        box = wx.StaticBox(self, -1, label)
+        box = wx.StaticBox(self, -1, "Dynamic Control")
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 
-        self.ReadCSVButton = wx.Button(self, enum['UseCSV'], "Import CSV")
+        self.ReadCSVButton = wx.Button(self, enum['UseCSV'], "Load Sim")
         self.Bind(wx.EVT_BUTTON, self.on_import_csv, self.ReadCSVButton)
 
-        self.CSVPathBox = wx.TextCtrl(self, enum['CSVPathBoxE'], "Type Path to CSV File Here")
+        self.CSVPathBox = wx.TextCtrl(self, enum['CSVPathBoxE'], size=(250, -1))
+        self.CSVPathBox.SetHint("Enter path/to/csv_file")
 
         #self.ReadCSVButton.Move((675, 540))
         #self.ReadCSVButton.SetBackgroundColour(wx.Colour(0x886421))
@@ -149,35 +150,33 @@ class ModeControlBox(wx.Panel):
         #self.DebugBox.SetSize(0, 500, 450, 200, wx.VERTICAL | wx.GROW)
 
 
-        self.SetMode0 = wx.Button(self, enum['SimMode_0'], "Set Mode 0")
+        self.SetMode0 = wx.Button(self, wx.ID_ANY, "Start Sim")
         self.Bind(wx.EVT_BUTTON, self.on_mode_0, self.SetMode0)
         self.SetMode0.Move((25, 0))
-        self.SetMode0.SetBackgroundColour(wx.Colour(0x886421))
-        self.SetMode0.SetForegroundColour(wx.Colour(0xFFFFFF))
 
-        self.SetMode1 = wx.Button(self, enum['SimMode_1'], "Set Mode 1")
+
+        self.SetMode1 = wx.Button(self, wx.ID_ANY, "Stop Sim")
         self.Bind(wx.EVT_BUTTON, self.on_mode_1, self.SetMode1)
         self.SetMode1.Move((50, 0))
-        self.SetMode1.SetBackgroundColour(wx.Colour(0x886421))
-        self.SetMode1.SetForegroundColour(wx.Colour(0xFFFFFF))
 
-        self.SetMode2 = wx.Button(self, enum['SimMode_2'], "Set Mode 2")
+        self.SetMode2 = wx.Button(self, wx.ID_ANY, "Reset")
         self.Bind(wx.EVT_BUTTON, self.on_mode_2, self.SetMode2)
         self.SetMode2.Move((0, 75))
-        self.SetMode2.SetBackgroundColour(wx.Colour(0x886421))
-        self.SetMode2.SetForegroundColour(wx.Colour(0xFFFFFF))
 
         csv_box = wx.BoxSizer(wx.HORIZONTAL)
-        csv_box.Add(self.ReadCSVButton, flag=wx.ALIGN_CENTER_VERTICAL)
-        csv_box.Add(self.CSVPathBox, flag=wx.ALIGN_CENTER_VERTICAL)
+        csv_box.Add(self.CSVPathBox, flag=wx.ALIGN_CENTER)
+        csv_box.AddSpacer(2)
+        csv_box.Add(self.ReadCSVButton, flag=wx.ALIGN_CENTER)
 
-        mode_box = wx.BoxSizer(wx.VERTICAL)
-        mode_box.Add(self.SetMode0, flag=wx.ALIGN_CENTER_HORIZONTAL)
-        mode_box.Add(self.SetMode1, flag=wx.ALIGN_CENTER_HORIZONTAL)
-        mode_box.Add(self.SetMode2, flag=wx.ALIGN_CENTER_HORIZONTAL)
+        mode_box = wx.BoxSizer(wx.HORIZONTAL)
+        mode_box.Add(self.SetMode0, flag=wx.ALIGN_CENTER)
+        mode_box.AddSpacer(10)
+        mode_box.Add(self.SetMode1, flag=wx.ALIGN_CENTER)
+        mode_box.AddSpacer(10)
+        mode_box.Add(self.SetMode2, flag=wx.ALIGN_CENTER)
 
-        sizer.Add(csv_box, 0, wx.ALL, 0)
-        sizer.Add(mode_box, 0, wx.ALL, 10)
+        sizer.Add(csv_box, 0, wx.ALL | wx.ALIGN_CENTRE_HORIZONTAL, 5)
+        sizer.Add(mode_box, 0, wx.ALL  | wx.ALIGN_CENTRE_HORIZONTAL, 5)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
@@ -206,9 +205,10 @@ class InputControlBox(wx.Panel):
         box = wx.StaticBox(self, wx.ID_ANY, "Static Control")
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 
-        self.SetX = wx.TextCtrl(self, wx.ID_ANY, "          ")
-        self.SetY = wx.TextCtrl(self, wx.ID_ANY, "          ")
-        self.SetZ = wx.TextCtrl(self, wx.ID_ANY, "          ")
+        self.SetX = wx.TextCtrl(self, wx.ID_ANY, size=(80, -1))
+        self.SetY = wx.TextCtrl(self, wx.ID_ANY, size=(80, -1))
+        self.SetZ = wx.TextCtrl(self, wx.ID_ANY, size=(80, -1))
+
 
         self.SetPointButton = wx.Button(self, wx.ID_ANY, "Set Setpoint")
         self.ToggleControllerButton = wx.Button(self, wx.ID_ANY, "Toggle Controller")
@@ -222,17 +222,17 @@ class InputControlBox(wx.Panel):
         button_sizer.Add(self.ToggleControllerButton, flag=wx.ALIGN_CENTER)
 
         set_value_box = wx.BoxSizer(wx.HORIZONTAL)
-        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "X:"), flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "X: "), flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.Add(self.SetX, flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.AddSpacer(12)
-        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "Y:"), flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "Y: "), flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.Add(self.SetY, flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.AddSpacer(12)
-        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "Z:"), flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "Z: "), flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.Add(self.SetZ, flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.AddSpacer(12)
 
-        sizer.Add(set_value_box, 0, wx.ALL, 5)
+        sizer.Add(set_value_box, 0, wx.ALIGN_CENTER, 5)
         sizer.AddSpacer(10)
         sizer.Add(button_sizer, 0, wx.ALIGN_CENTER)
 
@@ -271,8 +271,8 @@ class DebugConsoleBox(wx.Panel):
 
         self.Bind(wx.EVT_TEXT_ENTER, self.on_command_enter, self.DebugBox)
 
-        sizer.Add(self.DebugOutput, 0, wx.ALL, 10)
-        sizer.Add(self.DebugBox, 0, wx.ALL, 10)
+        sizer.Add(self.DebugOutput, 0, wx.ALL, 5)
+        sizer.Add(self.DebugBox, 0, wx.ALL, 5)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
@@ -350,15 +350,11 @@ class AxisControlBox(wx.Panel):
                        (self.mag_setpoint_label, 1, wx.ALIGN_RIGHT), (self.mag_setpoint_val),
                        (self.pwm_label, 1, wx.ALIGN_RIGHT), (self.pwm_val)])
 
-        box = wx.StaticBox(self, wx.ID_ANY, "")
+        box = wx.StaticBox(self, wx.ID_ANY, f"{axis.upper()}-Axis")
         box_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         box_sizer.Add(sizer, 1, wx.EXPAND | wx.ALL, 5)
 
-        label = wx.StaticText(self, wx.ID_ANY, f"{axis.upper()}-Axis")
-        label.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(label, 0, wx.ALIGN_LEFT)
         main_sizer.Add(box_sizer, 1, wx.EXPAND | wx.ALL, 5)
 
         self.SetSizer(main_sizer)
@@ -374,7 +370,7 @@ class AxisControlBox(wx.Panel):
         self.current_str = str(self.current)
         self.curr_val.SetValue(self.current_str)
 
-        self.mag_setpoint_label = round(sensor_data["mag_field_" + self.axis], 3)
+        self.mag_setpoint_label = round(pid.setpoint, 3)
         self.mag_setpoint_str = str(self.mag_setpoint_label)
         self.mag_setpoint_val.SetValue(self.mag_setpoint_str)
 
@@ -385,7 +381,7 @@ class AxisControlBox(wx.Panel):
 class GraphFrame(wx.Frame):
     """ The main frame of the application
     """
-    title = 'Helmholtz Cage'
+    title = 'Helmholtz Cage Control Panel'
 
     def __init__(self):
         wx.Frame.__init__(self, None, -1, self.title)
@@ -437,15 +433,16 @@ class GraphFrame(wx.Frame):
     def create_main_panel(self):
         self.panel = wx.Panel(self)
 
+
         self.init_plot()
         self.canvas = FigCanvas(self.panel, -1, self.fig)
 
-        self.mode_control = ModeControlBox(self.panel, -1, "DYNAMIC CONTROL", 0)
+        self.mode_control = ModeControlBox(self.panel, -1, "Dynamic Control", 0)
         self.x_axis_control = AxisControlBox(self.panel, -1, 50, "x")
         self.y_axis_control = AxisControlBox(self.panel, -1, 75, "y")
         self.z_axis_control = AxisControlBox(self.panel, -1, 100, "z")
-        self.static_control = InputControlBox(self.panel, -1, "STATIC CONTROL", 125)
-        self.debug_console = DebugConsoleBox(self.panel, -1, "CONSOLE", 150)
+        self.static_control = InputControlBox(self.panel, -1, "Static Control", 125)
+        self.debug_console = DebugConsoleBox(self.panel, -1, "Console", 150)
 
         self.pause_button = wx.Button(self.panel, -1, "Pause")
         self.Bind(wx.EVT_BUTTON, self.on_pause_button, self.pause_button)
@@ -464,72 +461,74 @@ class GraphFrame(wx.Frame):
         # self.cb_xlab.SetValue(True)
 
         self.cb_xline = wx.RadioButton(self.panel, -1,
-            "Show X axis field",
+            "Show X-axis",
             style=wx.ALIGN_RIGHT)
         self.Bind(wx.EVT_BUTTON, self.show_x_plot, self.cb_xline)
         self.cb_xline.SetValue(True)
         self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_xline)
 
         self.cb_yline = wx.RadioButton(self.panel, -1,
-            "Show Y axis field",
+            "Show Y-axis",
             style=wx.ALIGN_RIGHT)
         self.Bind(wx.EVT_BUTTON, self.show_y_plot, self.cb_yline)
         self.cb_yline.SetValue(False)
         self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_yline)
 
         self.cb_zline = wx.RadioButton(self.panel, -1,
-            "Show Z axis field",
+            "Show Z-axis",
             style=wx.ALIGN_RIGHT)
         self.Bind(wx.EVT_UPDATE_UI, self.show_z_plot, self.cb_zline)
         self.cb_yline.SetValue(False)
         self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_zline)
 
-        self.update_button = wx.Button(self.panel, -1, "Update")
+        # self.update_button = wx.Button(self.panel, -1, "Update")
         #self.Bind(wx.EVT_BUTTON, self.on_update_button, self.update_button)
         #self.Bind(wx.EVT_UPDATE_UI, self.on_update_pause_button, self.update_button)
 
        # self.DebugBox = wx.TextCtrl(self.panel, enum['DebugBoxID'])
 
         self.hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.hbox1.Add(self.pause_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+        self.hbox1.Add(self.pause_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(20)
-        self.hbox1.Add(self.cb_xline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+        self.hbox1.Add(self.cb_xline, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(10)
-        self.hbox1.Add(self.cb_yline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+        self.hbox1.Add(self.cb_yline, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(10)
-        self.hbox1.Add(self.cb_zline, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-        self.hbox1.AddSpacer(10)
-        self.hbox1.Add(self.update_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+        self.hbox1.Add(self.cb_zline, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
+        # self.hbox1.AddSpacer(10)
+        # self.hbox1.Add(self.update_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
 
         self.hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        self.hbox2.Add(self.mode_control, border=5, flag=wx.ALL)
+        self.hbox2.AddSpacer(40)
+
+        self.hbox2.Add(self.mode_control, proportion=1, border=5, flag=wx.ALL | wx.EXPAND)
         #self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
-        self.hbox2.Add(self.static_control, border=5,flag=wx.ALL | wx.GROW)
-        self.hbox2.AddSpacer(24)
+        self.hbox2.Add(self.static_control, proportion=1, border=5,flag=wx.ALL | wx.EXPAND)
+        self.hbox2.AddSpacer(40)
         #self.hbox2.Add(self.debug_console, border=5, flag=wx.ALL | wx.GROW)
 
         self.axis_control_vbox = wx.BoxSizer(wx.VERTICAL)
-        self.axis_control_vbox.Add(self.x_axis_control, border=5, flag=wx.ALL)
-        self.axis_control_vbox.Add(self.y_axis_control, border=5, flag=wx.ALL)
-        self.axis_control_vbox.Add(self.z_axis_control, border=5, flag=wx.ALL)
+        self.axis_control_vbox.Add(self.x_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
+        self.axis_control_vbox.Add(self.y_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
+        self.axis_control_vbox.Add(self.z_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
 
 
         #self.axis_control_vbox.AddSpacer(24)
 
         self.graph_control_vbox =  wx.BoxSizer(wx.VERTICAL)
-        self.graph_control_vbox.Add(self.canvas, 1, flag=wx.TOP | wx.TOP | wx.GROW)
-        self.graph_control_vbox.Add(self.hbox1, border=5, flag=wx.ALL)
-        self.graph_control_vbox.Add(self.hbox2, border=5, flag=wx.ALL)
+        self.graph_control_vbox.Add(self.canvas, 1, flag=wx.TOP | wx.EXPAND)
+        self.graph_control_vbox.Add(self.hbox1, border=1, flag=wx.EXPAND)
+        self.graph_control_vbox.Add(self.hbox2, border=1, flag=wx.EXPAND)
 
         self.console_vbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.console_vbox.Add(self.debug_console, border=10, flag=wx.ALL | wx.GROW)
-        self.graph_control_vbox.Add(self.console_vbox, border=5, flag=wx.ALL)
+        self.console_vbox.Add(self.debug_console, border=5, flag=wx.ALL | wx.EXPAND)
+        self.graph_control_vbox.Add(self.console_vbox, border=5, flag=wx.ALL | wx.EXPAND)
 
         self.vbox = wx.BoxSizer(wx.HORIZONTAL)
 
 
-        self.vbox.Add(self.axis_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
-        self.vbox.Add(self.graph_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
+        self.vbox.Add(self.axis_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP | wx.EXPAND)
+        self.vbox.Add(self.graph_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP | wx.EXPAND)
 
 
         #testing obj methods from outside
@@ -547,6 +546,7 @@ class GraphFrame(wx.Frame):
 
         self.panel.SetSizer(self.vbox)
         self.vbox.Fit(self)
+        self.vbox.SetSizeHints(self)
 
     def create_status_bar(self):
         self.statusbar = self.CreateStatusBar()
@@ -560,7 +560,9 @@ class GraphFrame(wx.Frame):
 
         self.axes = self.fig.add_subplot(111)
         self.axes.set_facecolor(COLOR_NAME)
-        self.axes.set_title('Magnetometer', size=12)
+        self.axes.set_title('Magnetic Field', size=12)
+        self.axes.set_xlabel('Time (s)', size=8)
+        self.axes.set_ylabel('Magnetic Field Strength (Gauss)', size=8)
 
         pylab.setp(self.axes.get_xticklabels(), fontsize=8)
         pylab.setp(self.axes.get_yticklabels(), fontsize=8)
@@ -666,7 +668,7 @@ class GraphFrame(wx.Frame):
             label = "y axis"
         else:
             label = "z axis"
-        self.update_button.SetLabel(label)
+        #self.update_button.SetLabel(label)
         self.draw_plot()
 
     def show_x_plot(self, event):
@@ -743,7 +745,7 @@ class GraphFrame(wx.Frame):
         logger.info("Exiting GUI")
         arduino.set_coil_current(0)
         logger.info("Turned off all coils")
-        # TODO: add logic to stop threads before closing serial connection
+        # TODO: add logic to stop threads before closing serial connection23
         #arduino.ser.close()
         logger.info("Closed Arduino connection")
 

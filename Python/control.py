@@ -4,17 +4,17 @@ from logger import logger
 from time import sleep
 
 class PID_controller:
-    def __init__(self, axis, setpoint, process_var,time_interval, Kp, Kd, Ki):
+    def __init__(self, axis, setpoint, Kp, Ki, Kd):
         self.axis = axis
         self.setpoint = setpoint
         self.process_var = sensor_data["mag_field_x"]
-        self.time_interval = sensor_data["time_interval"] #in seconds
+        self.time_interval = sensor_data["time_interval"] # in seconds
         self.Kp = Kp
         self.Kd = Kd
         self.Ki = Ki
         self.err_integ = 0
         self.prev_err = 0
-        self.enable = 1
+        self.enable = False
 
     def update_values(self, process_var,time_interval):
         self.process_var = process_var
@@ -22,7 +22,7 @@ class PID_controller:
 
     def set_setpoint(self, setpoint):
         self.setpoint = setpoint
-        logger.info(f"Setpoint for {self.axis} updated to {setpoint}")
+        logger.info(f"Updated setpoint for {self.axis}-axis  to {setpoint} Gauss")
         self.err_integ = 0 # need to reset these for next value I think
         self.prev_err = 0
 
@@ -37,6 +37,9 @@ class PID_controller:
         if self.enable:
             logger.info(f"PID Controller for {self.axis} enabled")
         else:
+            # Reset pwm to 0
+            arduino.set_coil_current(0)
+            sensor_data[f'pwm_{self.axis}'] = 0
             logger.info(f"PID Controller for {self.axis} disabled")
 
     def proportional(self,setpoint,process_var):
@@ -45,7 +48,8 @@ class PID_controller:
 
     def differential(self, setpoint,process_var,time_interval):
         err = setpoint - process_var
-        err_diff = self.Kd*(self.prev_err - err)/time_interval
+        #err_diff = self.Kd*(self.prev_err - err)/time_interval
+        err_diff = self.Kd*(err - self.prev_err)/time_interval
         self.prev_err = err
         return err_diff
 
@@ -66,16 +70,11 @@ class PID_controller:
     def run_PID(self):
         while (True):
             self.update_values(sensor_data["mag_field_x"],sensor_data["time_interval"])
-            print("Current Mag Field: ", self.process_var)
-            print("Current PWM: ", sensor_data[f'pwm_{self.axis}'])
-            print("Setpoint: ", self.setpoint)
             new_val = self.get_PID()
-            print("New Value: ", new_val)
-            # Ensure that the PWM value is between -255 and 255 (also multiplied by -1 to match the direction of the current)
             if self.enable:
-                sensor_data[f'pwm_{self.axis}'] = (sensor_data[f'pwm_{self.axis}'] + (int(255*new_val)*-1))
-                print("PWM Value: ", sensor_data[f'pwm_{self.axis}'])
-                arduino.set_coil_current((sensor_data[f'pwm_{self.axis}'] + int(255*new_val)))
+                new_pwm_val = sensor_data[f'pwm_{self.axis}'] + (-1 * int(100*new_val))
+                sensor_data[f'pwm_{self.axis}'] = max(-100, min(100, new_pwm_val))
+                arduino.set_coil_current(sensor_data[f'pwm_{self.axis}'])
                 sleep(0.1)
             else:
                 sleep(0.5) # sleep for 0.5 seconds if PID is disabled
@@ -83,5 +82,5 @@ class PID_controller:
 
 
 
-pid = PID_controller("x",-0.2,0,0,0.1,0,0)
+pid = PID_controller("x",0,0.05,0,0)
 

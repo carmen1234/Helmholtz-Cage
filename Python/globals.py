@@ -6,8 +6,8 @@ from enum import Enum
 # Config
 port = "/dev/cu.usbmodem101"
 debug = 0
-graph_y_max = -0.5
-graph_y_min = 0
+graph_y_max = 1
+graph_y_min = -1
 
 
 # Data
