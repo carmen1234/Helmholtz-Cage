@@ -89,11 +89,14 @@ class MegaController:
         self.pid_x = PID_controller("x",0,0.05,0,0) #todo: change pid to pid_x
         self.pid_y = PID_controller("y",0,0.05,0,0)
         self.pid_z = PID_controller("z",0,0.05,0,0)
+        self.setpoints = {"x_setpoint": 0.0,
+                          "y_setpoint": 0.0,
+                          "z_setpoint": 0.0}
         self.sim_on = 0  # sim refers to dynamic mode 
         self.sim_data = []
         self.sim_step = 0 # basically which row its on, needed for pausing,restarting
         self.sim_step_len = 0 #number of simulation steps (rows in csv file)
-        self.enabl_pid = False
+        self.enable_pid = False
     
     def get_sim(self, path):
         reader = read_csv_into_dict(path)
@@ -121,7 +124,14 @@ class MegaController:
             arduino.set_coil_current(0)
             sensor_data[f'pwm_{self.axis}'] = 0
             logger.info(f"PID Controller for {self.axis} disabled")
-        
+
+    def update_setpoint_data(self, setpoint_x, setpoint_y, setpoint_z):
+       self.setpoints["x_setpoint"] = setpoint_x
+       self.setpoints["y_setpoint"] = setpoint_y
+       self.setpoints["z_setpoint"] = setpoint_z
+       self.pid_x.set_setpoint(setpoint_x)
+       self.pid_y.set_setpoint(setpoint_y)
+       self.pid_z.set_setpoint(setpoint_z) 
 
     def run_sim(self): #i think this will still need to be its own thread
         if self.sim_on == 0:
@@ -130,9 +140,10 @@ class MegaController:
             #time difference stuff will be done later cuz its giving me a headache
             current_step = self.sim_data[self.sim_step] #current dict that has data
             
-            self.pid_x.set_setpoint(float(current_step["Bx(G)"]))
-            self.pid_y.set_setpoint(float(current_step["By(G)"]))
-            self.pid_z.set_setpoint(float(current_step["Bz(G)"]))
+            # self.pid_x.set_setpoint(float(current_step["Bx(G)"]))
+            # self.pid_y.set_setpoint(float(current_step["By(G)"]))
+            # self.pid_z.set_setpoint(float(current_step["Bz(G)"]))
+            self.update_setpoint_data(float(current_step["Bx(G)"]), float(current_step["By(G)"]), float(current_step["Bz(G)"]))
 
             #have it sleep until next step, but check if it is last step
             if self.sim_step == (self.sim_step_len - 1):
@@ -150,7 +161,7 @@ class MegaController:
             new_val_y = self.pid_y.get_PID()
             self.pid_z.update_values(sensor_data["mag_field_z"],sensor_data["time_interval"])
             new_val_z = self.pid_z.get_PID()
-            if self.enable_pid:
+            if self.enable_pid == True:
                 new_pwm_val_x = sensor_data[f'pwm_{self.pid_x.axis}'] + (-1 * int(100*new_val_x))
                 new_pwm_val_y = sensor_data[f'pwm_{self.pid_y.axis}'] + (-1 * int(100*new_val_y))
                 new_pwm_val_z = sensor_data[f'pwm_{self.pid_z.axis}'] + (-1 * int(100*new_val_z))
@@ -165,6 +176,7 @@ class MegaController:
                 sleep(0.5) # sleep for 0.5 seconds if PID is disabled
                 # TODO: change this so thread sleeps when controller is off
 
+main_controller = MegaController()
 
 pid = PID_controller("x",0,0.05,0,0) #todo: delete later
 pid_y = PID_controller("y",0,0.05,0,0)

@@ -2,8 +2,9 @@ import threading
 import wx
 
 from arduino import arduino
-from control import pid
+from control import pid, main_controller
 from logger import logger
+from dynamic_sim import dyna_sim
 
 from gui import GraphFrame
 
@@ -12,8 +13,12 @@ if __name__ == "__main__":
     sensor_thread = threading.Thread(target=arduino.update_arduino_data, daemon=True)
     sensor_thread.start()
 
-    controller_thread = threading.Thread(target=pid.run_PID, daemon=True)
+    controller_thread = threading.Thread(target=main_controller.run_pid_xyz, daemon=True)
     controller_thread.start()
+
+    dynamic_sim_thread = threading.Thread(target=main_controller.run_sim, daemon=True)
+    dynamic_sim_thread.start()
+
 
     # while True:
     #     # Read and print current/field values
