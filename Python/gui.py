@@ -20,7 +20,7 @@ import threading
 
 from globals import sensor_data, graph_y_max, graph_y_min, avg_data
 from arduino import arduino
-from control import pid
+from control import pid, main_controller
 from logger import logger, log_stream
 from dynamic_sim import dyna_sim
 
@@ -253,19 +253,22 @@ class InputControlBox(wx.Panel):
         sizer.Fit(self)
 
     def on_toggle_controller(self, event):
-        pid.toggle_PID()
+        main_controller.toggle_PID()
 
     def on_set_setpoint(self, event):
-        inputX_mag = self.SetX.GetValue()
-        inputY_mag = self.SetY.GetValue()
-        inputZ_mag = self.SetZ.GetValue()
-
-        if not (float(inputX_mag) <= 1.0 and float(inputX_mag) >= -1.0):
-            logger.error("Invalid input range for X-axis setpoint")
+        if main_controller.sim_on == 1:
+            logger.error("Cannot use static control during simulation")
         else:
-            pid.set_setpoint(float(inputX_mag))
+            inputX_mag = self.SetX.GetValue()
+            inputY_mag = self.SetY.GetValue()
+            inputZ_mag = self.SetZ.GetValue()
 
-        # TODO: add for Y and Z axis
+            if not (float(inputX_mag) <= 1.0 and float(inputX_mag) >= -1.0):
+                logger.error("Invalid input range for X-axis setpoint")
+            else:
+                main_controller.pid_x.set_setpoint(float(inputX_mag))
+
+            # TODO: add for Y and Z axis
 
 class DebugConsoleBox(wx.Panel):
     """ A static box with a debug console.
@@ -312,7 +315,7 @@ class DebugConsoleBox(wx.Panel):
         elif command_terms[0] == "clear": # clear debug output box
             self.DebugOutput.Clear()
         elif command_terms[0] == "tune_pid": # set kp,ki,kd vals, atm only does single coil pair
-            pid.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
+            main_controller.pid_x.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
         elif command_terms[0] == "set_pwm": # also calls set coil current, will only check
             # TODO: add axis argument
             pwm_val = int(command_terms[1])
@@ -350,6 +353,7 @@ class AxisControlBox(wx.Panel):
         self.value = initval
         self.axis = axis
 
+        #mostly sensor stuff
         self.mag_label = wx.StaticText(self, enum['ID_MagXRead'], "M. Field Strength: ")
         self.mag_val = wx.TextCtrl(self, enum['ID_MagXInput'], "          ", style=wx.TE_READONLY)
 
@@ -365,6 +369,22 @@ class AxisControlBox(wx.Panel):
         self.pwm_label = wx.StaticText(self, wx.ID_ANY, "PWM Value: ")
         self.pwm_val = wx.TextCtrl(self, wx.ID_ANY, "          ", style=wx.TE_READONLY)
 
+
+        #pid control info
+        # self.Kp_label = wx.StaticText(self, wx.ID_ANY, "Kp: ")
+        # self.Kp_val = wx.TextCtrl(self, wx.ID_ANY, "   ", style=wx.TE_READONLY)
+
+        # self.Ki_label = wx.StaticText(self, wx.ID_ANY, "Ki: ")
+        # self.Ki_val = wx.TextCtrl(self, wx.ID_ANY, "   ", style=wx.TE_READONLY)
+
+        # self.Kd_label = wx.StaticText(self, wx.ID_ANY, "Kd: ")
+        # self.Kd_val = wx.TextCtrl(self, wx.ID_ANY, "   ", size=wx.Size(10,20), style=wx.TE_READONLY)
+
+        # pid_sizer = wx.FlexGridSizer(1, 6, 2, 2)
+        # pid_sizer.AddMany([(self.Kp_label, 1, wx.ALIGN_CENTER_HORIZONTAL), (self.Kp_val),
+        #                    (self.Ki_label, 1, wx.ALIGN_CENTER_HORIZONTAL), (self.Ki_val),
+        #                    (self.Kd_label, 1, wx.ALIGN_RIGHT), (self.Kd_val)])
+
         sizer = wx.FlexGridSizer(5, 2, 2, 2)
         sizer.AddMany([(self.mag_label, 1, wx.ALIGN_RIGHT), (self.mag_val),
                        (self.curr_label, 1, wx.ALIGN_RIGHT), (self.curr_val),
@@ -375,9 +395,10 @@ class AxisControlBox(wx.Panel):
         box = wx.StaticBox(self, wx.ID_ANY, f"{axis.upper()}-Axis")
         box_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         box_sizer.Add(sizer, 1, wx.EXPAND | wx.ALL, 5)
+        #box_sizer.Add(pid_sizer, 1, wx.EXPAND | wx.ALL, 1)
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(box_sizer, 1, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(box_sizer, 1, wx.EXPAND | wx.ALL)
 
         self.SetSizer(main_sizer)
 
@@ -396,7 +417,7 @@ class AxisControlBox(wx.Panel):
         self.avg_mag_field_str = str(self.avg_mag_field)
         self.avg_mag_val.SetValue(self.avg_mag_field_str)
 
-        self.mag_setpoint_label = round(pid.setpoint, 3)
+        self.mag_setpoint_label = round(main_controller.setpoints[self.axis + "_setpoint"], 3)
         self.mag_setpoint_str = str(self.mag_setpoint_label)
         self.mag_setpoint_val.SetValue(self.mag_setpoint_str)
 
