@@ -22,7 +22,6 @@ from globals import sensor_data, graph_y_max, graph_y_min, avg_data
 from arduino import arduino
 from control import pid, main_controller
 from logger import logger, log_stream
-from dynamic_sim import dyna_sim
 
 import matplotlib
 matplotlib.use('WXAgg')
@@ -184,10 +183,10 @@ class ModeControlBox(wx.Panel):
 
     def on_mode_0(self):
         #check if sim is actually loaded
-        if dyna_sim.sim_data == []:
+        if main_controller.sim_data == []:
             pass #error msg
         else:
-            dyna_sim.turn_on_sim()
+            main_controller.turn_on_sim()
 
     def on_mode_1(self):
        #effectively pause sim
@@ -201,7 +200,7 @@ class ModeControlBox(wx.Panel):
 
     def on_import_csv(self):
         input_path = self.CSVPathBox.GetValue()
-        fileStatus = dyna_sim.get_sim(input_path)
+        fileStatus = main_controller.get_sim(input_path)
         if fileStatus == None:
             pass #error stuff, I think I need logging to print to debug console?
         else:
@@ -797,5 +796,6 @@ class GraphFrame(wx.Frame):
         logger.info("Closed Arduino connection")
 
         event.Skip() # Allow the window to close
+        # self.redraw_timer.Stop()
+        # self.Destroy()
 
-        #self.Destroy() # on winows this male it close on the second click
