@@ -499,7 +499,10 @@ class GraphFrame(wx.Frame):
         self.panel = wx.Panel(self)
 
         self.init_plot()
-        self.canvas = FigCanvas(self.panel, -1, self.fig)
+        #self.canvas = FigCanvas(self.panel, -1, self.fig)
+        self.canvas1 = FigCanvas(self.panel, -1, self.fig)
+        self.canvas2 = FigCanvas(self.panel, -1, self.fig2)
+        self.canvas3 = FigCanvas(self.panel, -1, self.fig3)
 
         self.mode_control = ModeControlBox(self.panel, -1, "DYNAMIC CONTROL", 0)
         self.x_axis_control = AxisControlBox(self.panel, -1, "X AXIS", 50, 1)
@@ -578,7 +581,15 @@ class GraphFrame(wx.Frame):
         #self.axis_control_vbox.AddSpacer(24)
 
         self.graph_control_vbox =  wx.BoxSizer(wx.VERTICAL)
-        self.graph_control_vbox.Add(self.canvas, 1, flag=wx.TOP | wx.TOP | wx.GROW)
+
+        self.graph_test_vbox =  wx.BoxSizer(wx.HORIZONTAL)
+        self.graph_test_vbox.Add(self.canvas1, 1, flag=wx.TOP | wx.RIGHT)
+        self.graph_test_vbox.Add(self.canvas2, 1, flag=wx.RIGHT)
+        self.graph_test_vbox.Add(self.canvas3, 1, flag=wx.RIGHT)
+        #self.vbox.Add(self.graph_test_vbox, 0, flag=wx.TOP | wx.RIGHT | wx.GROW)
+        #self.graph_control_vbox.Add(self.canvas, 1, flag=wx.TOP | wx.TOP | wx.GROW)
+        self.graph_control_vbox.Add(self.graph_test_vbox, 1, flag=wx.TOP | wx.TOP | wx.GROW)
+
         self.graph_control_vbox.Add(self.hbox1, border=5, flag=wx.ALL)
         self.graph_control_vbox.Add(self.hbox2, border=5, flag=wx.ALL)
 
@@ -588,6 +599,13 @@ class GraphFrame(wx.Frame):
 
         self.vbox = wx.BoxSizer(wx.HORIZONTAL)
 
+        # self.graph_test_vbox =  wx.BoxSizer(wx.HORIZONTAL)
+        # self.graph_test_vbox.Add(self.canvas1, 1, flag=wx.TOP | wx.RIGHT)
+        # self.graph_test_vbox.Add(self.canvas2, 1, flag=wx.RIGHT)
+        # self.graph_test_vbox.Add(self.canvas3, 1, flag=wx.RIGHT)
+        # self.vbox.Add(self.graph_test_vbox, 0, flag=wx.TOP | wx.RIGHT | wx.GROW)
+
+        
        
         self.vbox.Add(self.axis_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
         self.vbox.Add(self.graph_control_vbox, 0, flag=wx.ALIGN_TOP | wx.TOP)
@@ -598,8 +616,6 @@ class GraphFrame(wx.Frame):
 
 
 
-        #self.vbox.Add(self.hbox2, 0, flag=wx.ALIGN_TOP | wx.TOP)
-        #self.vbox.Add(self.canvas, 1, flag=wx.TOP | wx.TOP | wx.GROW)
 
         self.vbox2 =  wx.BoxSizer(wx.VERTICAL)
 
@@ -618,39 +634,86 @@ class GraphFrame(wx.Frame):
         """
         self.dpi = 100
         self.fig = Figure((3.0, 3.0), dpi=self.dpi)
+        self.fig2 = Figure((3.0, 3.0), dpi=self.dpi)
+        self.fig3 = Figure((3.0, 3.0), dpi=self.dpi)
 
         self.axes = self.fig.add_subplot(111)
         self.axes.set_facecolor(COLOR_NAME)
         self.axes.set_title('Magnetometer', size=12)
 
+        self.axes2 = self.fig2.add_subplot(111)
+        self.axes2.set_facecolor(COLOR_NAME)
+        self.axes2.set_title('Magnetometer2', size=12)
+
+        self.axes3 = self.fig3.add_subplot(111)
+        self.axes3.set_facecolor(COLOR_NAME)
+        self.axes3.set_title('Magnetometer3', size=12)
+
         pylab.setp(self.axes.get_xticklabels(), fontsize=8)
         pylab.setp(self.axes.get_yticklabels(), fontsize=8)
 
+        pylab.setp(self.axes2.get_xticklabels(), fontsize=8)
+        pylab.setp(self.axes2.get_yticklabels(), fontsize=8)
+
+        pylab.setp(self.axes3.get_xticklabels(), fontsize=8)
+        pylab.setp(self.axes3.get_yticklabels(), fontsize=8)
         # plot the data as a line series, and save the reference
         # to the plotted line series
         #
 
+        self.plot_data_x = self.axes.plot(
+        self.dataX,
+        linewidth=2,
+        color=(1, 0, 1),
+        )[0]
+
+        self.plot_data_y = self.axes2.plot(
+        self.dataY,
+        linewidth=1,
+        color=(0, 1, 1),
+        )[0]
+
+        self.plot_data_z = self.axes3.plot(
+        self.dataZ,
+        linewidth=1,
+        color=(1, 0, 1),
+        )[0]
         #x-axis
-        if (axis_int == 0):
-            self.plot_data = self.axes.plot(
-            self.dataX,
-            linewidth=2,
-            color=(1, 0, 1),
-            )[0]
-        #y-axis
-        elif (axis_int == 1):
-            self.plot_data = self.axes.plot(
-            self.dataY,
-            linewidth=1,
-            color=(0, 1, 1),
-            )[0]
-        #z-axis
-        else:
-            self.plot_data = self.axes.plot(
-            self.dataZ,
-            linewidth=1,
-            color=(1, 0, 1),
-            )[0]
+        # if (axis_int == 0):
+        #     self.plot_data = self.axes.plot(
+        #     self.dataX,
+        #     linewidth=2,
+        #     color=(1, 0, 1),
+        #     )[0]
+        #     self.plot_data = self.axes2.plot(
+        #     self.dataX,
+        #     linewidth=2,
+        #     color=(1, 0, 1),
+        #     )[0]
+        # #y-axis
+        # elif (axis_int == 1):
+        #     self.plot_data = self.axes.plot(
+        #     self.dataY,
+        #     linewidth=1,
+        #     color=(0, 1, 1),
+        #     )[0]
+        #     self.plot_data = self.axes2.plot(
+        #     self.dataY,
+        #     linewidth=1,
+        #     color=(0, 1, 1),
+        #     )[0] 
+        # #z-axis
+        # else:
+        #     self.plot_data = self.axes.plot(
+        #     self.dataZ,
+        #     linewidth=1,
+        #     color=(1, 0, 1),
+        #     )[0]
+        #     self.plot_data = self.axes2.plot(
+        #     self.dataZ,
+        #     linewidth=1,
+        #     color=(1, 0, 1),
+        #     )[0]
         
     def draw_plot(self):
         """ Redraws the plot
@@ -701,6 +764,16 @@ class GraphFrame(wx.Frame):
 
         self.axes.grid(True, color='gray')
 
+        self.axes2.set_xbound(lower=xmin, upper=xmax)
+        self.axes2.set_ybound(lower=-10000, upper=10000)
+
+        self.axes2.grid(True, color='gray')
+
+        self.axes3.set_xbound(lower=xmin, upper=xmax)
+        self.axes3.set_ybound(lower=-10000, upper=10000)
+
+        self.axes3.grid(True, color='gray')
+
         # Using setp here is convenient, because get_xticklabels
         # returns a list over which one needs to explicitly
         # iterate, and setp already handles this.
@@ -708,10 +781,25 @@ class GraphFrame(wx.Frame):
         pylab.setp(self.axes.get_xticklabels(),
             visible=True)
 
-        self.plot_data.set_xdata(np.arange(len(self.data)))
-        self.plot_data.set_ydata(np.array(self.data))
+        pylab.setp(self.axes2.get_xticklabels(),
+            visible=True)
 
-        self.canvas.draw()
+        pylab.setp(self.axes3.get_xticklabels(),
+            visible=True)
+
+        self.plot_data_x.set_xdata(np.arange(len(self.data)))
+        self.plot_data_x.set_ydata(np.array(self.data))
+
+        self.plot_data_y.set_xdata(np.arange(len(self.data)))
+        self.plot_data_y.set_ydata(np.array(self.data))
+
+        self.plot_data_z.set_xdata(np.arange(len(self.data)))
+        self.plot_data_z.set_ydata(np.array(self.data))
+
+        #self.canvas.draw()
+        self.canvas1.draw()
+        self.canvas2.draw()
+        self.canvas3.draw()
 
     def on_pause_button(self, event):
         """ Pauses the graphing
@@ -763,7 +851,10 @@ class GraphFrame(wx.Frame):
 
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            self.canvas.print_figure(path, dpi=self.dpi)
+            #self.canvas.print_figure(path, dpi=self.dpi)
+            self.canvas1.print_figure(path, dpi=self.dpi)
+            self.canvas2.print_figure(path, dpi=self.dpi)
+            self.canvas3.print_figure(path, dpi=self.dpi)
             #self.flash_status_message("Saved to %s" % path)
 
     def on_redraw_timer(self, event):
