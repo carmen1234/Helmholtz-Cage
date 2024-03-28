@@ -639,15 +639,15 @@ class GraphFrame(wx.Frame):
 
         self.axes = self.fig.add_subplot(111)
         self.axes.set_facecolor(COLOR_NAME)
-        self.axes.set_title('Magnetometer', size=12)
+        self.axes.set_title('Magnetometer: X', size=12)
 
         self.axes2 = self.fig2.add_subplot(111)
         self.axes2.set_facecolor(COLOR_NAME)
-        self.axes2.set_title('Magnetometer2', size=12)
+        self.axes2.set_title('Magnetometer: Y', size=12)
 
         self.axes3 = self.fig3.add_subplot(111)
         self.axes3.set_facecolor(COLOR_NAME)
-        self.axes3.set_title('Magnetometer3', size=12)
+        self.axes3.set_title('Magnetometer: Z', size=12)
 
         pylab.setp(self.axes.get_xticklabels(), fontsize=8)
         pylab.setp(self.axes.get_yticklabels(), fontsize=8)
@@ -676,7 +676,7 @@ class GraphFrame(wx.Frame):
         self.plot_data_z = self.axes3.plot(
         self.dataZ,
         linewidth=1,
-        color=(1, 0, 1),
+        color=(1, 1, 0),
         )[0]
         #x-axis
         # if (axis_int == 0):
