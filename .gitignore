@@ -1,0 +1,13 @@
+# Python specific
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+*.log
+
+# CSV files
+*.csv
+
+# Visual Studio Code
+.vscode/
