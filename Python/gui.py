@@ -509,26 +509,26 @@ class GraphFrame(wx.Frame):
         # self.Bind(wx.EVT_CHECKBOX, self.on_cb_xlab, self.cb_xlab)
         # self.cb_xlab.SetValue(True)
 
-        self.cb_xline = wx.RadioButton(self.panel, -1,
-            "Show X-axis",
-            style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_BUTTON, self.show_x_plot, self.cb_xline)
-        self.cb_xline.SetValue(True)
-        self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_xline)
+        # self.cb_xline = wx.RadioButton(self.panel, -1,
+        #     "Show X-axis",
+        #     style=wx.ALIGN_RIGHT)
+        # self.Bind(wx.EVT_BUTTON, self.show_x_plot, self.cb_xline)
+        # self.cb_xline.SetValue(True)
+        # self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_xline)
 
-        self.cb_yline = wx.RadioButton(self.panel, -1,
-            "Show Y-axis",
-            style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_BUTTON, self.show_y_plot, self.cb_yline)
-        self.cb_yline.SetValue(False)
-        self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_yline)
+        # self.cb_yline = wx.RadioButton(self.panel, -1,
+        #     "Show Y-axis",
+        #     style=wx.ALIGN_RIGHT)
+        # self.Bind(wx.EVT_BUTTON, self.show_y_plot, self.cb_yline)
+        # self.cb_yline.SetValue(False)
+        # self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_yline)
 
-        self.cb_zline = wx.RadioButton(self.panel, -1,
-            "Show Z-axis",
-            style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_UPDATE_UI, self.show_z_plot, self.cb_zline)
-        self.cb_yline.SetValue(False)
-        self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_zline)
+        # self.cb_zline = wx.RadioButton(self.panel, -1,
+        #     "Show Z-axis",
+        #     style=wx.ALIGN_RIGHT)
+        # self.Bind(wx.EVT_UPDATE_UI, self.show_z_plot, self.cb_zline)
+        # self.cb_yline.SetValue(False)
+        # self.Bind(wx.EVT_UPDATE_UI, self.on_update_line_value, self.cb_zline)
 
         # self.update_button = wx.Button(self.panel, -1, "Update")
         #self.Bind(wx.EVT_BUTTON, self.on_update_button, self.update_button)
@@ -536,14 +536,14 @@ class GraphFrame(wx.Frame):
 
        # self.DebugBox = wx.TextCtrl(self.panel, enum['DebugBoxID'])
 
-        self.hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.hbox1.Add(self.pause_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
-        self.hbox1.AddSpacer(20)
-        self.hbox1.Add(self.cb_xline, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
-        self.hbox1.AddSpacer(10)
-        self.hbox1.Add(self.cb_yline, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
-        self.hbox1.AddSpacer(10)
-        self.hbox1.Add(self.cb_zline, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
+        # self.hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        # self.hbox1.Add(self.pause_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
+        # self.hbox1.AddSpacer(20)
+        # self.hbox1.Add(self.cb_xline, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
+        # self.hbox1.AddSpacer(10)
+        # self.hbox1.Add(self.cb_yline, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
+        # self.hbox1.AddSpacer(10)
+        # self.hbox1.Add(self.cb_zline, border=5, flag=wx.ALL | wx.ALIGN_CENTER)
         # self.hbox1.AddSpacer(10)
         # self.hbox1.Add(self.update_button, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
 
@@ -575,7 +575,7 @@ class GraphFrame(wx.Frame):
         #self.graph_control_vbox.Add(self.canvas, 1, flag=wx.TOP | wx.TOP | wx.GROW)
         self.graph_control_vbox.Add(self.graph_test_vbox, 1, flag=wx.TOP | wx.TOP | wx.GROW)
 
-        self.graph_control_vbox.Add(self.hbox1, border=1, flag=wx.EXPAND)
+        #self.graph_control_vbox.Add(self.hbox1, border=1, flag=wx.EXPAND)
         self.graph_control_vbox.Add(self.hbox2, border=1, flag=wx.EXPAND)
 
         self.console_vbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -854,7 +854,6 @@ class GraphFrame(wx.Frame):
         #
         if not self.paused:
             self.update_sensor_data(event)
-<<<<<<< HEAD
 
             self.testingX = sensor_data["mag_field_x"]
             self.dataX.append(self.datagenX.next(self.testingX))
@@ -888,15 +887,15 @@ class GraphFrame(wx.Frame):
         """
         self.testing = 0
 
-        if (self.cb_xline.GetValue()):
-           self.testing = -0.1
+       # if (self.cb_xline.GetValue()):
+        self.testing = -0.1
            #self.testing = sensor_data["mag_field_x"]
 
-        elif (self.cb_yline.GetValue()):
-            self.testing = 2.2
+        #elif (self.cb_yline.GetValue()):
+        self.testing = 2.2
             #self.testing = sensor_data["mag_field_y"]
-        else:
-            self.testing = 3.5
+        #else:
+        self.testing = 3.5
             #self.testing = sensor_data["mag_field_z"]
 
     def on_exit(self, event):
