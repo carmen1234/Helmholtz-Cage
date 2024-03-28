@@ -729,24 +729,30 @@ class GraphFrame(wx.Frame):
         self.y_axis_control.update_current(2)
         self.z_axis_control.update_current(3)
 
-        if (self.cb_xline.GetValue()):
-            self.data = self.dataX
-            axis_int = 0
+        # if (self.cb_xline.GetValue()):
+        #     self.data = self.dataX
+        #     axis_int = 0
 
-        elif (self.cb_yline.GetValue()):
-            self.data = self.dataY
-            axis_int = 1
-        else:
-            self.data = self.dataZ
-            axis_int = 2
+        # elif (self.cb_yline.GetValue()):
+        #     self.data = self.dataY
+        #     axis_int = 1
+        # else:
+        #     self.data = self.dataZ
+        #     axis_int = 2
 
         # when xmin is set as the lower bound in set_xbound,
         # it "follows" xmax to produce a sliding window effect. 
         # therefore, xmin is assigned after xmax.
         
 
-        xmax = len(self.data) if len(self.data) > 50 else 50
-        xmin = xmax - 50
+        xmax_x = len(self.dataX) if len(self.dataX) > 50 else 50
+        xmin_x = xmax_x - 50
+
+        xmax_y = len(self.dataY) if len(self.dataY) > 50 else 50
+        xmin_y = xmax_y - 50
+
+        xmax_z = len(self.dataZ) if len(self.dataZ) > 50 else 50
+        xmin_z = xmax_z - 50
 
         # for ymin and ymax, find the minimal and maximal values
         # in the data set and add a mininal margin.
@@ -755,21 +761,27 @@ class GraphFrame(wx.Frame):
         # minimal/maximal value in the current display, and not
         # the whole data set.
     
-        ymin = round(min(self.data), 0) - 1
-        ymax = round(max(self.data), 0) + 1
+        ymin_x = round(min(self.dataX), 0) - 1
+        ymax_x = round(max(self.dataX), 0) + 1
+
+        ymin_y = round(min(self.dataY), 0) - 1
+        ymax_y = round(max(self.dataY), 0) + 1
+
+        ymin_z = round(min(self.dataZ), 0) - 1
+        ymax_z = round(max(self.dataZ), 0) + 1
 
         #set the bounds of the x axis (sliding window or not)
-        self.axes.set_xbound(lower=xmin, upper=xmax)
+        self.axes.set_xbound(lower=xmin_x, upper=xmax_x)
         self.axes.set_ybound(lower=-10000, upper=10000)
 
         self.axes.grid(True, color='gray')
 
-        self.axes2.set_xbound(lower=xmin, upper=xmax)
+        self.axes2.set_xbound(lower=xmin_y, upper=xmax_y)
         self.axes2.set_ybound(lower=-10000, upper=10000)
 
         self.axes2.grid(True, color='gray')
 
-        self.axes3.set_xbound(lower=xmin, upper=xmax)
+        self.axes3.set_xbound(lower=xmin_z, upper=xmax_z)
         self.axes3.set_ybound(lower=-10000, upper=10000)
 
         self.axes3.grid(True, color='gray')
@@ -787,14 +799,14 @@ class GraphFrame(wx.Frame):
         pylab.setp(self.axes3.get_xticklabels(),
             visible=True)
 
-        self.plot_data_x.set_xdata(np.arange(len(self.data)))
-        self.plot_data_x.set_ydata(np.array(self.data))
+        self.plot_data_x.set_xdata(np.arange(len(self.dataX)))
+        self.plot_data_x.set_ydata(np.array(self.dataX))
 
-        self.plot_data_y.set_xdata(np.arange(len(self.data)))
-        self.plot_data_y.set_ydata(np.array(self.data))
+        self.plot_data_y.set_xdata(np.arange(len(self.dataY)))
+        self.plot_data_y.set_ydata(np.array(self.dataY))
 
-        self.plot_data_z.set_xdata(np.arange(len(self.data)))
-        self.plot_data_z.set_ydata(np.array(self.data))
+        self.plot_data_z.set_xdata(np.arange(len(self.dataZ)))
+        self.plot_data_z.set_ydata(np.array(self.dataZ))
 
         #self.canvas.draw()
         self.canvas1.draw()
@@ -816,24 +828,27 @@ class GraphFrame(wx.Frame):
     def on_update_line_value(self, event):
         #COLOR_NAME = 'green'
         label =  "test"
-        if (self.cb_xline.GetValue()):
-            label = "x axis"
+        # if (self.cb_xline.GetValue()):
+        #     label = "x axis"
 
-        elif (self.cb_yline.GetValue()):
-            label = "y axis"
-        else:
-            label = "z axis"
-        self.update_button.SetLabel(label)
+        # elif (self.cb_yline.GetValue()):
+        #     label = "y axis"
+        # else:
+        #     label = "z axis"
+        # self.update_button.SetLabel(label)
         self.draw_plot()
 
     def show_x_plot(self, event):
-        self.draw_plot()
+       # self.draw_plot()
+       label = "test"
 
     def show_y_plot(self, event):
-        self.draw_plot()
+       # self.draw_plot()
+       label = "test"
 
     def show_z_plot(self, event):
-        self.draw_plot()
+       # self.draw_plot()
+       label = "test"
 
     def on_save_plot(self, event):
         """ Should save the plot as a png
@@ -863,21 +878,30 @@ class GraphFrame(wx.Frame):
         #
         if not self.paused:
             self.update_sensor_data(event)
-            
-            if (self.cb_xline.GetValue()):
-                #self.testing = -0.1
-                self.testingX = sensor_data["mag_field_x"]
-                self.dataX.append(self.datagenX.next(self.testingX))
 
-            elif (self.cb_yline.GetValue()):
-                #self.testing = 2.2
-                self.testingY = sensor_data["mag_field_y"]
-                self.dataY.append(self.datagenY.next(self.testingY))
+            self.testingX = sensor_data["mag_field_x"]
+            self.dataX.append(self.datagenX.next(self.testingX))
+
+            self.testingY = sensor_data["mag_field_y"]
+            self.dataY.append(self.datagenY.next(self.testingY))
+
+            self.testingZ = sensor_data["mag_field_z"]
+            self.dataZ.append(self.datagenZ.next(self.testingZ))
+            
+            # if (self.cb_xline.GetValue()):
+            #     #self.testing = -0.1
+            #     self.testingX = sensor_data["mag_field_x"]
+            #     self.dataX.append(self.datagenX.next(self.testingX))
+
+            # elif (self.cb_yline.GetValue()):
+            #     #self.testing = 2.2
+            #     self.testingY = sensor_data["mag_field_y"]
+            #     self.dataY.append(self.datagenY.next(self.testingY))
         
-            else:
-                #self.testing = 3.5
-                self.testingZ = sensor_data["mag_field_z"]
-                self.dataZ.append(self.datagenZ.next(self.testingZ))
+            # else:
+            #     #self.testing = 3.5
+            #     self.testingZ = sensor_data["mag_field_z"]
+            #     self.dataZ.append(self.datagenZ.next(self.testingZ))
             #self.data.append(self.datagen.next(self.testing))
 
         self.draw_plot()
