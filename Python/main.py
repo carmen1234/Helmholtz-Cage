@@ -2,9 +2,8 @@ import threading
 import wx
 
 from arduino import arduino
-from control import pid, main_controller
+from control import main_controller
 from logger import logger
-from dynamic_sim import dyna_sim
 
 from gui import GraphFrame
 
@@ -16,8 +15,8 @@ if __name__ == "__main__":
     controller_thread = threading.Thread(target=main_controller.run_pid_xyz, daemon=True)
     controller_thread.start()
 
-    dynamic_sim_thread = threading.Thread(target=main_controller.run_sim, daemon=True)
-    dynamic_sim_thread.start()
+    # dynamic_sim_thread = threading.Thread(target=main_controller.run_sim, daemon=True)
+    # dynamic_sim_thread.start()
 
 
     # while True:

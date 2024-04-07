@@ -59,8 +59,8 @@ class Arduino:
                 fp.write(f"{current_x},{current_y},{current_z},{mag_field_x},{mag_field_y},{mag_field_z}\n")
                 #do we want to print avg data as well?
 
-    def set_coil_current(self, speed):
-        command = f"S:{-speed}\n"
+    def set_coil_current(self, axis, speed):
+        command = f"{axis.upper()}:{-speed}\n" # Q: why negative speed?
         logger.debug(f"Sending command to Arduino: {command}")
         if self.connected:
             self.ser.write(command.encode('utf-8'))

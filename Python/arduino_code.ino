@@ -7,10 +7,12 @@
 
 // Sensors
 ACS712 curr_sens_x(A0, 5.0, 1023, 100);
+ACS712 curr_sens_y(A1, 5.0, 1023, 100);
 QMC5883LCompass magnetometer;
 
 // Configure the H-bridges
 CytronMD driver_x(PWM_DIR, 3, 4);  // PWM = Pin 3, DIR = Pin 4.
+CytronMD driver_y(PWM_DIR, 6, 7);  // PWM = Pin 6, DIR = Pin 7.
 
 // Readings
 int mag_field_x, mag_field_y, mag_field_z;
@@ -29,6 +31,7 @@ void setup() {
 
   // Calibrate current sensor (make sure current = 0)
   curr_sens_x.autoMidPointDC(100);
+  curr_sens_y.autoMidPointDC(100);
 }
 
 void loop() {
@@ -47,7 +50,7 @@ void loop() {
 
   // Current Sensor
   curr_x = curr_sens_x.mA_DC(100);
-  curr_y = 0;
+  curr_y = curr_sens_y.mA_DC(100);
   curr_z = 0;
 
   Serial.print("CX:");
@@ -67,11 +70,22 @@ void loop() {
 }
 
 void processCommand(String command) {
-  if (command.startsWith("S:")) {
-    int speed = command.substring(2).toInt();
-    if (speed > 50) speed = 50;
-    if (speed < -50) speed = -50;
-    // Checks in place while testing^
+  if (command.startsWith("X:")) {
+    int speed_x = command.substring(2).toInt();
+    if (speed > 25) speed = 25;
+    if (speed < -25) speed = -25;
     driver_x.setSpeed(speed);
+  }  else if (command.startsWith("Y:")) {
+    int speed_y = command.substring(2).toInt();
+    if (speed > 25) speed = 25;
+    if (speed < -25) speed = -25;
+    driver_y.setSpeed(speed);
+  }  else if (command.startsWith("Z:")) {
+    int speed_z = command.substring(2).toInt();
+    if (speed > 25) speed = 25;
+    if (speed < -25) speed = -25;
+    driver_z.setSpeed(speed);
+  } else {
+    Serial.println("Invalid command");
   }
 }

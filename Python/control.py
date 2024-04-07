@@ -28,7 +28,7 @@ class PID_controller:
         self.prev_err = 0
 
     def tune_constants(self, Kp, Ki, Kd):
-        logger.info(f"Updated {self.axis}-axis PID Constants -- Kp: {Kp}, Ki: {Ki}, Kd: {Kd}") 
+        logger.info(f"Updated {self.axis}-axis PID Constants -- Kp: {Kp}, Ki: {Ki}, Kd: {Kd}")
         self.Kp = Kp
         self.Ki = Ki
         self.Kd = Kd
@@ -39,7 +39,7 @@ class PID_controller:
             logger.info(f"PID Controller for {self.axis} enabled")
         else:
             # Reset pwm to 0
-            arduino.set_coil_current(0)
+            arduino.set_coil_current(self.axis, 0)
             sensor_data[f'pwm_{self.axis}'] = 0
             logger.info(f"PID Controller for {self.axis} disabled")
 
@@ -75,29 +75,29 @@ class PID_controller:
             if self.enable:
                 new_pwm_val = sensor_data[f'pwm_{self.axis}'] + (-1 * int(100*new_val))
                 sensor_data[f'pwm_{self.axis}'] = max(-100, min(100, new_pwm_val))
-                arduino.set_coil_current(sensor_data[f'pwm_{self.axis}'])
+                arduino.set_coil_current(self.axis, sensor_data[f'pwm_{self.axis}'])
                 sleep(0.1)
             else:
                 sleep(0.5) # sleep for 0.5 seconds if PID is disabled
                 # TODO: change this so thread sleeps when controller is off
 
-    
+
 
 
 class MegaController:
     def __init__(self):
-        self.pid_x = PID_controller("x",0,0.05,0,0) #todo: change pid to pid_x
-        self.pid_y = PID_controller("y",0,0.05,0,0)
-        self.pid_z = PID_controller("z",0,0.05,0,0)
+        self.pid_x = PID_controller("x",0,0.1,0,0) #todo: change pid to pid_x
+        self.pid_y = PID_controller("y",0,0.1,0,0)
+        self.pid_z = PID_controller("z",0,0.1,0,0)
         self.setpoints = {"x_setpoint": 0.0,
                           "y_setpoint": 0.0,
                           "z_setpoint": 0.0}
-        self.sim_on = 0  # sim refers to dynamic mode 
+        self.sim_on = 0  # sim refers to dynamic mode
         self.sim_data = []
         self.sim_step = 0 # basically which row its on, needed for pausing,restarting
         self.sim_step_len = 0 #number of simulation steps (rows in csv file)
         self.enable_pid = False
-    
+
     def get_sim(self, path):
         reader = read_csv_into_dict(path)
         if reader != None:
@@ -118,12 +118,16 @@ class MegaController:
     def toggle_PID(self):
         self.enable_pid = not self.enable_pid
         if self.enable_pid:
-            logger.info(f"PID Controller for {self.axis} enabled")
+            logger.info(f"PID Controller enabled")
         else:
             # Reset pwm to 0
-            arduino.set_coil_current(0)
-            sensor_data[f'pwm_{self.axis}'] = 0
-            logger.info(f"PID Controller for {self.axis} disabled")
+            arduino.set_coil_current("x", 0)
+            arduino.set_coil_current("y", 0)
+            arduino.set_coil_current("z", 0)
+            sensor_data[f'pwm_{self.pid_x.axis}'] = 0
+            sensor_data[f'pwm_{self.pid_y.axis}'] = 0
+            sensor_data[f'pwm_{self.pid_z.axis}'] = 0
+            logger.info(f"PID Controller disabled")
 
     def update_setpoint_data(self, setpoint_x, setpoint_y, setpoint_z):
        self.setpoints["x_setpoint"] = setpoint_x
@@ -131,7 +135,7 @@ class MegaController:
        self.setpoints["z_setpoint"] = setpoint_z
        self.pid_x.set_setpoint(setpoint_x)
        self.pid_y.set_setpoint(setpoint_y)
-       self.pid_z.set_setpoint(setpoint_z) 
+       self.pid_z.set_setpoint(setpoint_z)
 
     def run_sim(self): #i think this will still need to be its own thread
         if self.sim_on == 0:
@@ -139,7 +143,7 @@ class MegaController:
         elif self.sim_on == 1:
             #time difference stuff will be done later cuz its giving me a headache
             current_step = self.sim_data[self.sim_step] #current dict that has data
-            
+
             # self.pid_x.set_setpoint(float(current_step["Bx(G)"]))
             # self.pid_y.set_setpoint(float(current_step["By(G)"]))
             # self.pid_z.set_setpoint(float(current_step["Bz(G)"]))
@@ -153,10 +157,10 @@ class MegaController:
                 sleep(next_step_time - current_step["Time(s)"])
                 self.sim_step = self.sim_step + 1 # increment for next one
 
-    def run_pid_xyz(self): #this should be used for the thread 
+    def run_pid_xyz(self): #this should be used for the thread
         while (True):
             self.pid_x.update_values(sensor_data["mag_field_x"],sensor_data["time_interval"])
-            new_val_x = self.pid_x.get_PID()    
+            new_val_x = self.pid_x.get_PID()
             self.pid_y.update_values(sensor_data["mag_field_y"],sensor_data["time_interval"])
             new_val_y = self.pid_y.get_PID()
             self.pid_z.update_values(sensor_data["mag_field_z"],sensor_data["time_interval"])
@@ -170,7 +174,9 @@ class MegaController:
                 sensor_data[f'pwm_{self.pid_z.axis}'] = max(-100, min(100, new_pwm_val_z))
 
                 #modify this func so it can set multiple
-                arduino.set_coil_current(sensor_data[f'pwm_{self.axis}'])
+                arduino.set_coil_current(self.pid_x.axis, sensor_data[f'pwm_{self.pid_x.axis}'])
+                arduino.set_coil_current(self.pid_y.axis, sensor_data[f'pwm_{self.pid_y.axis}'])
+                arduino.set_coil_current(self.pid_z.axis, sensor_data[f'pwm_{self.pid_z.axis}'])
                 sleep(0.1)
             else:
                 sleep(0.5) # sleep for 0.5 seconds if PID is disabled
@@ -178,7 +184,7 @@ class MegaController:
 
 main_controller = MegaController()
 
-pid = PID_controller("x",0,0.05,0,0) #todo: delete later
-pid_y = PID_controller("y",0,0.05,0,0)
-pid_z = PID_controller("z",0,0.05,0,0)
+# pid_x = PID_controller("x",0,0.05,0,0) #todo: delete later
+# pid_y = PID_controller("y",0,0.05,0,0)
+# pid_z = PID_controller("z",0,0.05,0,0)
 

@@ -20,7 +20,7 @@ import threading
 
 from globals import sensor_data, graph_y_max, graph_y_min, avg_data
 from arduino import arduino
-from control import pid, main_controller
+from control import main_controller
 from logger import logger, log_stream
 
 import matplotlib
@@ -267,7 +267,17 @@ class InputControlBox(wx.Panel):
             else:
                 main_controller.pid_x.set_setpoint(float(inputX_mag))
 
-            # TODO: add for Y and Z axis
+            if not (float(inputY_mag) <= 1.0 and float(inputY_mag) >= -1.0):
+                logger.error("Invalid input range for Y-axis setpoint")
+            else:
+                main_controller.pid_y.set_setpoint(float(inputY_mag))
+
+            if not (float(inputZ_mag) <= 1.0 and float(inputZ_mag) >= -1.0):
+                logger.error("Invalid input range for Z-axis setpoint")
+            else:
+                main_controller.pid_z.set_setpoint(float(inputZ_mag))
+
+        # Add error-checking (empty input == don't do anything)
 
 class DebugConsoleBox(wx.Panel):
     """ A static box with a debug console.
@@ -315,15 +325,24 @@ class DebugConsoleBox(wx.Panel):
             self.DebugOutput.Clear()
         elif command_terms[0] == "tune_pid": # set kp,ki,kd vals, atm only does single coil pair
             main_controller.pid_x.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
-        elif command_terms[0] == "set_pwm": # also calls set coil current, will only check
+        elif command_terms[0] == "set_pwm_x": # also calls set coil current, will only check
             # TODO: add axis argument
             pwm_val = int(command_terms[1])
             if pwm_val > 255 or pwm_val < -255:
                 logger.error("Invalid PWM value")
             else:
                 sensor_data["pwm_x"] = pwm_val
-                arduino.set_coil_current(pwm_val)
-                logger.info(f"Setting PWM to {pwm_val}")
+                arduino.set_coil_current("x", pwm_val)
+                logger.info(f"Setting PWM_x to {pwm_val}")
+        elif command_terms[0] == "set_pwm_y": # also calls set coil current, will only check
+            # TODO: add axis argument
+            pwm_val = int(command_terms[1])
+            if pwm_val > 255 or pwm_val < -255:
+                logger.error("Invalid PWM value")
+            else:
+                sensor_data["pwm_y"] = pwm_val
+                arduino.set_coil_current("y", pwm_val)
+                logger.info(f"Setting PWM_y to {pwm_val}")
         elif command_terms[0] == "reset_avg":
             avg_data["avg_mag_x"] = 0
             avg_data["avg_mag_y"] = 0
@@ -688,7 +707,7 @@ class GraphFrame(wx.Frame):
         #     self.dataY,
         #     linewidth=1,
         #     color=(0, 1, 1),
-        #     )[0] 
+        #     )[0]
         # #z-axis
         # else:
         #     self.plot_data = self.axes.plot(
@@ -701,7 +720,7 @@ class GraphFrame(wx.Frame):
         #     linewidth=1,
         #     color=(1, 0, 1),
         #     )[0]
-        
+
 
     def draw_plot(self):
         """ Redraws the plot
@@ -742,7 +761,7 @@ class GraphFrame(wx.Frame):
         # minimal/maximal value in the current display, and not
         # the whole data set.
 
-    
+
         ymin_x = round(min(self.dataX), 0) - 1
         ymax_x = round(max(self.dataX), 0) + 1
 
@@ -863,7 +882,7 @@ class GraphFrame(wx.Frame):
 
             self.testingZ = sensor_data["mag_field_z"]
             self.dataZ.append(self.datagenZ.next(self.testingZ))
-            
+
             # if (self.cb_xline.GetValue()):
             #     #self.testing = -0.1
             #     self.testingX = sensor_data["mag_field_x"]
@@ -873,7 +892,7 @@ class GraphFrame(wx.Frame):
             #     #self.testing = 2.2
             #     self.testingY = sensor_data["mag_field_y"]
             #     self.dataY.append(self.datagenY.next(self.testingY))
-        
+
             # else:
             #     #self.testing = 3.5
             #     self.testingZ = sensor_data["mag_field_z"]
@@ -901,7 +920,9 @@ class GraphFrame(wx.Frame):
     def on_exit(self, event):
         # Exit Sequence
         logger.info("Exiting GUI")
-        arduino.set_coil_current(0)
+        arduino.set_coil_current("X", 0)
+        arduino.set_coil_current("Y", 0)
+        arduino.set_coil_current("Z", 0)
         logger.info("Turned off all coils")
         # TODO: add logic to stop threads before closing serial connection23
         #arduino.ser.close()
