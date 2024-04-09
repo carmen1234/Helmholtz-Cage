@@ -60,7 +60,7 @@ class Arduino:
                 #do we want to print avg data as well?
 
     def set_coil_current(self, axis, speed):
-        command = f"{axis.upper()}:{-speed}\n" # Q: why negative speed?
+        command = f"{axis.upper()}:{speed}\n"
         logger.debug(f"Sending command to Arduino: {command}")
         if self.connected:
             self.ser.write(command.encode('utf-8'))
@@ -73,3 +73,11 @@ class Arduino:
 
 arduino = Arduino(port)
 
+
+# def set_coil_current(self, speed_x, speed_y, speed_z):
+#     command = f"X:{speed_x},Y:{speed_y},Z:{speed_z}\n"
+#     logger.debug(f"Sending command to Arduino: {command}")
+#     if self.connected:
+#         self.ser.write(command.encode('utf-8'))
+#     else:
+#         logger.debug(f"Arduino not connected. Command not sent: {command}")

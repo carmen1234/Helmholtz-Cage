@@ -343,6 +343,15 @@ class DebugConsoleBox(wx.Panel):
                 sensor_data["pwm_y"] = pwm_val
                 arduino.set_coil_current("y", pwm_val)
                 logger.info(f"Setting PWM_y to {pwm_val}")
+        elif command_terms[0] == "set_pwm_z": # also calls set coil current, will only check
+            # TODO: add axis argument
+            pwm_val = int(command_terms[1])
+            if pwm_val > 255 or pwm_val < -255:
+                logger.error("Invalid PWM value")
+            else:
+                sensor_data["pwm_z"] = pwm_val
+                arduino.set_coil_current("z", pwm_val)
+                logger.info(f"Setting PWM_z to {pwm_val}")
         elif command_terms[0] == "reset_avg":
             avg_data["avg_mag_x"] = 0
             avg_data["avg_mag_y"] = 0

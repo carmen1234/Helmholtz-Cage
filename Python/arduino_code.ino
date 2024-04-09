@@ -7,12 +7,14 @@
 
 // Sensors
 ACS712 curr_sens_x(A0, 5.0, 1023, 100);
-ACS712 curr_sens_y(A1, 5.0, 1023, 100);
+ACS712 curr_sens_y(A2, 5.0, 1023, 100);
+ACS712 curr_sens_z(A1, 5.0, 1023, 100);
 QMC5883LCompass magnetometer;
 
 // Configure the H-bridges
 CytronMD driver_x(PWM_DIR, 3, 4);  // PWM = Pin 3, DIR = Pin 4.
-CytronMD driver_y(PWM_DIR, 6, 7);  // PWM = Pin 6, DIR = Pin 7.
+CytronMD driver_y(PWM_DIR, 6, 7)`;  // PWM = Pin 6, DIR = Pin 7.
+CytronMD driver_z(PWM_DIR, 9, 8);  // PWM = Pin 6, DIR = Pin 7.
 
 // Readings
 int mag_field_x, mag_field_y, mag_field_z;
@@ -32,6 +34,7 @@ void setup() {
   // Calibrate current sensor (make sure current = 0)
   curr_sens_x.autoMidPointDC(100);
   curr_sens_y.autoMidPointDC(100);
+  curr_sens_z.autoMidPointDC(100);
 }
 
 void loop() {
@@ -51,7 +54,7 @@ void loop() {
   // Current Sensor
   curr_x = curr_sens_x.mA_DC(100);
   curr_y = curr_sens_y.mA_DC(100);
-  curr_z = 0;
+  curr_z = curr_sens_z.mA_DC(100);;
 
   Serial.print("CX:");
   Serial.print(curr_x);
@@ -87,5 +90,40 @@ void processCommand(String command) {
     driver_z.setSpeed(speed);
   } else {
     Serial.println("Invalid command");
+  }
+}
+
+void processCommand(String command) {
+  // Split the command string by commas to separate commands for X, Y, and Z.
+  String[] commands = command.split(",");
+  for (String individualCommand : commands) {
+    // Split each command by the colon to separate the axis from its speed value.
+    String[] parts = individualCommand.split(":");
+    if (parts.length == 2) {
+      String axis = parts[0];
+      int speed = Integer.parseInt(parts[1]);
+
+      // Constrain the speed values.
+      if (speed > 100) speed = 100;
+      if (speed < -100) speed = -100;
+
+      // Apply the speed to the correct axis.
+      switch (axis) {
+        case "X":
+          driver_x.setSpeed(speed);
+          break;
+        case "Y":
+          driver_y.setSpeed(speed);
+          break;
+        case "Z":
+          driver_z.setSpeed(speed);
+          break;
+        default:
+          Serial.println("Invalid command: " + axis);
+          break;
+      }
+    } else {
+      Serial.println("Invalid command format");
+    }
   }
 }
