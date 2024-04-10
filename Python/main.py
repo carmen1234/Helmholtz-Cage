@@ -36,3 +36,4 @@ if __name__ == "__main__":
     app.frame = GraphFrame()
     app.frame.Show()
     app.MainLoop()
+

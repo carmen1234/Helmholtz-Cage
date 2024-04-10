@@ -262,17 +262,23 @@ class InputControlBox(wx.Panel):
             inputY_mag = self.SetY.GetValue()
             inputZ_mag = self.SetZ.GetValue()
 
-            if not (float(inputX_mag) <= 1.0 and float(inputX_mag) >= -1.0):
+            if inputX_mag == "":
+                print("No input for X-axis setpoint")
+            elif not (float(inputX_mag) <= 1.0 and float(inputX_mag) >= -1.0):
                 logger.error("Invalid input range for X-axis setpoint")
             else:
                 main_controller.pid_x.set_setpoint(float(inputX_mag))
 
-            if not (float(inputY_mag) <= 1.0 and float(inputY_mag) >= -1.0):
+            if inputY_mag == "":
+                print("No input for Y-axis setpoint")
+            elif not (float(inputY_mag) <= 1.0 and float(inputY_mag) >= -1.0):
                 logger.error("Invalid input range for Y-axis setpoint")
             else:
                 main_controller.pid_y.set_setpoint(float(inputY_mag))
 
-            if not (float(inputZ_mag) <= 1.0 and float(inputZ_mag) >= -1.0):
+            if inputZ_mag == "":
+                print("No input for Z-axis setpoint")
+            elif not (float(inputZ_mag) <= 1.0 and float(inputZ_mag) >= -1.0):
                 logger.error("Invalid input range for Z-axis setpoint")
             else:
                 main_controller.pid_z.set_setpoint(float(inputZ_mag))
@@ -323,8 +329,12 @@ class DebugConsoleBox(wx.Panel):
             arduino.set_coil_current(0)
         elif command_terms[0] == "clear": # clear debug output box
             self.DebugOutput.Clear()
-        elif command_terms[0] == "tune_pid": # set kp,ki,kd vals, atm only does single coil pair
+        elif command_terms[0] == "tune_pidx": # set kp,ki,kd vals, atm only does single coil pair
             main_controller.pid_x.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
+        elif command_terms[0] == "tune_pidy": # set kp,ki,kd vals, atm only does single coil pair
+            main_controller.pid_y.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
+        elif command_terms[0] == "tune_pidz": # set kp,ki,kd vals, atm only does single coil pair
+            main_controller.pid_z.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
         elif command_terms[0] == "set_pwm_x": # also calls set coil current, will only check
             # TODO: add axis argument
             pwm_val = int(command_terms[1])
@@ -332,7 +342,7 @@ class DebugConsoleBox(wx.Panel):
                 logger.error("Invalid PWM value")
             else:
                 sensor_data["pwm_x"] = pwm_val
-                arduino.set_coil_current("x", pwm_val)
+                arduino.set_coil_current(pwm_val, sensor_data["pwm_y"], sensor_data["pwm_z"])
                 logger.info(f"Setting PWM_x to {pwm_val}")
         elif command_terms[0] == "set_pwm_y": # also calls set coil current, will only check
             # TODO: add axis argument
@@ -341,7 +351,7 @@ class DebugConsoleBox(wx.Panel):
                 logger.error("Invalid PWM value")
             else:
                 sensor_data["pwm_y"] = pwm_val
-                arduino.set_coil_current("y", pwm_val)
+                arduino.set_coil_current(sensor_data["pwm_x"], pwm_val, sensor_data["pwm_z"])
                 logger.info(f"Setting PWM_y to {pwm_val}")
         elif command_terms[0] == "set_pwm_z": # also calls set coil current, will only check
             # TODO: add axis argument
@@ -350,13 +360,15 @@ class DebugConsoleBox(wx.Panel):
                 logger.error("Invalid PWM value")
             else:
                 sensor_data["pwm_z"] = pwm_val
-                arduino.set_coil_current("z", pwm_val)
+                arduino.set_coil_current(sensor_data["pwm_x"], sensor_data["pwm_y"], pwm_val)
                 logger.info(f"Setting PWM_z to {pwm_val}")
         elif command_terms[0] == "reset_avg":
             avg_data["avg_mag_x"] = 0
             avg_data["avg_mag_y"] = 0
             avg_data["avg_mag_z"] = 0
             avg_data["reading_cnt"] = 0
+        elif command_terms[0] == "exit":
+            wx.Exit()
         else:
             logger.error(f"Invalid command - {command}")
 
@@ -677,7 +689,7 @@ class GraphFrame(wx.Frame):
 
         self.plot_data_x = self.axes.plot(
         self.dataX,
-        linewidth=2,
+        linewidth=1,
         color=(1, 0, 1),
         )[0]
 
@@ -929,15 +941,13 @@ class GraphFrame(wx.Frame):
     def on_exit(self, event):
         # Exit Sequence
         logger.info("Exiting GUI")
-        arduino.set_coil_current("X", 0)
-        arduino.set_coil_current("Y", 0)
-        arduino.set_coil_current("Z", 0)
+        arduino.set_coil_current(0, 0, 0)
         logger.info("Turned off all coils")
-        # TODO: add logic to stop threads before closing serial connection23
-        #arduino.ser.close()
         logger.info("Closed Arduino connection")
 
-        event.Skip() # Allow the window to close
+
+        # event.Skip() # Allow the window to close
+        wx.Exit()
         # self.redraw_timer.Stop()
         # self.Destroy()
 

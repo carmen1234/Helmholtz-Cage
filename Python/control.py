@@ -33,16 +33,6 @@ class PID_controller:
         self.Ki = Ki
         self.Kd = Kd
 
-    def toggle_PID(self): #i think I can remove this from here?
-        self.enable = not self.enable
-        if self.enable:
-            logger.info(f"PID Controller for {self.axis} enabled")
-        else:
-            # Reset pwm to 0
-            arduino.set_coil_current(self.axis, 0)
-            sensor_data[f'pwm_{self.axis}'] = 0
-            logger.info(f"PID Controller for {self.axis} disabled")
-
     def proportional(self,setpoint,process_var):
         err = setpoint - process_var
         if self.axis == "x":
@@ -69,19 +59,6 @@ class PID_controller:
         sensor_data[f"mag_field_{self.axis}_setpoint"] = mag_field_setpoint
 
         return mag_field_setpoint
-
-    def run_PID(self): #can also be removed?
-        while (True):
-            self.update_values(sensor_data["mag_field_x"],sensor_data["time_interval"])
-            new_val = self.get_PID()
-            if self.enable:
-                new_pwm_val = sensor_data[f'pwm_{self.axis}'] + (-1 * int(100*new_val))
-                sensor_data[f'pwm_{self.axis}'] = max(-100, min(100, new_pwm_val))
-                arduino.set_coil_current(self.axis, sensor_data[f'pwm_{self.axis}'])
-                sleep(5)
-            else:
-                sleep(0.5) # sleep for 0.5 seconds if PID is disabled
-                # TODO: change this so thread sleeps when controller is off
 
 
 
@@ -123,12 +100,10 @@ class MegaController:
             logger.info(f"PID Controller enabled")
         else:
             # Reset pwm to 0
-            arduino.set_coil_current("x", 0)
-            arduino.set_coil_current("y", 0)
-            arduino.set_coil_current("z", 0)
             sensor_data[f'pwm_{self.pid_x.axis}'] = 0
             sensor_data[f'pwm_{self.pid_y.axis}'] = 0
             sensor_data[f'pwm_{self.pid_z.axis}'] = 0
+            arduino.set_coil_current(sensor_data['pwm_x'], sensor_data['pwm_y'], sensor_data['pwm_z'])
             logger.info(f"PID Controller disabled")
 
     def update_setpoint_data(self, setpoint_x, setpoint_y, setpoint_z):
@@ -168,19 +143,16 @@ class MegaController:
             self.pid_z.update_values(sensor_data["mag_field_z"],sensor_data["time_interval"])
             new_val_z = self.pid_z.get_PID()
             if self.enable_pid == True:
-                print(f"new_val_x: {new_val_x}\n")
+                #print(f"new_val_x: {new_val_x}\n")
                 new_pwm_val_x = sensor_data[f'pwm_{self.pid_x.axis}'] + (int(100*new_val_x))
                 new_pwm_val_y = sensor_data[f'pwm_{self.pid_y.axis}'] + (int(100*new_val_y))
-                new_pwm_val_z = sensor_data[f'pwm_{self.pid_z.axis}'] + (-1*int(100*new_val_z))
+                new_pwm_val_z = sensor_data[f'pwm_{self.pid_z.axis}'] + (int(100*new_val_z))
                 sensor_data[f'pwm_{self.pid_x.axis}'] = max(-100, min(100, new_pwm_val_x))
                 sensor_data[f'pwm_{self.pid_y.axis}'] = max(-100, min(100, new_pwm_val_y))
                 sensor_data[f'pwm_{self.pid_z.axis}'] = max(-100, min(100, new_pwm_val_z))
-                print(f"sensor_data[f'pwm_{self.pid_x.axis}']: ", sensor_data[f'pwm_{self.pid_x.axis}'])
+                #print(f"sensor_data[f'pwm_{self.pid_x.axis}']: ", sensor_data[f'pwm_{self.pid_x.axis}'])
 
-                #modify this func so it can set multiple
-                arduino.set_coil_current(self.pid_x.axis, sensor_data[f'pwm_{self.pid_x.axis}'])
-                # arduino.set_coil_current(self.pid_y.axis, sensor_data[f'pwm_{self.pid_y.axis}'])
-                #arduino.set_coil_current(self.pid_z.axis, sensor_data[f'pwm_{self.pid_z.axis}'])
+                arduino.set_coil_current(sensor_data['pwm_x'], sensor_data['pwm_y'], sensor_data['pwm_z'])
                 sleep(0.1)
             else:
                 sleep(0.5) # sleep for 0.5 seconds if PID is disabled

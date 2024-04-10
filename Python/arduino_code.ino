@@ -72,7 +72,7 @@ void loop() {
   delay(100);
 }
 
-void processCommand(String command) {
+void processCommand(char command) {
   if (command.startsWith("X:")) {
     int speed_x = command.substring(2).toInt();
     if (speed > 25) speed = 25;
