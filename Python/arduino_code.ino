@@ -47,7 +47,7 @@ void loop() {
   // Magnetometer
   magnetometer.read();
   // Return XYZ readings
-  mag_field_x = magnetometer.getX();
+  mag_field_x = magnetometer.getX() * -1;
   mag_field_y = magnetometer.getY();
   mag_field_z = magnetometer.getZ();
 
@@ -72,58 +72,27 @@ void loop() {
   delay(100);
 }
 
-void processCommand(char command) {
-  if (command.startsWith("X:")) {
-    int speed_x = command.substring(2).toInt();
-    if (speed > 25) speed = 25;
-    if (speed < -25) speed = -25;
-    driver_x.setSpeed(speed);
-  }  else if (command.startsWith("Y:")) {
-    int speed_y = command.substring(2).toInt();
-    if (speed > 25) speed = 25;
-    if (speed < -25) speed = -25;
-    driver_y.setSpeed(speed);
-  }  else if (command.startsWith("Z:")) {
-    int speed_z = command.substring(2).toInt();
-    if (speed > 25) speed = 25;
-    if (speed < -25) speed = -25;
-    driver_z.setSpeed(speed);
-  } else {
-    Serial.println("Invalid command");
-  }
-}
-
 void processCommand(String command) {
   // Split the command string by commas to separate commands for X, Y, and Z.
-  String[] commands = command.split(",");
-  for (String individualCommand : commands) {
-    // Split each command by the colon to separate the axis from its speed value.
-    String[] parts = individualCommand.split(":");
-    if (parts.length == 2) {
-      String axis = parts[0];
-      int speed = Integer.parseInt(parts[1]);
+  int index1 = command.indexOf(",");
+  int index2 = command.lastIndexOf(",");
 
-      // Constrain the speed values.
-      if (speed > 100) speed = 100;
-      if (speed < -100) speed = -100;
+  String cmd1 = command.substring(0, index1);
+  String cmd2 = command.substring(index1+1, index2);
+  String cmd3 = command.substring(index2+1);
 
-      // Apply the speed to the correct axis.
-      switch (axis) {
-        case "X":
-          driver_x.setSpeed(speed);
-          break;
-        case "Y":
-          driver_y.setSpeed(speed);
-          break;
-        case "Z":
-          driver_z.setSpeed(speed);
-          break;
-        default:
-          Serial.println("Invalid command: " + axis);
-          break;
-      }
-    } else {
-      Serial.println("Invalid command format");
-    }
+  int speed_x = cmd1.substring(2).toInt();
+  int speed_y = cmd2.substring(2).toInt();
+  int speed_z = cmd3.substring(2).toInt();
+
+  int speeds[3] = {speed_x, speed_y, speed_z};
+
+  for (int i = 0; i < 3; i++) {
+    if (speeds[i] > 100) speeds[i] = 100;
+    if (speeds[i] < -100) speeds[i] = -100;
   }
+
+  driver_x.setSpeed(speed_x);
+  driver_y.setSpeed(speed_y);
+  driver_z.setSpeed(speed_z);
 }

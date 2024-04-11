@@ -65,7 +65,7 @@ class PID_controller:
 
 class MegaController:
     def __init__(self):
-        self.pid_x = PID_controller("x",0,0.1,0.0009,0) #todo: change pid to pid_x
+        self.pid_x = PID_controller("x",0,0.1,0.0009,0)
         self.pid_y = PID_controller("y",0,0.1,0.001,0)
         self.pid_z = PID_controller("z",0,0.05,0.005,0)
         self.setpoints = {"x_setpoint": 0.0,
