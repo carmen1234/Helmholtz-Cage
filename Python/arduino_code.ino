@@ -92,7 +92,7 @@ void processCommand(String command) {
     if (speeds[i] < -100) speeds[i] = -100;
   }
 
-  driver_x.setSpeed(speed_x);
-  driver_y.setSpeed(speed_y);
-  driver_z.setSpeed(speed_z);
+  driver_x.setSpeed(speeds[0]);
+  driver_y.setSpeed(speeds[1]);
+  driver_z.setSpeed(speeds[2]);
 }

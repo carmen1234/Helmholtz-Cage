@@ -15,22 +15,8 @@ if __name__ == "__main__":
     controller_thread = threading.Thread(target=main_controller.run_pid_xyz, daemon=True)
     controller_thread.start()
 
-    # dynamic_sim_thread = threading.Thread(target=main_controller.run_sim, daemon=True)
-    # dynamic_sim_thread.start()
-
-
-    # while True:
-    #     # Read and print current/field values
-    #     current, mag_field_x, mag_field_y = sensor_data["current"], sensor_data["mag_field_x"], sensor_data['mag_field_y']
-    #     if current is not None and mag_field_x is not None and mag_field_y is not None:
-    #         print(f"Current: {current}, Magnetic Field - X: {mag_field_x}, Magnetic Field - Y: {mag_field_y}")
-
-        # Example of how to set coil_current (must be between -255 and 255) (PWM freq)
-        #coil_current = 150
-        #arduino.set_coil_current(coil_current)
-
-        #For testing without actual sensor readings
-        #sensor_data["current"] = 1
+    dynamic_sim_thread = threading.Thread(target=main_controller.run_sim, daemon=True)
+    dynamic_sim_thread.start()
 
     app = wx.App()
     app.frame = GraphFrame()

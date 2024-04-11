@@ -151,16 +151,15 @@ class ModeControlBox(wx.Panel):
 
 
         self.SetMode0 = wx.Button(self, wx.ID_ANY, "Start Sim")
-        self.Bind(wx.EVT_BUTTON, self.on_mode_0, self.SetMode0)
+        self.Bind(wx.EVT_BUTTON, self.on_start, self.SetMode0)
         self.SetMode0.Move((25, 0))
 
-
-        self.SetMode1 = wx.Button(self, wx.ID_ANY, "Stop Sim")
-        self.Bind(wx.EVT_BUTTON, self.on_mode_1, self.SetMode1)
+        self.SetMode1 = wx.Button(self, wx.ID_ANY, "Pause Sim")
+        self.Bind(wx.EVT_BUTTON, self.on_stop, self.SetMode1)
         self.SetMode1.Move((50, 0))
 
         self.SetMode2 = wx.Button(self, wx.ID_ANY, "Reset")
-        self.Bind(wx.EVT_BUTTON, self.on_mode_2, self.SetMode2)
+        self.Bind(wx.EVT_BUTTON, self.on_reset, self.SetMode2)
         self.SetMode2.Move((0, 75))
 
         csv_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -181,31 +180,25 @@ class ModeControlBox(wx.Panel):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    def on_mode_0(self):
-        #check if sim is actually loaded
-        if main_controller.sim_data == []:
-            pass #error msg
+    def on_start(self, event):
+        main_controller.turn_on_sim()
+        self.SetMode1.SetLabel("Pause Sim")
+
+    def on_stop(self, event):
+        if main_controller.sim_on == 1:
+            main_controller.pause_sim()
+            self.SetMode1.SetLabel("Resume Sim")
         else:
-            main_controller.turn_on_sim()
+            main_controller.resume_sim()
+            self.SetMode1.SetLabel("Pause Sim")
 
-    def on_mode_1(self):
-       #effectively pause sim
-       # return self.value
-       pass
+    def on_reset(self, event):
+        main_controller.reset_sim()
+        self.SetMode1.SetLabel("Pause Sim")
 
-    def on_mode_2(self):
-       #does reset mean restart? or clear everything
-       # return self.value
-       pass
-
-    def on_import_csv(self):
+    def on_import_csv(self, event):
         input_path = self.CSVPathBox.GetValue()
         fileStatus = main_controller.get_sim(input_path)
-        if fileStatus == None:
-            pass #error stuff, I think I need logging to print to debug console?
-        else:
-            pass #added some kind of status message like "sim loaded or something"
-
 
 
 class InputControlBox(wx.Panel):
@@ -262,26 +255,31 @@ class InputControlBox(wx.Panel):
             inputY_mag = self.SetY.GetValue()
             inputZ_mag = self.SetZ.GetValue()
 
+            x_val, y_val, z_val = 0, 0, 0
+
             if inputX_mag == "":
-                print("No input for X-axis setpoint")
+                x_val = '-'
             elif not (float(inputX_mag) <= 1.0 and float(inputX_mag) >= -1.0):
                 logger.error("Invalid input range for X-axis setpoint")
             else:
-                main_controller.pid_x.set_setpoint(float(inputX_mag))
+                x_val = float(inputX_mag)
 
             if inputY_mag == "":
-                print("No input for Y-axis setpoint")
+                y_val = '-'
             elif not (float(inputY_mag) <= 1.0 and float(inputY_mag) >= -1.0):
                 logger.error("Invalid input range for Y-axis setpoint")
             else:
-                main_controller.pid_y.set_setpoint(float(inputY_mag))
+                y_val = float(inputY_mag)
+
 
             if inputZ_mag == "":
-                print("No input for Z-axis setpoint")
+                z_val = '-'
             elif not (float(inputZ_mag) <= 1.0 and float(inputZ_mag) >= -1.0):
                 logger.error("Invalid input range for Z-axis setpoint")
             else:
-                main_controller.pid_z.set_setpoint(float(inputZ_mag))
+                z_val = float(inputZ_mag)
+
+            main_controller.update_setpoint_data(x_val, y_val, z_val)
 
         # Add error-checking (empty input == don't do anything)
 
@@ -456,7 +454,10 @@ class AxisControlBox(wx.Panel):
         self.avg_mag_field_str = str(self.avg_mag_field)
         self.avg_mag_val.SetValue(self.avg_mag_field_str)
 
-        self.mag_setpoint_label = round(main_controller.setpoints[self.axis + "_setpoint"], 3)
+        if sensor_data["mag_field_" + self.axis + "_setpoint"] == '-':
+            self.mag_setpoint_label = '-'
+        else:
+            self.mag_setpoint_label =  round(sensor_data["mag_field_" + self.axis + "_setpoint"], 3)
         self.mag_setpoint_str = str(self.mag_setpoint_label)
         self.mag_setpoint_val.SetValue(self.mag_setpoint_str)
 
@@ -533,9 +534,9 @@ class GraphFrame(wx.Frame):
         self.static_control = InputControlBox(self.panel, -1, "Static Control", 125)
         self.debug_console = DebugConsoleBox(self.panel, -1, "Console", 150)
 
-        self.pause_button = wx.Button(self.panel, -1, "Pause")
-        self.Bind(wx.EVT_BUTTON, self.on_pause_button, self.pause_button)
-        self.Bind(wx.EVT_UPDATE_UI, self.on_update_pause_button, self.pause_button)
+        # self.pause_button = wx.Button(self.panel, -1, "Pause")
+        # self.Bind(wx.EVT_BUTTON, self.on_pause_button, self.pause_button)
+        # self.Bind(wx.EVT_UPDATE_UI, self.on_update_pause_button, self.pause_button)
 
         # self.cb_grid = wx.CheckBox(self.panel, -1,
         #     "Show Grid",

@@ -20,9 +20,9 @@ sensor_data = {"current_x": 0.0,
                "pwm_x": 0,
                "pwm_y": 0,
                "pwm_z": 0,
-               "mag_field_x_setpoint": 0.0,
-               "mag_field_y_setpoint": 0.0,
-               "mag_field_z_setpoint": 0.0,
+               "mag_field_x_setpoint": '-',
+               "mag_field_y_setpoint": '-',
+               "mag_field_z_setpoint": '-',
                "time_interval": 0.1,
               }
 
