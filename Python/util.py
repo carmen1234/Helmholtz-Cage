@@ -2,8 +2,11 @@ import csv
 from globals import HW_params
 
 def read_csv_into_dict(csv_path):
-    csv_file = open(csv_path,"r")
-    return csv.DictReader(csv_file) #default delim is ","
+    try:
+        csv_file = open(csv_path,"r")
+        return csv.DictReader(csv_file) #default delim is ","
+    except IOError:
+        return None
 
 def get_current_from_mag_field(mag_field):
     # using B = u*n*I
