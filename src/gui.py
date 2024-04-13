@@ -324,14 +324,15 @@ class DebugConsoleBox(wx.Panel):
         if command_terms[0] == "":
             pass
         elif command_terms[0] == "set0": #turn all coils 'off' by setting current to 0, will need to call set_coil_current
-            arduino.set_coil_current(0)
+            arduino.set_coil_current(0,0,0)
+            logger.info("Turning off coils")
         elif command_terms[0] == "clear": # clear debug output box
             self.DebugOutput.Clear()
-        elif command_terms[0] == "tune_pidx": # set kp,ki,kd vals, atm only does single coil pair
+        elif command_terms[0] == "tune_pid_x": # set kp,ki,kd vals, atm only does single coil pair
             main_controller.pid_x.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
-        elif command_terms[0] == "tune_pidy": # set kp,ki,kd vals, atm only does single coil pair
+        elif command_terms[0] == "tune_pid_y": # set kp,ki,kd vals, atm only does single coil pair
             main_controller.pid_y.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
-        elif command_terms[0] == "tune_pidz": # set kp,ki,kd vals, atm only does single coil pair
+        elif command_terms[0] == "tune_pid_z": # set kp,ki,kd vals, atm only does single coil pair
             main_controller.pid_z.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
         elif command_terms[0] == "set_pwm_x": # also calls set coil current, will only check
             # TODO: add axis argument
@@ -365,6 +366,7 @@ class DebugConsoleBox(wx.Panel):
             avg_data["avg_mag_y"] = 0
             avg_data["avg_mag_z"] = 0
             avg_data["reading_cnt"] = 0
+            logger.info("Resseting average calculations")
         elif command_terms[0] == "exit":
             wx.Exit()
         else:
