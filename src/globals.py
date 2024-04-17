@@ -2,10 +2,15 @@
 # Can be imported into other files using `from globals import ...`
 
 from enum import Enum
+from datetime import datetime
+
+# Get timestamp for session
+timestamp = datetime.now().strftime("%d-%m-%Y__%H-%M-%S")
 
 # Config
 port = "/dev/cu.usbmodem101"
 debug = 0
+dark_mode = 0
 graph_y_max = 1
 graph_y_min = -1
 
@@ -31,6 +36,10 @@ avg_data = {"avg_mag_x": 0.0,
             "avg_mag_z": 0.0,
             "reading_cnt": 0
             }
+
+pid_data = {"pid_x": [0,0,0],
+            "pid_y": [0,0,0],
+            "pid_z": [0,0,0]} #init it main controller
 
 # HW parameters
 class HW_params(float, Enum):

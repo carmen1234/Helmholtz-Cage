@@ -18,7 +18,7 @@ from math import pi
 import time
 import threading
 
-from globals import sensor_data, graph_y_max, graph_y_min, avg_data
+from globals import sensor_data, graph_y_max, graph_y_min, avg_data, pid_data, dark_mode
 from arduino import arduino
 from control import main_controller
 from logger import logger, log_stream
@@ -65,7 +65,9 @@ enum = {
     'SimMode_0': 28,
     'SimMode_1': 29,
     'SimMode_2': 30,
-    'DebugOutputID' : 31
+    'DebugOutputID' : 31,
+    'PID_ID_Val': 32,
+    'PID_ID_Label': 33
 }
 
 COLOR_NAME = 'black'
@@ -133,8 +135,10 @@ class ModeControlBox(wx.Panel):
 
         self.value = initval
 
-        box = wx.StaticBox(self, -1, "Dynamic Control")
-        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        self.foreground_default = 0
+
+        self.box = wx.StaticBox(self, -1, "Dynamic Control")
+        sizer = wx.StaticBoxSizer(self.box, wx.VERTICAL)
 
         self.ReadCSVButton = wx.Button(self, enum['UseCSV'], "Load Sim")
         self.Bind(wx.EVT_BUTTON, self.on_import_csv, self.ReadCSVButton)
@@ -161,6 +165,12 @@ class ModeControlBox(wx.Panel):
         self.SetMode2 = wx.Button(self, wx.ID_ANY, "Reset")
         self.Bind(wx.EVT_BUTTON, self.on_reset, self.SetMode2)
         self.SetMode2.Move((0, 75))
+
+        #appearence:
+        self.ReadCSVButton.SetBackgroundColour((8, 150, 200, 255))
+        self.SetMode0.SetBackgroundColour((8, 150, 200, 255))
+        self.SetMode1.SetBackgroundColour((8, 150, 200, 255))
+        self.SetMode2.SetBackgroundColour((8, 150, 200, 255))
 
         csv_box = wx.BoxSizer(wx.HORIZONTAL)
         csv_box.Add(self.CSVPathBox, flag=wx.ALIGN_CENTER)
@@ -199,6 +209,15 @@ class ModeControlBox(wx.Panel):
     def on_import_csv(self, event):
         input_path = self.CSVPathBox.GetValue()
         fileStatus = main_controller.get_sim(input_path)
+    
+    def toggle_foreground_color(self, toggle):
+        if toggle:
+            self.box.SetForegroundColour((255, 255, 255, 255))
+        else:
+            self.box.SetForegroundColour(wx.NullColour)
+
+
+
 
 
 class InputControlBox(wx.Panel):
@@ -206,9 +225,9 @@ class InputControlBox(wx.Panel):
         wx.Panel.__init__(self, parent, wx.ID_ANY)
 
         self.value = initval
-
-        box = wx.StaticBox(self, wx.ID_ANY, "Static Control")
-        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+    
+        self.box = wx.StaticBox(self, wx.ID_ANY, "Static Control")
+        sizer = wx.StaticBoxSizer(self.box, wx.VERTICAL)
 
         self.SetX = wx.TextCtrl(self, wx.ID_ANY, size=(80, -1))
         self.SetY = wx.TextCtrl(self, wx.ID_ANY, size=(80, -1))
@@ -221,19 +240,27 @@ class InputControlBox(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.on_set_setpoint, self.SetPointButton)
         self.Bind(wx.EVT_BUTTON, self.on_toggle_controller, self.ToggleControllerButton)
 
+        #apperance: TODO
+        self.SetPointButton.SetBackgroundColour((50, 175, 250, 255))
+        self.ToggleControllerButton.SetBackgroundColour((50, 175, 250, 255))
+
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_sizer.Add(self.SetPointButton, flag=wx.ALIGN_CENTER)
         button_sizer.AddSpacer(10)
         button_sizer.Add(self.ToggleControllerButton, flag=wx.ALIGN_CENTER)
 
+        self.X_label = wx.StaticText(self, enum['Axis_LabelX'], "X: ")
+        self.Y_label = wx.StaticText(self, enum['Axis_LabelX'], "Y: ")
+        self.Z_label = wx.StaticText(self, enum['Axis_LabelX'], "Z: ")
+
         set_value_box = wx.BoxSizer(wx.HORIZONTAL)
-        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "X: "), flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.Add(self.X_label, flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.Add(self.SetX, flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.AddSpacer(12)
-        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "Y: "), flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.Add(self.Y_label, flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.Add(self.SetY, flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.AddSpacer(12)
-        set_value_box.Add(wx.StaticText(self, wx.ID_ANY, "Z: "), flag=wx.ALIGN_CENTER_VERTICAL)
+        set_value_box.Add(self.Z_label, flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.Add(self.SetZ, flag=wx.ALIGN_CENTER_VERTICAL)
         set_value_box.AddSpacer(12)
 
@@ -282,6 +309,17 @@ class InputControlBox(wx.Panel):
             main_controller.update_setpoint_data(x_val, y_val, z_val)
 
         # Add error-checking (empty input == don't do anything)
+    def toggle_foreground_color(self, toggle):
+        color = wx.NullColour
+        if toggle:
+            color = (255, 255, 255, 255)
+        else:
+            color = (wx.NullColour)
+
+        self.box.SetForegroundColour(color)
+        self.X_label.SetForegroundColour(color)
+        self.Y_label.SetForegroundColour(color)
+        self.Z_label.SetForegroundColour(color)
 
 class DebugConsoleBox(wx.Panel):
     """ A static box with a debug console.
@@ -291,8 +329,8 @@ class DebugConsoleBox(wx.Panel):
 
         self.value = initval
 
-        box = wx.StaticBox(self, -1, label)
-        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        self.box = wx.StaticBox(self, -1, label)
+        sizer = wx.StaticBoxSizer(self.box, wx.VERTICAL)
 
 
         self.DebugOutput = wx.TextCtrl(self, enum['DebugOutputID'], size=wx.Size(800,200), style=wx.TE_READONLY | wx.TE_MULTILINE)
@@ -382,8 +420,14 @@ class DebugConsoleBox(wx.Panel):
 
         # Scroll to the end of the text
         self.DebugOutput.ShowPosition(self.DebugOutput.GetLastPosition())
+    
+    def toggle_foreground_color(self, toggle):
+        if toggle:
+            self.box.SetForegroundColour((255, 255, 255, 255))
+        else:
+            self.box.SetForegroundColour(wx.NullColour)
 
-class AxisControlBox(wx.Panel):
+class AxisDataBox(wx.Panel):
     """ A static box with a box for reading magnetometer and current sensor values, and setting a current
     """
     def __init__(self, parent, ID, initval, axis):
@@ -402,10 +446,10 @@ class AxisControlBox(wx.Panel):
         self.avg_mag_label = wx.StaticText(self, enum['ID_MagXRead'], "Avg M. Field Strength: ")
         self.avg_mag_val = wx.TextCtrl(self, enum['ID_MagXInput'], "          ", style=wx.TE_READONLY)
 
-        self.mag_setpoint_label = wx.StaticText(self, wx.ID_ANY, "M. Field Strengh Setpoint: ")
+        self.mag_setpoint_label = wx.StaticText(self, enum['ID_MagXRead'], "M. Field Strengh Setpoint: ")
         self.mag_setpoint_val = wx.TextCtrl(self, wx.ID_ANY, "          ", style=wx.TE_READONLY)
 
-        self.pwm_label = wx.StaticText(self, wx.ID_ANY, "PWM Value: ")
+        self.pwm_label = wx.StaticText(self, enum['ID_MagXRead'], "PWM Value: ")
         self.pwm_val = wx.TextCtrl(self, wx.ID_ANY, "          ", style=wx.TE_READONLY)
 
 
@@ -431,8 +475,8 @@ class AxisControlBox(wx.Panel):
                        (self.pwm_label, 1, wx.ALIGN_RIGHT), (self.pwm_val),
                        (self.avg_mag_label, 1, wx.ALIGN_RIGHT), (self.avg_mag_val)])
 
-        box = wx.StaticBox(self, wx.ID_ANY, f"{axis.upper()}-Axis")
-        box_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        self.box = wx.StaticBox(self, wx.ID_ANY, f"{axis.upper()}-Axis")
+        box_sizer = wx.StaticBoxSizer(self.box, wx.VERTICAL)
         box_sizer.Add(sizer, 1, wx.EXPAND | wx.ALL, 5)
         #box_sizer.Add(pid_sizer, 1, wx.EXPAND | wx.ALL, 1)
 
@@ -456,7 +500,7 @@ class AxisControlBox(wx.Panel):
         self.avg_mag_field_str = str(self.avg_mag_field)
         self.avg_mag_val.SetValue(self.avg_mag_field_str)
 
-        if sensor_data["mag_field_" + self.axis + "_setpoint"] == '-':
+        if sensor_data["mag_field_" + self.axis + "_setpoint"] == '-': #TODO look at this more closely
             self.mag_setpoint_label = '-'
         else:
             self.mag_setpoint_label =  round(sensor_data["mag_field_" + self.axis + "_setpoint"], 3)
@@ -466,6 +510,72 @@ class AxisControlBox(wx.Panel):
         self.pwm = round(sensor_data["pwm_" + self.axis], 3)
         self.pwm_str = str(self.pwm)
         self.pwm_val.SetValue(self.pwm_str)
+    
+    def toggle_foreground_color(self, toggle):
+        color = wx.NullColour
+        if toggle:
+            color = (255, 255, 255, 255)
+        else:
+            color = wx.NullColour
+        
+        self.box.SetForegroundColour(color)
+        self.mag_label.SetForegroundColour(color)
+        self.curr_label.SetForegroundColour((color))
+        self.avg_mag_label.SetForegroundColour(color)
+        #self.mag_setpoint_label.SetForegroundColour(color)
+        self.pwm_label.SetForegroundColour(color)
+
+class PIDDataBox(wx.Panel):
+    #pid control info
+    def __init__(self, parent, ID, initval, axis):
+        wx.Panel.__init__(self, parent, ID)
+
+        self.value = initval
+        self.axis = axis
+
+        self.Kp_label = wx.StaticText(self, enum['PID_ID_Label'], "Kp: ")
+        self.Kp_val = wx.TextCtrl(self, enum['PID_ID_Val'], "         ", size=wx.Size(40,22), style=wx.TE_READONLY)
+
+        self.Ki_label = wx.StaticText(self, wx.ID_ANY, "Ki: ")
+        self.Ki_val = wx.TextCtrl(self, wx.ID_ANY, "         ",size=wx.Size(40,22), style=wx.TE_READONLY)
+
+        self.Kd_label = wx.StaticText(self, wx.ID_ANY, "Kd: ")
+        self.Kd_val = wx.TextCtrl(self, wx.ID_ANY, "         ", size=wx.Size(40,22), style=wx.TE_READONLY)
+
+        pid_sizer = wx.FlexGridSizer(1, 6, 2, 10)
+        pid_sizer.AddMany([(self.Kp_label, 1, wx.ALIGN_RIGHT), (self.Kp_val),
+                           (self.Ki_label, 1, wx.ALIGN_RIGHT), (self.Ki_val),
+                           (self.Kd_label, 1, wx.ALIGN_RIGHT), (self.Kd_val)])
+        
+        self.box = wx.StaticBox(self, wx.ID_ANY, f"{axis.upper()}-Axis PID")
+        box_sizer = wx.StaticBoxSizer(self.box, wx.VERTICAL)
+        box_sizer.Add(pid_sizer, 1, wx.EXPAND | wx.ALL, 5)
+        #box_sizer.Add(pid_sizer, 1, wx.EXPAND | wx.ALL, 1)
+
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+        main_sizer.Add(box_sizer, 1, wx.EXPAND | wx.ALL)
+
+        self.SetSizer(main_sizer)
+        
+    def update_values(self):
+        self.Kp_test = pid_data[f"pid_{self.axis}"][0]
+        self.Kp_test_str = str(self.Kp_test)
+        self.Kp_val.SetValue(self.Kp_test_str)
+
+        self.Ki_val.SetValue(str(pid_data[f"pid_{self.axis}"][1]))
+        self.Kd_val.SetValue(str(pid_data[f"pid_{self.axis}"][2]))
+    
+    def toggle_foreground_color(self, toggle):
+        color = wx.NullColour
+        if toggle:
+            color = (255, 255, 255, 255)
+        else:
+            color = wx.NullColour
+        
+        self.box.SetForegroundColour(color)
+        self.Kp_label.SetForegroundColour(color)
+        self.Ki_label.SetForegroundColour((color))
+        self.Kd_label.SetForegroundColour(color)
 
 class GraphFrame(wx.Frame):
     """ The main frame of the application
@@ -501,9 +611,9 @@ class GraphFrame(wx.Frame):
 
         menu_file = wx.Menu()
         m_expt = menu_file.Append(-1, "&Save plot\tCtrl-S", "Save plot to file")
-        m_import = menu_file.Append(enum['ID_IMPORT'], "&Import CSV File\tCtrl-M", "Help string shown in status bar for this menu item")
+        m_import = menu_file.Append(enum['ID_IMPORT'], "Toggle Dark Mode\tCtrl-M", "Help string shown in status bar for this menu item")
         self.Bind(wx.EVT_MENU, self.on_save_plot, m_expt)
-        self.Bind(wx.EVT_MENU, self.on_save_plot, m_import)
+        self.Bind(wx.EVT_MENU, self.on_toggle_dark_mode, m_import)
         menu_file.AppendSeparator()
 
         # Bind on_exit to both the exit menu item and the frame close event
@@ -524,15 +634,22 @@ class GraphFrame(wx.Frame):
 
 
         self.init_plot()
+
+        
+
         #self.canvas = FigCanvas(self.panel, -1, self.fig)
         self.canvas1 = FigCanvas(self.panel, -1, self.fig)
         self.canvas2 = FigCanvas(self.panel, -1, self.fig2)
         self.canvas3 = FigCanvas(self.panel, -1, self.fig3)
 
+
         self.mode_control = ModeControlBox(self.panel, -1, "Dynamic Control", 0)
-        self.x_axis_control = AxisControlBox(self.panel, -1, 50, "x")
-        self.y_axis_control = AxisControlBox(self.panel, -1, 75, "y")
-        self.z_axis_control = AxisControlBox(self.panel, -1, 100, "z")
+        self.x_axis_control = AxisDataBox(self.panel, -1, 50, "x")
+        self.y_axis_control = AxisDataBox(self.panel, -1, 75, "y")
+        self.z_axis_control = AxisDataBox(self.panel, -1, 100, "z")
+        self.x_axis_pid = PIDDataBox(self.panel, -1, 0, "x")
+        self.y_axis_pid = PIDDataBox(self.panel, -1, 0, "y")
+        self.z_axis_pid = PIDDataBox(self.panel, -1, 0, "z")
         self.static_control = InputControlBox(self.panel, -1, "Static Control", 125)
         self.debug_console = DebugConsoleBox(self.panel, -1, "Console", 150)
 
@@ -603,6 +720,10 @@ class GraphFrame(wx.Frame):
         self.axis_control_vbox.Add(self.x_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
         self.axis_control_vbox.Add(self.y_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
         self.axis_control_vbox.Add(self.z_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
+        self.axis_control_vbox.Add(self.x_axis_pid, border=5, flag=wx.ALL | wx.EXPAND) #just added
+        self.axis_control_vbox.Add(self.y_axis_pid, border=5, flag=wx.ALL | wx.EXPAND)
+        self.axis_control_vbox.Add(self.z_axis_pid, border=5, flag=wx.ALL | wx.EXPAND)
+
 
 
         #self.axis_control_vbox.AddSpacer(24)
@@ -752,6 +873,9 @@ class GraphFrame(wx.Frame):
         self.x_axis_control.update_values()
         self.y_axis_control.update_values()
         self.z_axis_control.update_values()
+        self.x_axis_pid.update_values()
+        self.y_axis_pid.update_values()
+        self.z_axis_pid.update_values()
 
         # if (self.cb_xline.GetValue()):
         #     self.data = self.dataX
@@ -940,6 +1064,30 @@ class GraphFrame(wx.Frame):
         #else:
         self.testing = 3.5
             #self.testing = sensor_data["mag_field_z"]
+        
+    def on_toggle_dark_mode(self, event):
+
+        global dark_mode
+        dark_mode = not dark_mode
+        
+
+        if dark_mode:
+            self.SetForegroundColour((255, 255, 255, 255))
+            self.SetBackgroundColour((53, 53, 53, 255))
+        else:
+            self.SetForegroundColour(wx.NullColour)
+            self.SetBackgroundColour(wx.NullColour)
+
+        self.mode_control.toggle_foreground_color(dark_mode)
+        self.static_control.toggle_foreground_color(dark_mode)
+        self.x_axis_control.toggle_foreground_color(dark_mode)
+        self.y_axis_control.toggle_foreground_color(dark_mode)
+        self.z_axis_control.toggle_foreground_color(dark_mode)
+        self.x_axis_pid.toggle_foreground_color(dark_mode)
+        self.y_axis_pid.toggle_foreground_color(dark_mode)
+        self.z_axis_pid.toggle_foreground_color(dark_mode)
+
+        self.Refresh()
 
     def on_exit(self, event):
         # Exit Sequence

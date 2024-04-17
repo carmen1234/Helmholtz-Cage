@@ -1,6 +1,7 @@
 import logging
 import io
-from globals import debug
+from globals import debug, timestamp
+
 
 # Create a logger
 logger = logging.getLogger(__name__)
@@ -11,7 +12,7 @@ else:
     logger.setLevel(logging.INFO)
 
 # Create a handler to write logs to a file
-file_handler = logging.FileHandler('app.log')
+file_handler = logging.FileHandler("session_"+timestamp+"_app.log")
 file_handler.setLevel(logging.DEBUG)
 
 # Create another handler to store logs in a variable

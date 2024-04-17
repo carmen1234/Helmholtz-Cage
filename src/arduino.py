@@ -3,7 +3,7 @@ import re
 from logger import logger
 import json
 
-from globals import sensor_data, port, avg_data
+from globals import sensor_data, port, avg_data, timestamp
 
 class Arduino:
     def __init__(self, port, baud_rate=9600):
@@ -40,10 +40,10 @@ class Arduino:
 
     def update_arduino_data(self):
         # Open file to log sensor data
-        fp = open('sensor_data.csv', 'w')
+        fp = open('session_' + timestamp + '_sensor_data.csv', 'w')
         fp.write("Current X,Current Y,Current Z,Magnetic Field X,Magnetic Field Y,Magnetic Field Z\n")
 
-        while True:
+        while self.connected:
             # Read and parse serial data if Arduino is connected
             line = self.ser.readline().decode('utf-8').strip() if self.connected else "CX:0,CY:0,CZ:0,X:0,Y:0,Z:0"
             current_x, current_y, current_z, mag_field_x, mag_field_y, mag_field_z = self.parse_serial_data(line)
