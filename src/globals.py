@@ -32,6 +32,10 @@ avg_data = {"avg_mag_x": 0.0,
             "reading_cnt": 0
             }
 
+pid_data = {"pid_x": [0,0,0],
+            "pid_y": [0,0,0],
+            "pid_z": [0,0,0]} #init it main controller
+
 # HW parameters
 class HW_params(float, Enum):
     raw_mag_min = -32768.0

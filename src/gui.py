@@ -18,7 +18,7 @@ from math import pi
 import time
 import threading
 
-from globals import sensor_data, graph_y_max, graph_y_min, avg_data
+from globals import sensor_data, graph_y_max, graph_y_min, avg_data, pid_data
 from arduino import arduino
 from control import main_controller
 from logger import logger, log_stream
@@ -65,7 +65,9 @@ enum = {
     'SimMode_0': 28,
     'SimMode_1': 29,
     'SimMode_2': 30,
-    'DebugOutputID' : 31
+    'DebugOutputID' : 31,
+    'PID_ID_Val': 32,
+    'PID_ID_Label': 33
 }
 
 COLOR_NAME = 'black'
@@ -383,7 +385,7 @@ class DebugConsoleBox(wx.Panel):
         # Scroll to the end of the text
         self.DebugOutput.ShowPosition(self.DebugOutput.GetLastPosition())
 
-class AxisControlBox(wx.Panel):
+class AxisDataBox(wx.Panel):
     """ A static box with a box for reading magnetometer and current sensor values, and setting a current
     """
     def __init__(self, parent, ID, initval, axis):
@@ -467,6 +469,46 @@ class AxisControlBox(wx.Panel):
         self.pwm_str = str(self.pwm)
         self.pwm_val.SetValue(self.pwm_str)
 
+class PIDDataBox(wx.Panel):
+    #pid control info
+    def __init__(self, parent, ID, initval, axis):
+        wx.Panel.__init__(self, parent, ID)
+
+        self.value = initval
+        self.axis = axis
+
+        self.Kp_label = wx.StaticText(self, enum['PID_ID_Label'], "Kp: ")
+        self.Kp_val = wx.TextCtrl(self, enum['PID_ID_Val'], "         ", size=wx.Size(40,22), style=wx.TE_READONLY)
+
+        self.Ki_label = wx.StaticText(self, wx.ID_ANY, "Ki: ")
+        self.Ki_val = wx.TextCtrl(self, wx.ID_ANY, "         ",size=wx.Size(40,22), style=wx.TE_READONLY)
+
+        self.Kd_label = wx.StaticText(self, wx.ID_ANY, "Kd: ")
+        self.Kd_val = wx.TextCtrl(self, wx.ID_ANY, "         ", size=wx.Size(40,22), style=wx.TE_READONLY)
+
+        pid_sizer = wx.FlexGridSizer(1, 6, 2, 10)
+        pid_sizer.AddMany([(self.Kp_label, 1, wx.ALIGN_RIGHT), (self.Kp_val),
+                           (self.Ki_label, 1, wx.ALIGN_RIGHT), (self.Ki_val),
+                           (self.Kd_label, 1, wx.ALIGN_RIGHT), (self.Kd_val)])
+        
+        box = wx.StaticBox(self, wx.ID_ANY, f"{axis.upper()}-Axis PID")
+        box_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        box_sizer.Add(pid_sizer, 1, wx.EXPAND | wx.ALL, 5)
+        #box_sizer.Add(pid_sizer, 1, wx.EXPAND | wx.ALL, 1)
+
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+        main_sizer.Add(box_sizer, 1, wx.EXPAND | wx.ALL)
+
+        self.SetSizer(main_sizer)
+        
+    def update_values(self):
+        self.Kp_test = pid_data[f"pid_{self.axis}"][0]
+        self.Kp_test_str = str(self.Kp_test)
+        self.Kp_val.SetValue(self.Kp_test_str)
+
+        self.Ki_val.SetValue(str(pid_data[f"pid_{self.axis}"][1]))
+        self.Kd_val.SetValue(str(pid_data[f"pid_{self.axis}"][2]))
+
 class GraphFrame(wx.Frame):
     """ The main frame of the application
     """
@@ -530,9 +572,12 @@ class GraphFrame(wx.Frame):
         self.canvas3 = FigCanvas(self.panel, -1, self.fig3)
 
         self.mode_control = ModeControlBox(self.panel, -1, "Dynamic Control", 0)
-        self.x_axis_control = AxisControlBox(self.panel, -1, 50, "x")
-        self.y_axis_control = AxisControlBox(self.panel, -1, 75, "y")
-        self.z_axis_control = AxisControlBox(self.panel, -1, 100, "z")
+        self.x_axis_control = AxisDataBox(self.panel, -1, 50, "x")
+        self.y_axis_control = AxisDataBox(self.panel, -1, 75, "y")
+        self.z_axis_control = AxisDataBox(self.panel, -1, 100, "z")
+        self.x_axis_pid = PIDDataBox(self.panel, -1, 0, "x")
+        self.y_axis_pid = PIDDataBox(self.panel, -1, 0, "y")
+        self.z_axis_pid = PIDDataBox(self.panel, -1, 0, "z")
         self.static_control = InputControlBox(self.panel, -1, "Static Control", 125)
         self.debug_console = DebugConsoleBox(self.panel, -1, "Console", 150)
 
@@ -603,6 +648,10 @@ class GraphFrame(wx.Frame):
         self.axis_control_vbox.Add(self.x_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
         self.axis_control_vbox.Add(self.y_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
         self.axis_control_vbox.Add(self.z_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
+        self.axis_control_vbox.Add(self.x_axis_pid, border=5, flag=wx.ALL | wx.EXPAND) #just added
+        self.axis_control_vbox.Add(self.y_axis_pid, border=5, flag=wx.ALL | wx.EXPAND)
+        self.axis_control_vbox.Add(self.z_axis_pid, border=5, flag=wx.ALL | wx.EXPAND)
+
 
 
         #self.axis_control_vbox.AddSpacer(24)
@@ -752,6 +801,9 @@ class GraphFrame(wx.Frame):
         self.x_axis_control.update_values()
         self.y_axis_control.update_values()
         self.z_axis_control.update_values()
+        self.x_axis_pid.update_values()
+        self.y_axis_pid.update_values()
+        self.z_axis_pid.update_values()
 
         # if (self.cb_xline.GetValue()):
         #     self.data = self.dataX

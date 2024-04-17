@@ -1,4 +1,4 @@
-from globals import sensor_data
+from globals import sensor_data, pid_data
 from arduino import arduino
 from logger import logger
 from time import sleep
@@ -17,6 +17,7 @@ class PID_controller:
         self.err_integ = 0
         self.prev_err = 0
         self.enable = False
+        pid_data[f"pid_{self.axis}"] = [Kp, Ki, Kd]
 
     def update_values(self, process_var,time_interval):
         self.process_var = process_var
@@ -33,6 +34,7 @@ class PID_controller:
         self.Kp = Kp
         self.Ki = Ki
         self.Kd = Kd
+        pid_data[f"pid_{self.axis}"] = [Kp, Ki, Kd]
 
     def proportional(self,setpoint,process_var):
         err = setpoint - process_var
