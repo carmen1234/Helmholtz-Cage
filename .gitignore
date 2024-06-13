@@ -9,6 +9,7 @@ __pycache__/
 
 # CSV files
 *.csv
+!sim.csv
 
 # Visual Studio Code
 .vscode/

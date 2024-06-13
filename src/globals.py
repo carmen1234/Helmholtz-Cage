@@ -20,9 +20,9 @@ sensor_data = {"current_x": 0.0,
                "pwm_x": 0,
                "pwm_y": 0,
                "pwm_z": 0,
-               "mag_field_x_setpoint": 0.0,
-               "mag_field_y_setpoint": 0.0,
-               "mag_field_z_setpoint": 0.0,
+               "mag_field_x_setpoint": '-',
+               "mag_field_y_setpoint": '-',
+               "mag_field_z_setpoint": '-',
                "time_interval": 0.1,
               }
 
@@ -31,6 +31,10 @@ avg_data = {"avg_mag_x": 0.0,
             "avg_mag_z": 0.0,
             "reading_cnt": 0
             }
+
+pid_data = {"pid_x": [0,0,0],
+            "pid_y": [0,0,0],
+            "pid_z": [0,0,0]} #init it main controller
 
 # HW parameters
 class HW_params(float, Enum):

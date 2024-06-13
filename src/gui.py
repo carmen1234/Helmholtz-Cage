@@ -18,7 +18,7 @@ from math import pi
 import time
 import threading
 
-from globals import sensor_data, graph_y_max, graph_y_min, avg_data
+from globals import sensor_data, graph_y_max, graph_y_min, avg_data, pid_data
 from arduino import arduino
 from control import main_controller
 from logger import logger, log_stream
@@ -65,7 +65,9 @@ enum = {
     'SimMode_0': 28,
     'SimMode_1': 29,
     'SimMode_2': 30,
-    'DebugOutputID' : 31
+    'DebugOutputID' : 31,
+    'PID_ID_Val': 32,
+    'PID_ID_Label': 33
 }
 
 COLOR_NAME = 'black'
@@ -151,16 +153,15 @@ class ModeControlBox(wx.Panel):
 
 
         self.SetMode0 = wx.Button(self, wx.ID_ANY, "Start Sim")
-        self.Bind(wx.EVT_BUTTON, self.on_mode_0, self.SetMode0)
+        self.Bind(wx.EVT_BUTTON, self.on_start, self.SetMode0)
         self.SetMode0.Move((25, 0))
 
-
-        self.SetMode1 = wx.Button(self, wx.ID_ANY, "Stop Sim")
-        self.Bind(wx.EVT_BUTTON, self.on_mode_1, self.SetMode1)
+        self.SetMode1 = wx.Button(self, wx.ID_ANY, "Pause Sim")
+        self.Bind(wx.EVT_BUTTON, self.on_stop, self.SetMode1)
         self.SetMode1.Move((50, 0))
 
         self.SetMode2 = wx.Button(self, wx.ID_ANY, "Reset")
-        self.Bind(wx.EVT_BUTTON, self.on_mode_2, self.SetMode2)
+        self.Bind(wx.EVT_BUTTON, self.on_reset, self.SetMode2)
         self.SetMode2.Move((0, 75))
 
         csv_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -181,31 +182,25 @@ class ModeControlBox(wx.Panel):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    def on_mode_0(self):
-        #check if sim is actually loaded
-        if main_controller.sim_data == []:
-            pass #error msg
+    def on_start(self, event):
+        main_controller.turn_on_sim()
+        self.SetMode1.SetLabel("Pause Sim")
+
+    def on_stop(self, event):
+        if main_controller.sim_on == 1:
+            main_controller.pause_sim()
+            self.SetMode1.SetLabel("Resume Sim")
         else:
-            main_controller.turn_on_sim()
+            main_controller.resume_sim()
+            self.SetMode1.SetLabel("Pause Sim")
 
-    def on_mode_1(self):
-       #effectively pause sim
-       # return self.value
-       pass
+    def on_reset(self, event):
+        main_controller.reset_sim()
+        self.SetMode1.SetLabel("Pause Sim")
 
-    def on_mode_2(self):
-       #does reset mean restart? or clear everything
-       # return self.value
-       pass
-
-    def on_import_csv(self):
+    def on_import_csv(self, event):
         input_path = self.CSVPathBox.GetValue()
         fileStatus = main_controller.get_sim(input_path)
-        if fileStatus == None:
-            pass #error stuff, I think I need logging to print to debug console?
-        else:
-            pass #added some kind of status message like "sim loaded or something"
-
 
 
 class InputControlBox(wx.Panel):
@@ -262,26 +257,31 @@ class InputControlBox(wx.Panel):
             inputY_mag = self.SetY.GetValue()
             inputZ_mag = self.SetZ.GetValue()
 
+            x_val, y_val, z_val = 0, 0, 0
+
             if inputX_mag == "":
-                print("No input for X-axis setpoint")
+                x_val = '-'
             elif not (float(inputX_mag) <= 1.0 and float(inputX_mag) >= -1.0):
                 logger.error("Invalid input range for X-axis setpoint")
             else:
-                main_controller.pid_x.set_setpoint(float(inputX_mag))
+                x_val = float(inputX_mag)
 
             if inputY_mag == "":
-                print("No input for Y-axis setpoint")
+                y_val = '-'
             elif not (float(inputY_mag) <= 1.0 and float(inputY_mag) >= -1.0):
                 logger.error("Invalid input range for Y-axis setpoint")
             else:
-                main_controller.pid_y.set_setpoint(float(inputY_mag))
+                y_val = float(inputY_mag)
+
 
             if inputZ_mag == "":
-                print("No input for Z-axis setpoint")
+                z_val = '-'
             elif not (float(inputZ_mag) <= 1.0 and float(inputZ_mag) >= -1.0):
                 logger.error("Invalid input range for Z-axis setpoint")
             else:
-                main_controller.pid_z.set_setpoint(float(inputZ_mag))
+                z_val = float(inputZ_mag)
+
+            main_controller.update_setpoint_data(x_val, y_val, z_val)
 
         # Add error-checking (empty input == don't do anything)
 
@@ -326,14 +326,15 @@ class DebugConsoleBox(wx.Panel):
         if command_terms[0] == "":
             pass
         elif command_terms[0] == "set0": #turn all coils 'off' by setting current to 0, will need to call set_coil_current
-            arduino.set_coil_current(0)
+            arduino.set_coil_current(0,0,0)
+            logger.info("Turning off coils")
         elif command_terms[0] == "clear": # clear debug output box
             self.DebugOutput.Clear()
-        elif command_terms[0] == "tune_pidx": # set kp,ki,kd vals, atm only does single coil pair
+        elif command_terms[0] == "tune_pid_x": # set kp,ki,kd vals, atm only does single coil pair
             main_controller.pid_x.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
-        elif command_terms[0] == "tune_pidy": # set kp,ki,kd vals, atm only does single coil pair
+        elif command_terms[0] == "tune_pid_y": # set kp,ki,kd vals, atm only does single coil pair
             main_controller.pid_y.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
-        elif command_terms[0] == "tune_pidz": # set kp,ki,kd vals, atm only does single coil pair
+        elif command_terms[0] == "tune_pid_z": # set kp,ki,kd vals, atm only does single coil pair
             main_controller.pid_z.tune_constants(float(command_terms[1]), float(command_terms[2]), float(command_terms[3]))
         elif command_terms[0] == "set_pwm_x": # also calls set coil current, will only check
             # TODO: add axis argument
@@ -367,6 +368,7 @@ class DebugConsoleBox(wx.Panel):
             avg_data["avg_mag_y"] = 0
             avg_data["avg_mag_z"] = 0
             avg_data["reading_cnt"] = 0
+            logger.info("Resseting average calculations")
         elif command_terms[0] == "exit":
             wx.Exit()
         else:
@@ -383,7 +385,7 @@ class DebugConsoleBox(wx.Panel):
         # Scroll to the end of the text
         self.DebugOutput.ShowPosition(self.DebugOutput.GetLastPosition())
 
-class AxisControlBox(wx.Panel):
+class AxisDataBox(wx.Panel):
     """ A static box with a box for reading magnetometer and current sensor values, and setting a current
     """
     def __init__(self, parent, ID, initval, axis):
@@ -456,13 +458,56 @@ class AxisControlBox(wx.Panel):
         self.avg_mag_field_str = str(self.avg_mag_field)
         self.avg_mag_val.SetValue(self.avg_mag_field_str)
 
-        self.mag_setpoint_label = round(main_controller.setpoints[self.axis + "_setpoint"], 3)
+        if sensor_data["mag_field_" + self.axis + "_setpoint"] == '-':
+            self.mag_setpoint_label = '-'
+        else:
+            self.mag_setpoint_label =  round(sensor_data["mag_field_" + self.axis + "_setpoint"], 3)
         self.mag_setpoint_str = str(self.mag_setpoint_label)
         self.mag_setpoint_val.SetValue(self.mag_setpoint_str)
 
         self.pwm = round(sensor_data["pwm_" + self.axis], 3)
         self.pwm_str = str(self.pwm)
         self.pwm_val.SetValue(self.pwm_str)
+
+class PIDDataBox(wx.Panel):
+    #pid control info
+    def __init__(self, parent, ID, initval, axis):
+        wx.Panel.__init__(self, parent, ID)
+
+        self.value = initval
+        self.axis = axis
+
+        self.Kp_label = wx.StaticText(self, enum['PID_ID_Label'], "Kp: ")
+        self.Kp_val = wx.TextCtrl(self, enum['PID_ID_Val'], "         ", size=wx.Size(40,22), style=wx.TE_READONLY)
+
+        self.Ki_label = wx.StaticText(self, wx.ID_ANY, "Ki: ")
+        self.Ki_val = wx.TextCtrl(self, wx.ID_ANY, "         ",size=wx.Size(40,22), style=wx.TE_READONLY)
+
+        self.Kd_label = wx.StaticText(self, wx.ID_ANY, "Kd: ")
+        self.Kd_val = wx.TextCtrl(self, wx.ID_ANY, "         ", size=wx.Size(40,22), style=wx.TE_READONLY)
+
+        pid_sizer = wx.FlexGridSizer(1, 6, 2, 10)
+        pid_sizer.AddMany([(self.Kp_label, 1, wx.ALIGN_RIGHT), (self.Kp_val),
+                           (self.Ki_label, 1, wx.ALIGN_RIGHT), (self.Ki_val),
+                           (self.Kd_label, 1, wx.ALIGN_RIGHT), (self.Kd_val)])
+        
+        box = wx.StaticBox(self, wx.ID_ANY, f"{axis.upper()}-Axis PID")
+        box_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        box_sizer.Add(pid_sizer, 1, wx.EXPAND | wx.ALL, 5)
+        #box_sizer.Add(pid_sizer, 1, wx.EXPAND | wx.ALL, 1)
+
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+        main_sizer.Add(box_sizer, 1, wx.EXPAND | wx.ALL)
+
+        self.SetSizer(main_sizer)
+        
+    def update_values(self):
+        self.Kp_test = pid_data[f"pid_{self.axis}"][0]
+        self.Kp_test_str = str(self.Kp_test)
+        self.Kp_val.SetValue(self.Kp_test_str)
+
+        self.Ki_val.SetValue(str(pid_data[f"pid_{self.axis}"][1]))
+        self.Kd_val.SetValue(str(pid_data[f"pid_{self.axis}"][2]))
 
 class GraphFrame(wx.Frame):
     """ The main frame of the application
@@ -527,15 +572,18 @@ class GraphFrame(wx.Frame):
         self.canvas3 = FigCanvas(self.panel, -1, self.fig3)
 
         self.mode_control = ModeControlBox(self.panel, -1, "Dynamic Control", 0)
-        self.x_axis_control = AxisControlBox(self.panel, -1, 50, "x")
-        self.y_axis_control = AxisControlBox(self.panel, -1, 75, "y")
-        self.z_axis_control = AxisControlBox(self.panel, -1, 100, "z")
+        self.x_axis_control = AxisDataBox(self.panel, -1, 50, "x")
+        self.y_axis_control = AxisDataBox(self.panel, -1, 75, "y")
+        self.z_axis_control = AxisDataBox(self.panel, -1, 100, "z")
+        self.x_axis_pid = PIDDataBox(self.panel, -1, 0, "x")
+        self.y_axis_pid = PIDDataBox(self.panel, -1, 0, "y")
+        self.z_axis_pid = PIDDataBox(self.panel, -1, 0, "z")
         self.static_control = InputControlBox(self.panel, -1, "Static Control", 125)
         self.debug_console = DebugConsoleBox(self.panel, -1, "Console", 150)
 
-        self.pause_button = wx.Button(self.panel, -1, "Pause")
-        self.Bind(wx.EVT_BUTTON, self.on_pause_button, self.pause_button)
-        self.Bind(wx.EVT_UPDATE_UI, self.on_update_pause_button, self.pause_button)
+        # self.pause_button = wx.Button(self.panel, -1, "Pause")
+        # self.Bind(wx.EVT_BUTTON, self.on_pause_button, self.pause_button)
+        # self.Bind(wx.EVT_UPDATE_UI, self.on_update_pause_button, self.pause_button)
 
         # self.cb_grid = wx.CheckBox(self.panel, -1,
         #     "Show Grid",
@@ -600,6 +648,10 @@ class GraphFrame(wx.Frame):
         self.axis_control_vbox.Add(self.x_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
         self.axis_control_vbox.Add(self.y_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
         self.axis_control_vbox.Add(self.z_axis_control, border=5, flag=wx.ALL | wx.EXPAND)
+        self.axis_control_vbox.Add(self.x_axis_pid, border=5, flag=wx.ALL | wx.EXPAND) #just added
+        self.axis_control_vbox.Add(self.y_axis_pid, border=5, flag=wx.ALL | wx.EXPAND)
+        self.axis_control_vbox.Add(self.z_axis_pid, border=5, flag=wx.ALL | wx.EXPAND)
+
 
 
         #self.axis_control_vbox.AddSpacer(24)
@@ -749,6 +801,9 @@ class GraphFrame(wx.Frame):
         self.x_axis_control.update_values()
         self.y_axis_control.update_values()
         self.z_axis_control.update_values()
+        self.x_axis_pid.update_values()
+        self.y_axis_pid.update_values()
+        self.z_axis_pid.update_values()
 
         # if (self.cb_xline.GetValue()):
         #     self.data = self.dataX
